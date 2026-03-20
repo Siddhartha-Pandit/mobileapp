@@ -5,25 +5,64 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+export interface AppTheme {
+  brandPrimary: string;
+  brandNavy: string;
+
+  background: string;
+  surface: string;
+  hover: string;
+  border: string;
+  textPrimary: string;
+  textSecondary: string;
+  danger: string;
+  warning: string;
+}
+
+export const lightTheme: AppTheme = {
+  brandPrimary: "#0AA971",
+  brandNavy: "#033766",
+
+  background: "#FDFDFD",
+  surface: "#FFFFFF",
+  hover: "#F3F4F6",
+  border: "#E5E7EB",
+  textPrimary: "#111827",
+  textSecondary: "#6B7280",
+  danger: "#DC2626",   
+  warning: "#D97706",  
+};
+
+export const darkTheme: AppTheme = {
+  brandPrimary: "#0AA971",
+  brandNavy: "#033766",
+
+  background: "#121212",
+  surface: "#1E1E1E",
+  hover: "#2A2A2A",
+  border: "#2C2C2C",
+  textPrimary: "#EAEAEA",
+  textSecondary: "#A1A1AA",
+  danger: "#F87171",   
+  warning: "#FBBF24", 
+};
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    ...lightTheme,
+    text: lightTheme.textPrimary,
+    tint: lightTheme.brandPrimary,
+    icon: lightTheme.textSecondary,
+    tabIconDefault: lightTheme.textSecondary,
+    tabIconSelected: lightTheme.brandPrimary,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    ...darkTheme,
+    text: darkTheme.textPrimary,
+    tint: darkTheme.brandPrimary,
+    icon: darkTheme.textSecondary,
+    tabIconDefault: darkTheme.textSecondary,
+    tabIconSelected: darkTheme.brandPrimary,
   },
 };
 
