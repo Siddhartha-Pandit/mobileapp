@@ -1,73 +1,55 @@
 import React from 'react';
-import { 
-  Text, 
-  Pressable, 
-  StyleSheet, 
-  type StyleProp, 
-  type ViewStyle 
-} from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import type { AppTheme } from '../constants/theme';
 
 interface Props {
   title: string;
-  onClick?: () => void;
+  onPress: () => void;
   theme: AppTheme;
-  fullWidth?: boolean;
-  // Note: HTML 'type' prop (submit, reset) doesn't apply to React Native, 
-  // so it's safely omitted from these props to maintain clean mobile architecture.
+  isLoading?: boolean;
   disabled?: boolean;
-  style?: StyleProp<ViewStyle>;
+  fullWidth?: boolean;
 }
 
-export const PrimaryButton = ({
-  title,
-  onClick,
-  theme,
-  fullWidth = false,
-  disabled = false,
-  style,
-}: Props) => {
+export const PrimaryButton = ({ title, onPress, theme, isLoading, disabled, fullWidth }: Props) => {
   return (
-    <Pressable
-      onPress={disabled ? undefined : onClick}
-      disabled={disabled}
-      style={({ pressed }) => [
-        styles.baseButton,
-        {
-          width: fullWidth ? '100%' : 180,
-          backgroundColor: disabled ? theme.border : theme.brandPrimary,
-          
-          // Shadows
-          shadowColor: disabled ? 'transparent' : theme.brandPrimary,
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: disabled ? 0 : 0.4,
-          shadowRadius: 20,
-          elevation: disabled ? 0 : 8,
-          
-          // Replicates the precise CSS transform scale on MouseDown/MouseUp
-          transform: [{ scale: pressed && !disabled ? 0.96 : 1 }],
-        },
-        style,
+    <TouchableOpacity
+      onPress={onPress}
+      style={[
+        styles.button,
+        { backgroundColor: theme.brandPrimary },
+        fullWidth && styles.fullWidth,
+        (disabled || isLoading) && styles.disabled,
       ]}
+      disabled={disabled || isLoading}
     >
-      <Text style={styles.textLabel}>
-        {title}
-      </Text>
-    </Pressable>
+      {isLoading ? (
+        <ActivityIndicator color={theme.background} />
+      ) : (
+        <Text style={[styles.text, { color: theme.background }]}>{title}</Text>
+      )}
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  baseButton: {
-    height: 56,
-    borderRadius: 16,
-    borderWidth: 0, // React Native equivalent to border: "none"
+  button: {
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
+    minWidth: 200,
   },
-  textLabel: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+  fullWidth: {
+    width: '100%',
+    minWidth: undefined,
+  },
+  text: {
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  disabled: {
+    opacity: 0.5,
   },
 });

@@ -1,38 +1,195 @@
-import React from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  Modal,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../hooks/useTheme';
+import { PrimaryButton } from '../components/PrimaryButton';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Wallet, Eye, EyeOff, Fingerprint, ScanFace } from 'lucide-react-native';
+import { GoogleIcon, AppleIcon } from '../components/BrandIcons';
 
-const Page = () => {
+const LoginScreen = () => {
   const { theme } = useTheme();
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
-    // In a real app, you'd perform authentication here
-    // For now, we'll just navigate to the home screen
-    router.replace('/(tabs)/home');
+    if (loading) return;
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      router.replace('/(tabs)/home' as any);
+    }, 2000);
   };
 
+  const handleSocialLogin = () => {
+    if (loading) return;
+    setLoading(true);
+    setTimeout(() => {
+        setLoading(false);
+        router.replace('/(tabs)/home' as any);
+    }, 2000)
+  }
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.header, { color: theme.textPrimary }]}>Login</Text>
-      <Button title="Log In" onPress={handleLogin} />
-    </View>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+
+        <Modal
+            transparent={true}
+            animationType="fade"
+            visible={loading}
+        >
+            <View style={styles.overlay}>
+                <ActivityIndicator size="large" color="#ffffff" />
+                <Text style={styles.loadingText}>Logging in...</Text>
+            </View>
+        </Modal>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          {/* Header */}
+          <View style={styles.headerContainer}>
+            <View style={[styles.logoContainer, { backgroundColor: theme.brandPrimary, shadowColor: theme.brandPrimary }]}>
+              <Wallet size={28} color="#ffffff" />
+            </View>
+            <Text style={[styles.title, { color: theme.textPrimary }]}>Dhukuti</Text>
+            <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Your Financial Companion</Text>
+          </View>
+
+          {/* Auth Card */}
+          <View style={[styles.authCard, { backgroundColor: theme.surface, borderColor: theme.border, shadowColor: theme.background === '#121212' ? 'transparent' : '#000' }]}>
+            {/* Email */}
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: theme.textPrimary }]}>Email Address</Text>
+              <TextInput
+                placeholder="name@example.com"
+                placeholderTextColor={theme.textSecondary}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                style={[styles.input, { borderColor: theme.border, backgroundColor: theme.background, color: theme.textPrimary }]}
+                editable={!loading}
+              />
+            </View>
+
+            {/* Password */}
+            <View style={styles.inputGroup}>
+              <Text style={[styles.label, { color: theme.textPrimary }]}>Password</Text>
+              <View style={styles.passwordInputContainer}>
+                <TextInput
+                  placeholder="••••••••"
+                  placeholderTextColor={theme.textSecondary}
+                  secureTextEntry={!showPassword}
+                  style={[styles.input, { borderColor: theme.border, backgroundColor: theme.background, color: theme.textPrimary, paddingRight: 48 }]}
+                  editable={!loading}
+                />
+                <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)} disabled={loading}>
+                  {showPassword ? <EyeOff size={20} color={theme.textSecondary} /> : <Eye size={20} color={theme.textSecondary} />}
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity onPress={() => router.push('/verify-otp' as any)} disabled={loading}>
+              <Text style={[styles.forgotPassword, { color: theme.brandPrimary }]}>Forgot Password?</Text>
+            </TouchableOpacity>
+
+            <PrimaryButton title="Login" theme={theme} onPress={handleLogin} fullWidth disabled={loading} />
+          </View>
+
+          {/* Divider */}
+          <View style={styles.dividerContainer}>
+            <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
+            <Text style={[styles.dividerText, { color: theme.textSecondary }]}>OR</Text>
+            <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
+          </View>
+
+          {/* Social Buttons */}
+          <View style={styles.socialContainer}>
+            <TouchableOpacity style={[styles.socialButton, { backgroundColor: theme.surface, borderColor: theme.border }]} onPress={handleSocialLogin} disabled={loading}>
+              <GoogleIcon size={22} color={theme.textPrimary} />
+              <Text style={[styles.socialButtonText, { color: theme.textPrimary }]}>Continue with Google</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.socialButton, { backgroundColor: theme.textPrimary, borderColor: theme.textPrimary }]} onPress={handleSocialLogin} disabled={loading}>
+              <AppleIcon size={22} color={theme.background} />
+              <Text style={[styles.socialButtonText, { color: theme.background }]}>Continue with Apple</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Sign Up */}
+          <View style={styles.signupContainer}>
+            <Text style={{ color: theme.textSecondary, fontWeight: '500' }}>Don't have an account?</Text>
+            <TouchableOpacity onPress={() => router.push('/signup' as any)} disabled={loading}>
+              <Text style={[styles.signupText, { color: theme.brandPrimary }]}>Sign Up</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Biometric */}
+          <View style={styles.biometricContainer}>
+            <TouchableOpacity onPress={handleLogin} disabled={loading}>
+                {Platform.OS === 'ios' ? (
+                    <ScanFace size={40} color={theme.textSecondary} />
+                ) : (
+                    <Fingerprint size={40} color={theme.textSecondary} />
+                )}
+            </TouchableOpacity>
+            <Text style={[styles.biometricText, { color: theme.textSecondary }]}>USE BIOMETRICS</Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: { flex: 1 },
+  container: { flex: 1 },
+  overlay: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
   },
-  header: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 20,
+  loadingText: {
+      color: '#fff',
+      marginTop: 16,
+      fontSize: 16,
+      fontWeight: '600'
   },
+  scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 16 },
+  headerContainer: { alignItems: 'center', marginBottom: 40 },
+  logoContainer: { width: 60, height: 60, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 16, shadowOpacity: 0.2, shadowRadius: 10, shadowOffset: { width: 0, height: 10 }, elevation: 5 },
+  title: { fontSize: 28, fontWeight: '800' },
+  subtitle: { marginTop: 6, fontWeight: '500' },
+  authCard: { width: '100%', borderRadius: 16, padding: 24, borderWidth: 1, marginBottom: 32, shadowOpacity: 0.08, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 5 },
+  inputGroup: { marginBottom: 20 },
+  label: { fontSize: 14, fontWeight: '600', marginBottom: 8 },
+  input: { width: '100%', height: 52, paddingHorizontal: 16, borderRadius: 12, borderWidth: 1, fontSize: 14 },
+  passwordInputContainer: { position: 'relative', justifyContent: 'center' },
+  eyeIcon: { position: 'absolute', right: 16 },
+  forgotPassword: { textAlign: 'right', fontSize: 13, fontWeight: '600', marginBottom: 24 },
+  dividerContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
+  dividerLine: { flex: 1, height: 1 },
+  dividerText: { marginHorizontal: 12, fontSize: 12, fontWeight: '700', letterSpacing: 2 },
+  socialContainer: { width: '100%', marginBottom: 24 },
+  socialButton: { width: '100%', height: 52, borderRadius: 12, borderWidth: 1, marginBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  socialButtonText: { fontWeight: '600', marginLeft: 10 },
+  signupContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 24 },
+  signupText: { marginLeft: 6, fontWeight: '700' },
+  biometricContainer: { opacity: 0.6, alignItems: 'center', marginTop: 8 },
+  biometricText: { fontSize: 11, fontWeight: '700', letterSpacing: 1, marginTop: 6 },
 });
 
-export default Page;
+export default LoginScreen;

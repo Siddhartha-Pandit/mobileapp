@@ -7,6 +7,7 @@ export const Fonts = {
 const lightPalette = {
   brandPrimary: '#007AFF',     // A professional blue
   brandSecondary: '#5856D6',   // A complementary purple
+  brandNavy: '#00002E',        // A deep, dark blue
   surface: '#FFFFFF',         // Card backgrounds, etc.
   background: '#F2F2F7',     // Main app background
   textPrimary: '#000000',      // For main headings and text
@@ -17,6 +18,7 @@ const lightPalette = {
 const darkPalette = {
   brandPrimary: '#0A84FF',     // A brighter blue for dark mode
   brandSecondary: '#5E5CE6',   // A brighter purple
+  brandNavy: '#1A1A4E',        // A dark blue for gradients
   surface: '#1C1C1E',         // Dark card backgrounds
   background: '#000000',     // True black background
   textPrimary: '#FFFFFF',      // White text
@@ -38,4 +40,4 @@ export const Colors = {
 };
 
 // This exports the TYPE of the theme for use in props
-export type AppTheme = typeof lightTheme;
+export type AppTheme = typeof lightTheme & typeof darkPalette;
