@@ -20,14 +20,26 @@ const SignUpScreen = () => {
   const { theme } = useTheme();
   const router = useRouter();
   
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [accepted, setAccepted] = useState(false);
 
   const handleSignUp = () => {
-    // Add sign-up logic here
-    console.log('Sign up pressed');
-    router.push('/(tabs)/home' as any); // Navigate to home on success
+    if (!email || !password || !fullName) {
+      // Basic validation for demo
+      console.log('Please fill all required fields');
+      return;
+    }
+    console.log('Sign up initiated for:', email);
+    // Navigate to OTP verification with signup flow
+    router.push({
+      pathname: '/verify-otp',
+      params: { email, flow: 'signup' }
+    } as any);
   };
 
   return (
@@ -39,7 +51,7 @@ const SignUpScreen = () => {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Header */}
           <View style={styles.headerContainer}>
-            <View style={[styles.logoContainer, { backgroundColor: theme.brandPrimary, shadowColor: theme.brandPrimary }]}>
+            <View style={[styles.logoContainer, { backgroundColor: theme.brandPrimary, boxShadow: `0px 10px 10px ${theme.brandPrimary}33` }]}>
               <ChartNoAxesCombined size={28} color="#ffffff" />
             </View>
             <Text style={[styles.title, { color: theme.textPrimary }]}>Create Account</Text>
@@ -49,15 +61,35 @@ const SignUpScreen = () => {
           {/* Form Card */}
           <View style={[styles.formCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             {/* Input Fields */}
-            <InputField icon={<User size={18} color={theme.textSecondary}/>} placeholder="Full Name" theme={theme} />
-            <InputField icon={<Mail size={18} color={theme.textSecondary}/>} placeholder="Email" type="email-address" theme={theme} />
-            <InputField icon={<Phone size={18} color={theme.textSecondary}/>} placeholder="Phone (Optional)" type="phone-pad" theme={theme} />
+            <InputField 
+              icon={<User size={18} color={theme.textSecondary}/>} 
+              placeholder="Full Name" 
+              theme={theme} 
+              value={fullName}
+              onChangeText={setFullName}
+            />
+            <InputField 
+              icon={<Mail size={18} color={theme.textSecondary}/>} 
+              placeholder="Email" 
+              type="email-address" 
+              theme={theme} 
+              value={email}
+              onChangeText={setEmail}
+            />
+            <InputField 
+              icon={<Phone size={18} color={theme.textSecondary}/>} 
+              placeholder="Phone (Optional)" 
+              type="phone-pad" 
+              theme={theme} 
+            />
             <PasswordField 
                 icon={<Lock size={18} color={theme.textSecondary}/>} 
                 placeholder="Password" 
                 theme={theme} 
                 show={showPassword} 
                 toggle={() => setShowPassword(!showPassword)} 
+                value={password}
+                onChangeText={setPassword}
             />
             <PasswordField 
                 icon={<Lock size={18} color={theme.textSecondary}/>} 
@@ -65,6 +97,8 @@ const SignUpScreen = () => {
                 theme={theme} 
                 show={showConfirm} 
                 toggle={() => setShowConfirm(!showConfirm)} 
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
             />
 
             {/* Terms & Conditions */}
@@ -83,7 +117,13 @@ const SignUpScreen = () => {
                 </Text>
             </View>
             
-            <PrimaryButton title="Sign Up" theme={theme} onPress={handleSignUp} fullWidth />
+            <PrimaryButton 
+              title="Sign Up" 
+              theme={theme} 
+              onPress={handleSignUp} 
+              fullWidth 
+              disabled={!accepted || !email || !password || !fullName} 
+            />
           </View>
 
           {/* Login Link */}
@@ -99,24 +139,30 @@ const SignUpScreen = () => {
   );
 };
 
-const InputField = ({ icon, placeholder, theme, type = 'default' as any }: any) => (
+const InputField = ({ icon, placeholder, theme, value, onChangeText, type = 'default' as any }: any) => (
     <View style={[styles.inputFieldContainer, { borderColor: theme.border, backgroundColor: theme.background }]}>
         {icon}
         <TextInput
             placeholder={placeholder}
             placeholderTextColor={theme.textSecondary}
             keyboardType={type}
+            value={value}
+            onChangeText={onChangeText}
+            autoCapitalize={type === 'email-address' ? 'none' : 'words'}
             style={[styles.input, { color: theme.textPrimary }]} />
     </View>
 );
 
-const PasswordField = ({ icon, placeholder, theme, show, toggle }: any) => (
+const PasswordField = ({ icon, placeholder, theme, show, toggle, value, onChangeText }: any) => (
     <View style={[styles.inputFieldContainer, { borderColor: theme.border, backgroundColor: theme.background }]}>
         {icon}
         <TextInput
             placeholder={placeholder}
             placeholderTextColor={theme.textSecondary}
             secureTextEntry={!show}
+            value={value}
+            onChangeText={onChangeText}
+            autoCapitalize="none"
             style={[styles.input, { color: theme.textPrimary }]} />
         <TouchableOpacity onPress={toggle} style={{padding: 4}}>
             {show ? <EyeOff size={18} color={theme.textSecondary} /> : <Eye size={18} color={theme.textSecondary} />}
@@ -127,9 +173,9 @@ const PasswordField = ({ icon, placeholder, theme, show, toggle }: any) => (
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   container: { flex: 1 },
-  scrollContent: { justifyContent: 'center', padding: 16 },
+  scrollContent: { justifyContent: 'center', padding: 16, paddingBottom: 40 },
   headerContainer: { alignItems: 'center', marginBottom: 40 },
-  logoContainer: { width: 60, height: 60, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 16, shadowOpacity: 0.2, shadowRadius: 10, shadowOffset: { width: 0, height: 10 }, elevation: 5 },
+  logoContainer: { width: 60, height: 60, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 16, boxShadow: '0px 10px 10px rgba(0,0,0,0.2)', elevation: 5 },
   title: { fontSize: 28, fontWeight: '800' },
   subtitle: { marginTop: 6, fontWeight: '500' },
   formCard: { width: '100%', borderRadius: 16, padding: 24, borderWidth: 1 },
@@ -156,7 +202,7 @@ const styles = StyleSheet.create({
       lineHeight: 18,
       flex: 1,
   },
-  footerContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 24 },
+  footerContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 24, paddingBottom: 20 },
   footerLink: { fontWeight: '700' },
 });
 

@@ -30,7 +30,7 @@ const ForgotPasswordScreen = () => {
   const handleSendCode = () => {
     // Logic to send verification code
     console.log('Sending code to:', email);
-    router.push({ pathname: '/verify-otp', params: { email } } as any);
+    router.push({ pathname: '/verify-otp', params: { email, flow: 'forgot' } } as any);
   };
 
   return (
@@ -47,7 +47,7 @@ const ForgotPasswordScreen = () => {
             <ScrollView contentContainerStyle={styles.scrollContent}>
             {/* Header */}
             <View style={styles.headerContainer}>
-                <View style={[styles.logoContainer, { backgroundColor: theme.brandPrimary, shadowColor: theme.brandPrimary }]}>
+                <View style={[styles.logoContainer, { backgroundColor: theme.brandPrimary, boxShadow: `0px 10px 15px ${theme.brandPrimary}33` }]}>
                 <Mail size={32} color="#ffffff" />
                 </View>
                 <Text style={[styles.title, { color: theme.textPrimary }]}>Forgot Your Password?</Text>
@@ -70,7 +70,7 @@ const ForgotPasswordScreen = () => {
                     style={[styles.input, { borderColor: theme.border, backgroundColor: theme.background, color: theme.textPrimary }]}
                 />
                 </View>
-                <PrimaryButton title="Send Verification Code" theme={theme} onPress={handleSendCode} fullWidth />
+                <PrimaryButton title="Next" theme={theme} onPress={handleSendCode} fullWidth />
             </View>
             </ScrollView>
       </KeyboardAvoidingView>
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 24, paddingBottom: 40 },
   headerContainer: { alignItems: 'center', marginBottom: 40, paddingHorizontal: 20 },
-  logoContainer: { width: 80, height: 80, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 24, shadowOpacity: 0.15, shadowRadius: 15, shadowOffset: { width: 0, height: 10 }, elevation: 5, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  logoContainer: { width: 80, height: 80, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: 24, boxShadow: '0px 10px 15px rgba(0,0,0,0.15)', elevation: 5, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
   title: { fontSize: 26, fontWeight: '800', textAlign: 'center', marginBottom: 12 },
   subtitle: { fontWeight: '500', textAlign: 'center', lineHeight: 22, color: 'gray' },
   formContainer: { width: '100%' },

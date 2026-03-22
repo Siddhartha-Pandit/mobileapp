@@ -81,7 +81,6 @@ export const TransactionItem = ({
         {
           backgroundColor: theme.surface,
           borderColor: `${theme.border}50`,
-          shadowColor: '#000',
         },
       ]}
     >
@@ -116,9 +115,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     marginBottom: 10,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.02,
-    shadowRadius: 12,
+    boxShadow: '0px 4px 12px rgba(0,0,0,0.02)',
     elevation: 3,
   },
   leftContent: {

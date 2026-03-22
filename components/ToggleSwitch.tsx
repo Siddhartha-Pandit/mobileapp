@@ -54,13 +54,7 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
+    boxShadow: '0px 2px 6px rgba(0,0,0,0.2)',
     elevation: 4, // for Android shadow
   },
 });

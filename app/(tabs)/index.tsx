@@ -27,7 +27,7 @@ export default function HomeScreen() {
   const fetchLocalUsers = async () => {
     try {
       setLoading(true);
-      const data = await db.select().from(users);
+      const data = (await db.select().from(users)) as any[];
       setUserList(data);
     } catch (e) {
       console.error(e);
@@ -45,7 +45,7 @@ export default function HomeScreen() {
         name,
         email,
         synced: false
-      });
+      } as any);
       
       setName('');
       setEmail('');
@@ -187,9 +187,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
+    boxShadow: '0px 4px 10px rgba(0,0,0,0.05)',
     elevation: 2,
   },
   networkText: {
@@ -213,9 +211,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
+    boxShadow: '0px 4px 10px rgba(0,0,0,0.05)',
     elevation: 2,
   },
   cardTitle: {

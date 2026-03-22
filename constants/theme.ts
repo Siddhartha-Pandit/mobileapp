@@ -1,43 +1,51 @@
-
 export const Fonts = {
   rounded: 'ui-rounded-dreams',
   mono: 'space-mono',
 };
 
-const lightPalette = {
-  brandPrimary: '#007AFF',     // A professional blue
-  brandSecondary: '#5856D6',   // A complementary purple
-  brandNavy: '#00002E',        // A deep, dark blue
-  surface: '#FFFFFF',         // Card backgrounds, etc.
-  background: '#F2F2F7',     // Main app background
-  textPrimary: '#000000',      // For main headings and text
-  textSecondary: '#6C6C70',    // For subheadings, captions
-  border: '#C6C6C8',          // Borders and dividers
+export interface AppTheme {
+  brandPrimary: string;
+  brandNavy: string;
+  background: string;
+  surface: string;
+  hover: string;
+  border: string;
+  textPrimary: string;
+  textSecondary: string;
+  brandSecondary: string;
+  danger: string;
+  warning: string;
+}
+
+export const lightTheme: AppTheme = {
+  brandPrimary: '#0AA971',
+  brandNavy: '#033766',
+  brandSecondary: '#033766',
+  background: '#FDFDFD',
+  surface: '#FFFFFF',
+  hover: '#F3F4F6',
+  border: '#E5E7EB',
+  textPrimary: '#111827',
+  textSecondary: '#6B7280',
+  danger: '#DC2626',
+  warning: '#D97706',
 };
 
-const darkPalette = {
-  brandPrimary: '#0A84FF',     // A brighter blue for dark mode
-  brandSecondary: '#5E5CE6',   // A brighter purple
-  brandNavy: '#1A1A4E',        // A dark blue for gradients
-  surface: '#1C1C1E',         // Dark card backgrounds
-  background: '#000000',     // True black background
-  textPrimary: '#FFFFFF',      // White text
-  textSecondary: '#8D8D93',    // Lighter gray for secondary text
-  border: '#38383A',          // Dark mode borders
-};
-
-export const lightTheme = {
-  ...lightPalette,
-};
-
-export const darkTheme = {
-  ...darkPalette,
+export const darkTheme: AppTheme = {
+  brandPrimary: '#0AA971',
+  brandNavy: '#033766',
+  brandSecondary: '#033766',
+  background: '#121212',
+  surface: '#1E1E1E',
+  hover: '#2A2A2A',
+  border: '#2C2C2C',
+  textPrimary: '#EAEAEA',
+  textSecondary: '#A1A1AA',
+  danger: '#F87171',
+  warning: '#FBBF24',
 };
 
 export const Colors = {
   light: lightTheme,
   dark: darkTheme,
 };
-
-// This exports the TYPE of the theme for use in props
-export type AppTheme = typeof lightTheme & typeof darkPalette;

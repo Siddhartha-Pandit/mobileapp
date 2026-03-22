@@ -98,7 +98,7 @@ export default function OnboardingInsightsScreen() {
                 </View>
 
                 {/* Floating AI Tip */}
-                <View style={[styles.aiTip, { backgroundColor: theme.brandPrimary, shadowColor: theme.brandPrimary }]}>
+                <View style={[styles.aiTip, { backgroundColor: theme.brandPrimary, boxShadow: `0px 10px 10px ${theme.brandPrimary}4D` }]}>
                     <Text style={styles.aiTipText}>✨ AI TIP: Save $200 more</Text>
                 </View>
             </BlurView>
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   aiBadgeText: { fontSize: 14, fontWeight: '700' },
   barGraphContainer: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 6, height: 64 },
   bar: { borderTopLeftRadius: 4, borderTopRightRadius: 4 },
-  aiTip: { position: 'absolute', top: '50%', left: '50%', transform: [{translateX: -75}, {translateY: -10}], paddingVertical: 6, paddingHorizontal: 10, borderRadius: 12, shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 10 } },
+  aiTip: { position: 'absolute', top: '50%', left: '50%', transform: [{translateX: -75}, {translateY: -10}], paddingVertical: 6, paddingHorizontal: 10, borderRadius: 12, boxShadow: '0px 10px 10px rgba(0,0,0,0.3)' },
   aiTipText: { color: '#fff', fontSize: 10, fontWeight: '700' },
   contentContainer: { textAlign: 'center', marginBottom: 24 },
   title: { fontWeight: '800', textAlign: 'center', marginBottom: 16 },

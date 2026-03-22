@@ -70,6 +70,7 @@ export default function OnboardingInvestmentsScreen() {
                 uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAdZWhC7O9NcRdMPieNzHK5zhSxDJTaFM7u6-9AGqbIsI8qe8mT7F9SHPlmzfp9d6Se-F9b5kPvmJCSO8LcSGLuKAeWLyD9kBggXKwntOvspRRLaH03O8FGfnGSeUxrQqXVtltR7hZeIYyp6MgWEVmWI38UBI36v8y853RW9BjFMWgRVNgJIM2G69zxfQgrC5L9jl2wpEXhFwasgL6kAkX0SLnd1XcvVc0fX7CDNfQUtkrb4BMrd0I2_bX0e2xoI4eArfsRirjZ9KdG',
               }}
               style={[styles.mainImage, { width: illustrationSize, height: illustrationSize }]}
+              resizeMode="contain"
             />
             
             {/* Floating Badge 1 */}
@@ -144,7 +145,6 @@ const styles = StyleSheet.create({
     opacity: 0.1,
   },
   mainImage: {
-      resizeMode: 'contain',
       borderRadius: 24,
   },
   badge: {

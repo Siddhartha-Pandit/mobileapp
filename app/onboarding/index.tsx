@@ -10,9 +10,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../hooks/useTheme';
-import { ProgressDots } from '../components/ProgressDots';
-import { PrimaryButton } from '../components/PrimaryButton';
+import { useTheme } from '../../hooks/useTheme';
+import { ProgressDots } from '../../components/ProgressDots';
+import { PrimaryButton } from '../../components/PrimaryButton';
 
 export default function OnboardingScreen() {
   const { theme } = useTheme();
@@ -69,6 +69,7 @@ export default function OnboardingScreen() {
                 uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA6vsCm2p9MT3xyUTei4xkYEGD4gZ6sbilMX4DRRFR51spltuC9GsIDbqRS0qPAmlKvoT6TUnEl68RUpjRNi0oIYyQAI3I3mM8rAapWtfkDRwIjaodCnbZ2ldC5DlcZHyu5Q6ZXEFx0Qce_2SivfL4p-cSzlgnOplA9x2SlxutD0L7SqH4H01qkVWt85LDfZJwnf-3Z_tUi_44vojzVF2fi1eNwG9Fqgpi_t7kPFgX-n73IZDUd2uXsUas34ZnOegvBzLY3X3KluYI',
               }}
               style={[{ width: illustrationSize, height: illustrationSize }, styles.illustrationImage]}
+              resizeMode="contain"
             />
           </View>
         </View>
@@ -125,26 +126,24 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: 'absolute',
-    borderRadius: 9999, // large number for a circle
+    borderRadius: 9999,
     opacity: 0.1,
   },
   illustrationImage: {
-    resizeMode: 'contain',
   },
   contentContainer: {
-    textAlign: 'center',
     marginBottom: 32,
   },
   title: {
     fontWeight: '800',
     textAlign: 'center',
-    marginBottom: 16, // Adjusted from margin to marginBottom
+    marginBottom: 16,
   },
   text: {
     textAlign: 'center',
     maxWidth: 320,
     alignSelf: 'center',
-    lineHeight: 22, // Adjusted for readability
+    lineHeight: 22,
   },
   buttonContainer: {
     alignItems: 'center',

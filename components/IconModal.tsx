@@ -180,10 +180,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: Platform.OS === "ios" ? 40 : 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
+    boxShadow: '0px -10px 20px rgba(0,0,0,0.15)',
     elevation: 20,
   },
   dragHandle: {

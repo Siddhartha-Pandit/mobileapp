@@ -24,6 +24,7 @@ const ResetPasswordScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleResetPassword = () => {
@@ -37,12 +38,23 @@ const ResetPasswordScreen = () => {
     }
     
     setError('');
-    console.log('Password has been reset.');
-    Alert.alert(
-        'Password Reset',
-        'Your password has been successfully updated. Please log in with your new password.',
-        [{ text: 'OK', onPress: () => router.replace('/login') }]
-      );
+    setIsLoading(true);
+
+    // Simulate API call
+    setTimeout(() => {
+        setIsLoading(false);
+        console.log('Password has been reset.');
+        Alert.alert(
+            'Password Reset',
+            'Your password has been successfully updated.',
+            [{ text: 'OK', onPress: () => router.replace('/login') }]
+        );
+        
+        // For web/simplicity if Alert doesn't block
+        if (Platform.OS === 'web') {
+            router.replace('/login');
+        }
+    }, 1500);
   };
 
   return (
@@ -106,10 +118,10 @@ const ResetPasswordScreen = () => {
 
                     {/* Error Message */}
                     <View style={styles.errorContainer}>
-                        {error && <Text style={styles.errorText}>{error}</Text>}
+                        {!!error && <Text style={styles.errorText}>{error}</Text>}
                     </View>
 
-                    <PrimaryButton title="Reset Password" theme={theme} onPress={handleResetPassword} fullWidth />
+                    <PrimaryButton title="Reset Password" theme={theme} onPress={handleResetPassword} isLoading={isLoading} fullWidth />
                 </View>
 
                  {/* Footer */}

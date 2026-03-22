@@ -186,7 +186,7 @@ export const MonthYearSelector = ({
                     styles.applyButton,
                     {
                       backgroundColor: theme.brandPrimary,
-                      shadowColor: theme.brandPrimary,
+                      boxShadow: `0px 4px 12px ${theme.brandPrimary}4D`,
                     }
                   ]}
                 >
@@ -211,10 +211,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   buttonShadow: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
+    boxShadow: '0px 4px 12px rgba(0,0,0,0.08)',
     elevation: 3,
   },
   buttonText: {
@@ -233,10 +230,7 @@ const styles = StyleSheet.create({
     height: 380,
     borderRadius: 24,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.15,
-    shadowRadius: 40,
+    boxShadow: '0px 20px 40px rgba(0,0,0,0.15)',
     elevation: 15,
   },
   monthsContainer: {
@@ -278,9 +272,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    boxShadow: '0px 4px 12px rgba(0,0,0,0.3)',
     elevation: 4,
   },
   applyButtonText: {

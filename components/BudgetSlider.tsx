@@ -82,19 +82,13 @@ export const BudgetSlider = ({
   
   const shadowProps = Platform.select({
     ios: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: isDark ? 4 : 6 },
-      shadowOpacity: isDark ? 0.6 : 0.15,
-      shadowRadius: isDark ? 12 : 16,
+      boxShadow: `0px ${isDark ? 4 : 6}px ${isDark ? 12 : 16}px rgba(0,0,0,${isDark ? 0.6 : 0.15})`,
     },
     android: {
       elevation: isDark ? 4 : 6,
     },
     default: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: isDark ? 4 : 6 },
-      shadowOpacity: isDark ? 0.6 : 0.15,
-      shadowRadius: isDark ? 12 : 16,
+      boxShadow: `0px ${isDark ? 4 : 6}px ${isDark ? 12 : 16}px rgba(0,0,0,${isDark ? 0.6 : 0.15})`,
     }
   });
 
@@ -130,7 +124,7 @@ export const BudgetSlider = ({
         }}
         {...panResponder.panHandlers}
       >
-        <View pointerEvents="none" style={styles.trackWrapper}>
+        <View style={[styles.trackWrapper, { pointerEvents: 'none' }]}>
           {/* Background Track */}
           <View
             style={[

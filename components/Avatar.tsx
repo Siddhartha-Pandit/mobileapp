@@ -34,19 +34,13 @@ export const Avatar = ({
   const isDark = theme.background === '#000000';
   const shadowProps = Platform.select({
     ios: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: isDark ? 10 : 15 },
-      shadowOpacity: isDark ? 0.6 : 0.15,
-      shadowRadius: isDark ? 30 : 35,
+      boxShadow: `0px ${isDark ? 10 : 15}px ${isDark ? 30 : 35}px rgba(0,0,0,${isDark ? 0.6 : 0.15})`,
     },
     android: {
       elevation: isDark ? 12 : 20,
     },
     default: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: isDark ? 10 : 15 },
-      shadowOpacity: isDark ? 0.6 : 0.15,
-      shadowRadius: isDark ? 30 : 35,
+      boxShadow: `0px ${isDark ? 10 : 15}px ${isDark ? 30 : 35}px rgba(0,0,0,${isDark ? 0.6 : 0.15})`,
     }
   });
 
@@ -143,10 +137,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
+    boxShadow: '0px 6px 16px rgba(0,0,0,0.25)',
     elevation: 6,
   },
 });

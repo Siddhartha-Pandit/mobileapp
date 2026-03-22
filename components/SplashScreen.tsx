@@ -52,6 +52,7 @@ export default function SplashScreen() {
           <Image
             source={require('../assets/images/logosq.png')}
             style={styles.logo}
+            resizeMode="cover"
           />
         </View>
         <Text style={[styles.title, { fontSize: titleSize, color: theme.textPrimary }]}>
@@ -90,16 +91,12 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
+    boxShadow: '0px 10px 20px rgba(0,0,0,0.2)',
     elevation: 5, // for Android
   },
   logo: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   title: {
     fontWeight: '800',

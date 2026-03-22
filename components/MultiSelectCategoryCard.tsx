@@ -34,7 +34,7 @@ export const MultiSelectCategoryCard = ({
           borderColor: isSelected ? theme.brandPrimary : theme.border,
           borderWidth: isSelected ? 2 : 1,
         },
-        isSelected ? [styles.shadowSelected, { shadowColor: theme.brandPrimary }] : styles.shadowDefault,
+        isSelected ? [styles.shadowSelected, { boxShadow: `0px 6px 16px ${theme.brandPrimary}33` }] : styles.shadowDefault,
       ]}
     >
       {/* Left section: Icon + Label */}
@@ -81,16 +81,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   shadowSelected: {
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 16,
+    boxShadow: '0px 6px 16px rgba(0,0,0,0.2)',
     elevation: 4,
   },
   shadowDefault: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
+    boxShadow: '0px 2px 6px rgba(0,0,0,0.04)',
     elevation: 1,
   },
   leftSection: {

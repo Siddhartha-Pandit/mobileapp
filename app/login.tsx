@@ -63,7 +63,7 @@ const LoginScreen = () => {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* Header */}
           <View style={styles.headerContainer}>
-            <View style={[styles.logoContainer, { backgroundColor: theme.brandPrimary, shadowColor: theme.brandPrimary }]}>
+            <View style={[styles.logoContainer, { backgroundColor: theme.brandPrimary, boxShadow: `0px 10px 10px ${theme.brandPrimary}33` }]}>
               <Wallet size={28} color="#ffffff" />
             </View>
             <Text style={[styles.title, { color: theme.textPrimary }]}>Dhukuti</Text>
@@ -71,7 +71,7 @@ const LoginScreen = () => {
           </View>
 
           {/* Auth Card */}
-          <View style={[styles.authCard, { backgroundColor: theme.surface, borderColor: theme.border, shadowColor: theme.background === '#121212' ? 'transparent' : '#000' }]}>
+          <View style={[styles.authCard, { backgroundColor: theme.surface, borderColor: theme.border, boxShadow: theme.background === '#121212' ? 'none' : '0px 10px 20px rgba(0,0,0,0.08)' }]}>
             {/* Email */}
             <View style={styles.inputGroup}>
               <Text style={[styles.label, { color: theme.textPrimary }]}>Email Address</Text>
@@ -102,7 +102,7 @@ const LoginScreen = () => {
               </View>
             </View>
 
-            <TouchableOpacity onPress={() => router.push('/verify-otp' as any)} disabled={loading}>
+            <TouchableOpacity onPress={() => router.push('/forgot-password' as any)} disabled={loading}>
               <Text style={[styles.forgotPassword, { color: theme.brandPrimary }]}>Forgot Password?</Text>
             </TouchableOpacity>
 
@@ -170,10 +170,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 16 },
   headerContainer: { alignItems: 'center', marginBottom: 40 },
-  logoContainer: { width: 60, height: 60, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 16, shadowOpacity: 0.2, shadowRadius: 10, shadowOffset: { width: 0, height: 10 }, elevation: 5 },
+  logoContainer: { width: 60, height: 60, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 16, boxShadow: '0px 10px 10px rgba(0,0,0,0.2)', elevation: 5 },
   title: { fontSize: 28, fontWeight: '800' },
   subtitle: { marginTop: 6, fontWeight: '500' },
-  authCard: { width: '100%', borderRadius: 16, padding: 24, borderWidth: 1, marginBottom: 32, shadowOpacity: 0.08, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 5 },
+  authCard: { width: '100%', borderRadius: 16, padding: 24, borderWidth: 1, marginBottom: 32, boxShadow: '0px 10px 20px rgba(0,0,0,0.08)', elevation: 5 },
   inputGroup: { marginBottom: 20 },
   label: { fontSize: 14, fontWeight: '600', marginBottom: 8 },
   input: { width: '100%', height: 52, paddingHorizontal: 16, borderRadius: 12, borderWidth: 1, fontSize: 14 },

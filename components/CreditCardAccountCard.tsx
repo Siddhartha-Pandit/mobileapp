@@ -78,7 +78,7 @@ export const CreditCardAccountCard = ({
       </View>
 
       {/* Glossy Overlay Reflection */}
-      <View style={styles.glossyOverlayContainer} pointerEvents="none">
+      <View style={[styles.glossyOverlayContainer, { pointerEvents: 'none' }]}>
         <LinearGradient
           colors={['rgba(255,255,255,0.05)', 'transparent']}
           start={{ x: 0, y: 0 }}
@@ -99,10 +99,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     position: 'relative',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.3,
-    shadowRadius: 24,
+    boxShadow: '0px 12px 24px rgba(0,0,0,0.3)',
     elevation: 8,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',

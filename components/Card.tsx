@@ -30,19 +30,13 @@ export const Card = ({ theme, children, onPress, style }: CardProps) => {
   
   const shadowProps = Platform.select({
     ios: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: isDark ? 0.3 : 0.05,
-      shadowRadius: 3,
+      boxShadow: `0px 1px 3px rgba(0,0,0,${isDark ? 0.3 : 0.05})`,
     },
     android: {
       elevation: isDark ? 2 : 1,
     },
     default: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: isDark ? 0.3 : 0.05,
-      shadowRadius: 3,
+      boxShadow: `0px 1px 3px rgba(0,0,0,${isDark ? 0.3 : 0.05})`,
     }
   });
 

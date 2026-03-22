@@ -24,9 +24,10 @@ const VerifyOtpScreen = () => {
   const params = useLocalSearchParams();
   const email = params.email as string || '';
 
-  const [otp, setOtp] = useState(new Array(CODE_LENGTH).fill(''));
+  const [otp, setOtp] = useState<string[]>(new Array(CODE_LENGTH).fill(''));
   const [error, setError] = useState('');
   const [resendCooldown, setResendCooldown] = useState(60);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(0);
   const inputsRef = useRef<(TextInput | null)[]>([]);
 
   useEffect(() => {
@@ -58,15 +59,22 @@ const VerifyOtpScreen = () => {
     }
   };
 
+  const flow = params.flow as string || 'forgot';
+
   const handleVerify = () => {
     const enteredOtp = otp.join('');
     setError('');
-    if (enteredOtp.length !== CODE_LENGTH || enteredOtp !== '123456') { // Demo logic
+    // For demo: 123456 is always correct
+    if (enteredOtp.length === CODE_LENGTH && enteredOtp === '123456') {
+        console.log(`Verifying OTP Success for flow: ${flow}`, enteredOtp);
+        if (flow === 'signup') {
+            router.push('/currency-setup' as any);
+        } else {
+            router.push('/reset-password' as any);
+        }
+    } else {
       setError('Invalid code. Please check and try again.');
-      return;
     }
-    console.log('Verifying OTP:', enteredOtp);
-    router.push('/reset-password' as any);
   };
 
   const handleResend = () => {
@@ -89,10 +97,17 @@ const VerifyOtpScreen = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Icon */}
-          <View style={[styles.iconContainer, { backgroundColor: theme.brandPrimary + '15', borderColor: theme.brandPrimary + '10'}]}>
-              <Lock size={56} color={theme.brandPrimary} strokeWidth={1.5} />
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          {/* Icon with Glow */}
+          <View style={[
+              styles.iconContainer, 
+              { 
+                  backgroundColor: '#1A1A1A', 
+                  borderColor: theme.brandPrimary + '20',
+                  boxShadow: `0 10px 30px ${theme.brandPrimary}20`,
+              }
+          ]}>
+              <Lock size={48} color={theme.brandPrimary} strokeWidth={1.5} />
           </View>
 
           {/* Header Text */}
@@ -103,7 +118,7 @@ const VerifyOtpScreen = () => {
             </Text>
           </View>
 
-          {/* OTP Input */}
+          {/* OTP Input Fields */}
           <View style={styles.codeContainer}>
             {otp.map((digit, index) => (
               <TextInput
@@ -112,39 +127,46 @@ const VerifyOtpScreen = () => {
                 style={[
                     styles.digitInput,
                     { 
-                        borderColor: error ? '#EF4444' : theme.border,
-                        backgroundColor: theme.surface,
-                        color: theme.textPrimary
+                        borderColor: error 
+                            ? '#EF4444' 
+                            : focusedIndex === index 
+                                ? theme.brandPrimary 
+                                : theme.border,
+                        backgroundColor: '#1A1A1A',
+                        color: theme.textPrimary,
+                        boxShadow: focusedIndex === index ? `0 0 0 2px ${theme.brandPrimary}30` : 'none',
                     }
                 ]}
                 keyboardType="number-pad"
                 maxLength={1}
                 value={digit}
+                onFocus={() => setFocusedIndex(index)}
+                onBlur={() => setFocusedIndex(null)}
                 onChangeText={(value) => handleChange(value, index)}
                 onKeyPress={(e) => handleKeyDown(e, index)}
               />
             ))}
           </View>
 
-          {/* Error Area */}
+          {/* Error Message */}
           <View style={styles.errorContainer}>
-            {error && <Text style={styles.errorText}>{error}</Text>}
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
           </View>
 
           {/* Verify Button */}
-          <View style={{width: '100%', marginBottom: 32}}>
+          <View style={styles.buttonWrapper}>
             <PrimaryButton title="Verify Code" theme={theme} onPress={handleVerify} fullWidth />
           </View>
 
-          {/* Resend Footer */}
+          {/* Resend Logic */}
           <View style={styles.resendContainer}>
               {resendCooldown > 0 ? (
-                  <Text style={{color: theme.textSecondary}}>
+                  <Text style={[styles.resendText, { color: theme.textSecondary }]}>
                       Resend code in <Text style={{ color: theme.textPrimary, fontWeight: '700' }}>{resendCooldown}s</Text>
                   </Text>
               ) : (
-                <TouchableOpacity onPress={handleResend} style={{padding: 4}}>
-                    <Text style={{ color: theme.brandPrimary, fontWeight: '700', textDecorationLine: 'underline' }}>Resend New Code</Text>
+                <TouchableOpacity onPress={handleResend} style={styles.resendButton}>
+                    <Text style={[styles.resendLink, { color: theme.brandPrimary }]}>Resend New Code</Text>
                 </TouchableOpacity>
               )}
           </View>
@@ -156,26 +178,64 @@ const VerifyOtpScreen = () => {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  header: { paddingHorizontal: 16, paddingTop: 16, flexDirection: 'row', justifyContent: 'flex-start' },
-  backButton: { padding: 8, borderRadius: 12, backgroundColor: 'rgba(0,0,0,0.04)' },
-  scrollContent: { flexGrow: 1, padding: 24, alignItems: 'center', paddingTop: '8%' },
-  iconContainer: { width: 120, height: 120, borderRadius: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 32, borderWidth: 1, },
-  headerTextContainer: { textAlign: 'center', marginBottom: 40, paddingHorizontal: 16 },
-  title: { fontSize: 26, fontWeight: '800', textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 },
-  subtitle: { fontSize: 15, textAlign: 'center', lineHeight: 22, color: 'gray' },
-  codeContainer: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginBottom: 16, gap: 8 },
+  header: { paddingHorizontal: 16, paddingTop: 16 },
+  backButton: { 
+      padding: 10, 
+      alignSelf: 'flex-start' 
+  },
+  scrollContent: { 
+      flexGrow: 1, 
+      paddingHorizontal: 24, 
+      alignItems: 'center', 
+      paddingTop: '8%',
+      paddingBottom: 40,
+  },
+  iconContainer: { 
+      width: 110, 
+      height: 110, 
+      borderRadius: 32, 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      marginBottom: 40, 
+      borderWidth: 1, 
+  },
+  headerTextContainer: { width: '100%', marginBottom: 40 },
+  title: { 
+      fontSize: 28, 
+      fontWeight: '800', 
+      textAlign: 'center', 
+      marginBottom: 16, 
+      letterSpacing: -0.5 
+  },
+  subtitle: { 
+      fontSize: 15, 
+      textAlign: 'center', 
+      lineHeight: 24, 
+      paddingHorizontal: 20,
+  },
+  codeContainer: { 
+      flexDirection: 'row', 
+      justifyContent: 'center', 
+      width: '100%', 
+      marginBottom: 40, 
+      gap: 10 
+  },
   digitInput: { 
-      flex: 1,
+      width: '14%',
       height: 60, 
       textAlign: 'center',
       fontSize: 22,
       fontWeight: '700',
       borderRadius: 12,
-      borderWidth: 2,
+      borderWidth: 1.5,
   },
-  errorContainer: { minHeight: 24, marginBottom: 16, alignItems: 'center' },
+  errorContainer: { minHeight: 24, marginBottom: 16 },
   errorText: { color: '#EF4444', fontSize: 14, fontWeight: '600', textAlign: 'center' },
-  resendContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
+  buttonWrapper: { width: '100%', marginBottom: 32 },
+  resendContainer: { alignItems: 'center' },
+  resendText: { fontSize: 15 },
+  resendButton: { padding: 4 },
+  resendLink: { fontWeight: '700', textDecorationLine: 'underline', fontSize: 15 },
 });
 
 export default VerifyOtpScreen;
