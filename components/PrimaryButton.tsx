@@ -1,5 +1,5 @@
-import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import type { AppTheme } from '../constants/theme';
 
 interface Props {
@@ -13,9 +13,14 @@ interface Props {
 }
 
 export const PrimaryButton = ({ title, onPress, theme, isLoading, disabled, fullWidth, style }: Props) => {
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress();
+  };
+
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={handlePress}
       style={[
         styles.button,
         { backgroundColor: theme.brandPrimary },

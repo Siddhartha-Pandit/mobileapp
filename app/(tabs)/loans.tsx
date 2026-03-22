@@ -8,6 +8,7 @@ import {
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
+import * as Haptics from "expo-haptics";
 import { 
   ChevronLeft, 
   Plus, 
@@ -67,6 +68,16 @@ export default function LoanDashboardScreen() {
     return true;
   });
 
+  const handleFilterPress = (filter: string) => {
+    setActiveFilter(filter);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
+  const handleLoanPress = (id: number) => {
+    Haptics.selectionAsync();
+    router.push('/loan-detail' as any);
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.maxContainer}>
@@ -118,7 +129,8 @@ export default function LoanDashboardScreen() {
                 return (
                   <TouchableOpacity 
                     key={filter} 
-                    onPress={() => setActiveFilter(filter)}
+                    onPress={() => handleFilterPress(filter)}
+                    activeOpacity={0.7}
                     style={[
                       styles.filterBtn, 
                       { 
@@ -141,7 +153,8 @@ export default function LoanDashboardScreen() {
             {filteredLoans.map((loan) => (
               <TouchableOpacity 
                 key={loan.id} 
-                onPress={() => router.push('/loan-detail' as any)}
+                onPress={() => handleLoanPress(loan.id)}
+                activeOpacity={0.6}
               >
                 <Card 
                   theme={theme} 
@@ -156,7 +169,7 @@ export default function LoanDashboardScreen() {
                       <Text style={[styles.loanTitle, { color: theme.textPrimary }]}>{loan.title}</Text>
                       <Text style={[styles.loanProgress, { color: theme.textSecondary }]}>{loan.progress}</Text>
                     </View>
-
+                    
                     <View style={styles.loanAmountContainer}>
                       <Text style={[styles.loanAmount, { color: theme.textPrimary }]}>
                         NPR {loan.amount}<Text style={[styles.moLabel, { color: theme.textSecondary }]}>/mo</Text>
@@ -170,13 +183,6 @@ export default function LoanDashboardScreen() {
           </View>
         </ScrollView>
 
-        {/* FLOATING ACTION BUTTON */}
-        <TouchableOpacity 
-          onPress={() => router.push('/add-loan' as any)}
-          style={[styles.fab, { backgroundColor: theme.brandPrimary, boxShadow: `0 8px 20px ${theme.brandPrimary}40` }]}
-        >
-          <Plus size={28} color="#FFFFFF" strokeWidth={3} />
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -194,12 +200,13 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 24,
+    paddingTop: 40, // Viewing zone (One UI style)
     paddingBottom: 150,
   },
   headerBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: 44, // Increased for touch (iOS style)
+    height: 44, // Increased for touch (iOS style)
+    borderRadius: 14,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -264,20 +271,24 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   filterBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 12, // Larger touch target
+    borderRadius: 24,
     borderWidth: 1,
+    minWidth: 80,
+    alignItems: 'center',
   },
   filterText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
   },
   loanCard: {
     marginHorizontal: 0,
+    borderRadius: 20, // More rounded (iOS style)
   },
   loanRow: {
-    padding: 16,
+    paddingVertical: 20, // Larger hit area
+    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
@@ -322,17 +333,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "800",
     textTransform: "uppercase",
-  },
-  fab: {
-    position: "absolute",
-    bottom: 20,
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 8,
-    zIndex: 20,
   },
 });

@@ -36,7 +36,7 @@ export const BalanceCard = ({ theme, balance, growth = 12.5 }: Props) => {
               {showBalance ? <Eye size={16} color="rgba(255,255,255,0.7)" /> : <EyeOff size={16} color="rgba(255,255,255,0.7)" />}
             </TouchableOpacity>
           </View>
-          <Text style={[styles.amount, { textShadowColor: 'rgba(0, 0, 0, 0.2)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 4 }]}>
+          <Text style={styles.amount}>
             {showBalance ? `रू ${balance.toLocaleString()}` : '••••••••'}
           </Text>
         </View>

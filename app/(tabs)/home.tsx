@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import {
   ArrowDown,
   ArrowUp,
@@ -47,6 +48,16 @@ export default function DashboardScreen() {
     { label: "Transfer", color: theme.brandNavy, icon: ArrowLeftRight, link: "/transfer" },
     { label: "More", color: theme.surface, icon: LayoutGrid, textColor: theme.textPrimary, link: "/more" },
   ];
+
+  const handleActionPress = (link: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push(link as any);
+  };
+
+  const handleTransactionPress = () => {
+    Haptics.selectionAsync();
+    router.push('/transaction-detail' as any);
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -98,7 +109,8 @@ export default function DashboardScreen() {
             return (
               <View key={i} style={styles.actionItem}>
                 <TouchableOpacity
-                  onPress={() => router.push(action.link as any)}
+                  onPress={() => handleActionPress(action.link)}
+                  activeOpacity={0.7}
                   style={[
                     styles.actionBtn, 
                     { 
@@ -198,7 +210,8 @@ export default function DashboardScreen() {
               {transactions.map((item, index) => (
                 <TouchableOpacity 
                   key={index}
-                  onPress={() => router.push('/transaction-detail' as any)}
+                  onPress={handleTransactionPress}
+                  activeOpacity={0.7}
                 >
                   <Card theme={theme} style={styles.transactionCard}>
                     <TransactionItem 
@@ -248,8 +261,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 32,
-    marginTop: 16,
+    marginBottom: 40,
+    marginTop: 24, // One UI Viewing Zone
     maxWidth: 800,
     alignSelf: 'center',
     width: '100%',

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Platform,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import type { LucideIcon } from 'lucide-react-native';
 import {
   ShoppingCart,
@@ -73,9 +74,14 @@ export const TransactionItem = ({
   const statusColor = isIncome ? theme.brandPrimary : '#EF4444';
   const iconBg = isIncome ? `${theme.brandPrimary}15` : '#EF444415';
 
+  const handlePress = () => {
+    Haptics.selectionAsync();
+    onPress?.();
+  };
+
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={handlePress}
       style={[
         styles.container,
         {

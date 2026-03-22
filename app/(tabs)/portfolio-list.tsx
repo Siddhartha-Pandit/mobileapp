@@ -7,8 +7,9 @@ import {
   TouchableOpacity,
   useWindowDimensions,
 } from "react-native";
+import { useRouter } from "expo-router";
+import * as Haptics from "expo-haptics";
 import {
-  Menu,
   Plus,
   PlusCircle,
   ChevronLeft,
@@ -19,16 +20,23 @@ import { DonutChart } from "../../components/charts/DonutChart";
 import { MiniBarChart } from "../../components/charts/MiniBarChart";
 import { CircularProgress } from "../../components/charts/CircularProgress";
 
-// Types & Components
+import { CustomTabs } from "../../components/CustomTabs";
 import { useTheme } from "../../hooks/useTheme";
 import { SectionHeader } from "../../components/SectionHeader";
+import HeaderBar from "../../components/HeaderBar";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import type { AppTheme } from "../../constants/theme";
 
 export default function PortfolioListPage() {
   const { theme } = useTheme();
+  const router = useRouter();
   const { width: SCREEN_WIDTH } = useWindowDimensions();
-  const [activeTab, setActiveTab] = useState<"portfolios" | "health">("portfolios");
+  const [activeTab, setActiveTab] = useState<string>("portfolios");
+
+  const tabOptions = [
+    { value: "portfolios", label: "Portfolios" },
+    { value: "health", label: "Overall Health" },
+  ];
 
   const statusColors = {
     gain: "#078838",
@@ -48,28 +56,33 @@ export default function PortfolioListPage() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.maxContainer}>
-        {/* HEADER */}
-        <View style={[styles.header, { backgroundColor: theme.surface, maxWidth: 1000, alignSelf: 'center', width: '100%' }]}>
-          <TouchableOpacity style={styles.iconBtn} onPress={() => activeTab === "health" && setActiveTab("portfolios")}>
-            {activeTab === "health" ? <ChevronLeft size={22} color={theme.textPrimary} /> : <Menu size={22} color={theme.textPrimary} />}
-          </TouchableOpacity>
-
-          <View style={styles.tabsWrapper}>
-            <TouchableOpacity onPress={() => setActiveTab("portfolios")} style={[styles.tab, activeTab === "portfolios" && { borderBottomColor: theme.brandPrimary }]}>
-              <Text style={[styles.tabText, { color: activeTab === "portfolios" ? theme.brandPrimary : theme.textSecondary }]}>Portfolios</Text>
+        {/* HEADER AREA */}
+        <HeaderBar
+          theme={theme}
+          title="Portfolio"
+          leftContent={
+            <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
+              <ChevronLeft size={22} color={theme.textPrimary} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setActiveTab("health")} style={[styles.tab, activeTab === "health" && { borderBottomColor: theme.brandPrimary }]}>
-              <Text style={[styles.tabText, { color: activeTab === "health" ? theme.brandPrimary : theme.textSecondary }]}>Overall Health</Text>
+          }
+          rightContent={
+            <TouchableOpacity style={styles.iconBtn}>
+              <Plus size={22} color={theme.brandPrimary} />
             </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity style={styles.iconBtn}>
-            {activeTab === "health" ? <Info size={20} color={theme.textPrimary} /> : <Plus size={22} color={theme.brandPrimary} />}
-          </TouchableOpacity>
-        </View>
+          }
+        />
 
         {/* MAIN CONTENT */}
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.tabSection}>
+            <CustomTabs 
+              theme={theme}
+              options={tabOptions}
+              activeTab={activeTab}
+              onChange={setActiveTab}
+            />
+          </View>
+
           {activeTab === "portfolios" ? (
             <View style={styles.tabContent}>
               {/* Portfolio Summary Card */}
@@ -234,28 +247,38 @@ const LegendItem = ({ color, label, value, theme }: any) => (
   </View>
 );
 
-const PortfolioCard = ({ title, stocks, risk, riskColor, value, todayChange, changeColor, equityWidth, profitAmount, theme }: any) => (
-  <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border, padding: 24, marginBottom: 16 }]}>
-    <View style={styles.cardHeaderRow}>
-      <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>{title}</Text>
-      <Text style={[styles.cardValue, { color: theme.textPrimary }]}>{value}</Text>
-    </View>
-    <View style={styles.cardSubRow}>
-      <Text style={[styles.cardSubText, { color: theme.textSecondary }]}>{stocks} • <Text style={{ color: riskColor, fontWeight: '700' }}>{risk}</Text></Text>
-      <Text style={[styles.todayChange, { color: changeColor }]}>{todayChange}</Text>
-    </View>
-    <View style={styles.equityRow}>
-      <View style={[styles.equityBg, { backgroundColor: theme.border }]}>
-        <View style={[styles.equityFill, { width: equityWidth, backgroundColor: theme.brandPrimary }]} />
+const PortfolioCard = ({ title, stocks, risk, riskColor, value, todayChange, changeColor, equityWidth, profitAmount, theme }: any) => {
+  const handlePress = () => {
+    Haptics.selectionAsync();
+  };
+
+  return (
+    <TouchableOpacity 
+      activeOpacity={0.7}
+      onPress={handlePress}
+      style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border, padding: 24, marginBottom: 16 }]}
+    >
+      <View style={styles.cardHeaderRow}>
+        <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>{title}</Text>
+        <Text style={[styles.cardValue, { color: theme.textPrimary }]}>{value}</Text>
       </View>
-      <Text style={[styles.equityLabel, { color: theme.textSecondary }]}>{equityWidth} Equity</Text>
-    </View>
-    <View style={[styles.cardFooter, { borderTopColor: theme.border }]}>
-      <Text style={[styles.footerLabel, { color: theme.textSecondary }]}>OVERALL GAIN</Text>
-      <Text style={[styles.footerAmount, { color: "#078838" }]}>{profitAmount}</Text>
-    </View>
-  </View>
-);
+      <View style={styles.cardSubRow}>
+        <Text style={[styles.cardSubText, { color: theme.textSecondary }]}>{stocks} • <Text style={{ color: riskColor, fontWeight: '700' }}>{risk}</Text></Text>
+        <Text style={[styles.todayChange, { color: changeColor }]}>{todayChange}</Text>
+      </View>
+      <View style={styles.equityRow}>
+        <View style={[styles.equityBg, { backgroundColor: theme.border }]}>
+          <View style={[styles.equityFill, { width: equityWidth, backgroundColor: theme.brandPrimary }]} />
+        </View>
+        <Text style={[styles.equityLabel, { color: theme.textSecondary }]}>{equityWidth} Equity</Text>
+      </View>
+      <View style={[styles.cardFooter, { borderTopColor: theme.border }]}>
+        <Text style={[styles.footerLabel, { color: theme.textSecondary }]}>OVERALL GAIN</Text>
+        <Text style={[styles.footerAmount, { color: "#078838" }]}>{profitAmount}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const AdvisorCard = ({ title, confidence, desc, theme, statusColors }: any) => (
   <View style={[styles.advisorCard, { backgroundColor: `${theme.brandPrimary}08`, borderColor: `${theme.brandPrimary}20` }]}>
@@ -284,32 +307,17 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: '100%',
   },
-  header: {
-    padding: 16,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    zIndex: 50,
-  },
   iconBtn: {
     padding: 8,
   },
-  tabsWrapper: {
-    flexDirection: 'row',
-    gap: 20,
-  },
-  tab: {
-    paddingVertical: 8,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '700',
+  tabSection: {
+    paddingHorizontal: 24,
+    marginBottom: 16,
+    marginTop: 8,
   },
   scrollContent: {
-    paddingVertical: 24,
+    paddingVertical: 16,
+    paddingTop: 40, // Viewing zone (One UI style)
     paddingBottom: 150,
   },
   tabContent: {

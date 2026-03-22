@@ -1,5 +1,5 @@
-import React from 'react';
 import { View, Text, StyleSheet, StyleProp, TextStyle, TouchableOpacity } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import type { AppTheme } from '../constants/theme';
 
 interface SectionHeaderProps {
@@ -79,7 +79,13 @@ export const SectionHeader = ({
       {(rightComponent || rightLabel) && (
         <View>
           {rightComponent || (
-            <TouchableOpacity onPress={onRightPress} activeOpacity={0.7}>
+            <TouchableOpacity 
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onRightPress?.();
+              }} 
+              activeOpacity={0.7}
+            >
               <Text style={[styles.rightLabel, { color: theme.brandPrimary }]}>
                 {rightLabel}
               </Text>
