@@ -1,50 +1,61 @@
-# Welcome to your Expo app 👋
+# Zenith - Personal Finance App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Zenith is a mobile-first personal finance application designed for simplicity, security, and a seamless user experience. It helps you manage your money with ease, providing tools for budgeting, expense tracking, and financial planning.
 
-## Get started
+## ✨ Key Features
 
-1. Install dependencies
+- **Offline-First:** The app is built to work offline, ensuring you can always access your financial data. All data is stored locally and synchronized with the server when a connection is available.
+- **One-Handed Usability:** The UI is designed for easy one-handed use, making it convenient to manage your finances on the go.
+- **Biometric Security:** Secure your financial data with biometric authentication (Face ID/Touch ID).
+- **Themed Interface:** The app supports both light and dark modes, with a consistent and visually appealing design.
+- **Cross-Platform:** Built with React Native and Expo, Zenith runs on both Android and iOS devices.
 
-   ```bash
-   npm install
-   ```
+## 🚀 Tech Stack
 
-2. Start the app
+- **Framework:** React Native with Expo
+- **Language:** TypeScript
+- **Routing:** Expo Router (File-based)
+- **UI:** Custom components with support for theming
 
-   ```bash
-   npx expo start
-   ```
+## 🏁 Getting Started
 
-In the output, you'll find options to open the app in a
+Follow these steps to get the project up and running on your local machine.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Prerequisites
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Make sure you have Node.js and the Expo CLI installed on your system.
 
 ```bash
-npm run reset-project
+npm install -g expo-cli
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Installation & Setup
 
-## Learn more
+1.  **Clone the repository:**
 
-To learn more about developing your project with Expo, look at the following resources:
+    ```bash
+    git clone <your-repository-url>
+    cd zenith-finance-app
+    ```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+2.  **Install dependencies:**
 
-## Join the community
+    ```bash
+    npm install
+    ```
 
-Join our community of developers creating universal apps.
+3.  **Start the development server:**
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+    ```bash
+    npx expo start
+    ```
+
+This will open the Expo DevTools in your browser. You can then run the app on:
+
+-   An Android emulator or physical device
+-   An iOS simulator or physical device
+-   In your web browser
+
+## 🤝 Contributing
+
+Contributions are welcome! Please refer to the `CONSISTENCY_GUIDE.md` for design principles, coding conventions, and API guidelines before submitting a pull request.
