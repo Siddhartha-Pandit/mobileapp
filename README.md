@@ -1,6 +1,6 @@
-# Zenith - Personal Finance App
+# Dukuti - Personal Finance App
 
-Zenith is a mobile-first personal finance application designed for simplicity, security, and a seamless user experience. It helps you manage your money with ease, providing tools for budgeting, expense tracking, and financial planning.
+Dukuti is a mobile-first personal finance application designed for simplicity, security, and a seamless user experience. It helps you manage your money with ease, providing tools for budgeting, expense tracking, and financial planning.
 
 ## ✨ Key Features
 
@@ -8,7 +8,7 @@ Zenith is a mobile-first personal finance application designed for simplicity, s
 - **One-Handed Usability:** The UI is designed for easy one-handed use, making it convenient to manage your finances on the go.
 - **Biometric Security:** Secure your financial data with biometric authentication (Face ID/Touch ID).
 - **Themed Interface:** The app supports both light and dark modes, with a consistent and visually appealing design.
-- **Cross-Platform:** Built with React Native and Expo, Zenith runs on both Android and iOS devices.
+- **Cross-Platform:** Built with React Native and Expo, Dukuti runs on both Android and iOS devices.
 
 ## 🚀 Tech Stack
 
@@ -35,7 +35,7 @@ npm install -g expo-cli
 
     ```bash
     git clone <your-repository-url>
-    cd zenith-finance-app
+    cd dhukuti-mobileapp
     ```
 
 2.  **Install dependencies:**
