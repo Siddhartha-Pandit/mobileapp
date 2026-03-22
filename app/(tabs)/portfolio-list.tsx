@@ -49,7 +49,7 @@ export default function PortfolioListPage() {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.maxContainer}>
         {/* HEADER */}
-        <View style={[styles.header, { backgroundColor: theme.surface }]}>
+        <View style={[styles.header, { backgroundColor: theme.surface, maxWidth: 1000, alignSelf: 'center', width: '100%' }]}>
           <TouchableOpacity style={styles.iconBtn} onPress={() => activeTab === "health" && setActiveTab("portfolios")}>
             {activeTab === "health" ? <ChevronLeft size={22} color={theme.textPrimary} /> : <Menu size={22} color={theme.textPrimary} />}
           </TouchableOpacity>
@@ -152,12 +152,12 @@ export default function PortfolioListPage() {
 
               <SectionHeader theme={theme} title="Risk Metrics" uppercase={true} paddingHorizontal={24} marginBottom={12} />
               <View style={styles.metricsGrid}>
-                <MetricCard theme={theme} label="CAGR" value="14.2%" status="EXCELLENT" color={statusColors.emerald} width={(SCREEN_WIDTH - 60) / 2} />
-                <MetricCard theme={theme} label="SHARPE RATIO" value="0.95" status="Excellent" color={statusColors.emerald} width={(SCREEN_WIDTH - 60) / 2} />
-                <MetricCard theme={theme} label="VOLATILITY" value="26%" status="Moderate" color={statusColors.warning} width={(SCREEN_WIDTH - 60) / 2} />
-                <MetricCard theme={theme} label="BETA VS NEPSE" value="1.05" status="Market Match" color={theme.textSecondary} width={(SCREEN_WIDTH - 60) / 2} />
-                <MetricCard theme={theme} label="MAX DRAWDOWN" value="-12.4%" status="Low Risk" color={statusColors.emerald} width={(SCREEN_WIDTH - 60) / 2} />
-                <MetricCard theme={theme} label="ALPHA" value="+2.1%" status="Overperforming" color={statusColors.emerald} width={(SCREEN_WIDTH - 60) / 2} />
+                <MetricCard theme={theme} label="CAGR" value="14.2%" status="EXCELLENT" color={statusColors.emerald} width={SCREEN_WIDTH > 768 ? (SCREEN_WIDTH - 80) / 3 : (SCREEN_WIDTH - 60) / 2} />
+                <MetricCard theme={theme} label="SHARPE RATIO" value="0.95" status="Excellent" color={statusColors.emerald} width={SCREEN_WIDTH > 768 ? (SCREEN_WIDTH - 80) / 3 : (SCREEN_WIDTH - 60) / 2} />
+                <MetricCard theme={theme} label="VOLATILITY" value="26%" status="Moderate" color={statusColors.warning} width={SCREEN_WIDTH > 768 ? (SCREEN_WIDTH - 80) / 3 : (SCREEN_WIDTH - 60) / 2} />
+                <MetricCard theme={theme} label="BETA VS NEPSE" value="1.05" status="Market Match" color={theme.textSecondary} width={SCREEN_WIDTH > 768 ? (SCREEN_WIDTH - 80) / 3 : (SCREEN_WIDTH - 60) / 2} />
+                <MetricCard theme={theme} label="MAX DRAWDOWN" value="-12.4%" status="Low Risk" color={statusColors.emerald} width={SCREEN_WIDTH > 768 ? (SCREEN_WIDTH - 80) / 3 : (SCREEN_WIDTH - 60) / 2} />
+                <MetricCard theme={theme} label="ALPHA" value="+2.1%" status="Overperforming" color={statusColors.emerald} width={SCREEN_WIDTH > 768 ? (SCREEN_WIDTH - 80) / 3 : (SCREEN_WIDTH - 60) / 2} />
               </View>
 
               <SectionHeader theme={theme} title="Allocation Overview" uppercase={true} paddingHorizontal={24} marginBottom={12} />
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   },
   maxContainer: {
     flex: 1,
-    maxWidth: 420,
+    maxWidth: 1000,
     alignSelf: 'center',
     width: '100%',
   },

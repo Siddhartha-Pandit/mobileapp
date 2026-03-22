@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet, Pressable, useWindowDimensions } from 'react-native';
 import { Link, usePathname } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -18,6 +18,7 @@ interface Props {
 export const BottomNavBar = ({ theme }: Props) => {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
+  const { width: windowWidth } = useWindowDimensions();
 
   const getIconColor = (isActive: boolean) =>
     isActive ? theme.brandPrimary : theme.textSecondary;
@@ -38,6 +39,7 @@ export const BottomNavBar = ({ theme }: Props) => {
           backgroundColor: theme.surface,
           borderTopColor: theme.border,
           paddingBottom: insets.bottom > 0 ? insets.bottom : 16,
+          maxWidth: windowWidth > 1200 ? 1000 : (windowWidth > 768 ? 900 : (windowWidth > 420 ? 480 : 420)),
         },
       ]}
     >
@@ -70,9 +72,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingTop: 16,
-    paddingHorizontal: 16,
-    maxWidth: 420,
+    paddingHorizontal: 24,
     alignSelf: 'center',
+    marginHorizontal: 'auto',
     width: '100%',
     elevation: 8,
     boxShadow: '0px -2px 8px rgba(0,0,0,0.1)',

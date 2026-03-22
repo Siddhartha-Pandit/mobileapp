@@ -109,12 +109,22 @@ const CurrencySetupScreen = () => {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  scrollContent: { padding: 24, flexGrow: 1, paddingBottom: 40 },
+  scrollContent: { 
+    padding: 24, 
+    flexGrow: 1, 
+    paddingBottom: 40,
+    maxWidth: 600,
+    alignSelf: 'center',
+    width: '100%',
+  },
   card: {
       padding: 20,
       borderRadius: 18,
       borderWidth: 1,
       marginTop: 20,
+      width: '100%',
+      maxWidth: 500,
+      alignSelf: 'center',
   },
   cardTitle: {
       fontSize: 18,

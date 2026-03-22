@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '../hooks/useTheme';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLoadingStore } from '../src/store/useLoadingStore';
 import { ChartNoAxesCombined, User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react-native';
 
 const SignUpScreen = () => {
@@ -28,18 +29,27 @@ const SignUpScreen = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [accepted, setAccepted] = useState(false);
 
+  const { showLoading, hideLoading } = useLoadingStore();
+
   const handleSignUp = () => {
     if (!email || !password || !fullName) {
       // Basic validation for demo
       console.log('Please fill all required fields');
       return;
     }
-    console.log('Sign up initiated for:', email);
-    // Navigate to OTP verification with signup flow
-    router.push({
-      pathname: '/verify-otp',
-      params: { email, flow: 'signup' }
-    } as any);
+    
+    showLoading('Creating your account...');
+    
+    // Simulate delay
+    setTimeout(() => {
+      hideLoading();
+      console.log('Sign up initiated for:', email);
+      // Navigate to OTP verification with signup flow
+      router.push({
+        pathname: '/verify-otp',
+        params: { email, flow: 'signup' }
+      } as any);
+    }, 1500);
   };
 
   return (

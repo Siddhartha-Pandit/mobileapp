@@ -20,6 +20,9 @@ const HeaderBar = ({ leftContent, title, rightContent, theme }: HeaderBarProps) 
             default: theme.surface,
           }),
           borderBottomColor: `${theme.border}20`,
+          maxWidth: 1000,
+          alignSelf: 'center',
+          width: '100%',
         },
       ]}
     >

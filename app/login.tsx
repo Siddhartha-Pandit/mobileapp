@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../hooks/useTheme';
+import { useLoadingStore } from '../src/store/useLoadingStore';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Wallet, Eye, EyeOff, Fingerprint, ScanFace } from 'lucide-react-native';
@@ -21,20 +22,31 @@ import { GoogleIcon, AppleIcon } from '../components/BrandIcons';
 const LoginScreen = () => {
   const { theme } = useTheme();
   const router = useRouter();
+  const { showLoading, hideLoading } = useLoadingStore();
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = () => {
-    if (loading) return;
-    setLoading(true);
-      router.replace('/(tabs)/home');
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    showLoading('Checking credentials...');
+    
+    // Simulate API call
+    setTimeout(() => {
+        hideLoading();
+        setIsSubmitting(false);
+        router.replace('/(tabs)/home');
+    }, 1500);
   };
 
   const handleSocialLogin = () => {
-    if (loading) return;
-    setLoading(true);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    showLoading('Redirecting to secure login...');
+    
     setTimeout(() => {
-        setLoading(false);
+        hideLoading();
+        setIsSubmitting(false);
         router.replace('/(tabs)/home');
     }, 1500);
   };
@@ -42,16 +54,6 @@ const LoginScreen = () => {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
 
-        <Modal
-            transparent={true}
-            animationType="fade"
-            visible={loading}
-        >
-            <View style={styles.overlay}>
-                <ActivityIndicator size="large" color="#ffffff" />
-                <Text style={styles.loadingText}>Logging in...</Text>
-            </View>
-        </Modal>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -78,7 +80,7 @@ const LoginScreen = () => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 style={[styles.input, { borderColor: theme.border, backgroundColor: theme.background, color: theme.textPrimary }]}
-                editable={!loading}
+                editable={!isSubmitting}
               />
             </View>
 
@@ -91,19 +93,19 @@ const LoginScreen = () => {
                   placeholderTextColor={theme.textSecondary}
                   secureTextEntry={!showPassword}
                   style={[styles.input, { borderColor: theme.border, backgroundColor: theme.background, color: theme.textPrimary, paddingRight: 48 }]}
-                  editable={!loading}
+                  editable={!isSubmitting}
                 />
-                <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)} disabled={loading}>
+                <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)} disabled={isSubmitting}>
                   {showPassword ? <EyeOff size={20} color={theme.textSecondary} /> : <Eye size={20} color={theme.textSecondary} />}
                 </TouchableOpacity>
               </View>
             </View>
 
-            <TouchableOpacity onPress={() => router.push('/forgot-password' as any)} disabled={loading}>
+            <TouchableOpacity onPress={() => router.push('/forgot-password' as any)} disabled={isSubmitting}>
               <Text style={[styles.forgotPassword, { color: theme.brandPrimary }]}>Forgot Password?</Text>
             </TouchableOpacity>
 
-            <PrimaryButton title="Login" theme={theme} onPress={handleLogin} fullWidth disabled={loading} />
+            <PrimaryButton title="Login" theme={theme} onPress={handleLogin} fullWidth disabled={isSubmitting} />
           </View>
 
           {/* Divider */}
@@ -115,11 +117,11 @@ const LoginScreen = () => {
 
           {/* Social Buttons */}
           <View style={styles.socialContainer}>
-            <TouchableOpacity style={[styles.socialButton, { backgroundColor: theme.surface, borderColor: theme.border }]} onPress={handleSocialLogin} disabled={loading}>
+            <TouchableOpacity style={[styles.socialButton, { backgroundColor: theme.surface, borderColor: theme.border }]} onPress={handleSocialLogin} disabled={isSubmitting}>
               <GoogleIcon size={22} color={theme.textPrimary} />
               <Text style={[styles.socialButtonText, { color: theme.textPrimary }]}>Continue with Google</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.socialButton, { backgroundColor: theme.textPrimary, borderColor: theme.textPrimary }]} onPress={handleSocialLogin} disabled={loading}>
+            <TouchableOpacity style={[styles.socialButton, { backgroundColor: theme.textPrimary, borderColor: theme.textPrimary }]} onPress={handleSocialLogin} disabled={isSubmitting}>
               <AppleIcon size={22} color={theme.background} />
               <Text style={[styles.socialButtonText, { color: theme.background }]}>Continue with Apple</Text>
             </TouchableOpacity>
@@ -128,14 +130,14 @@ const LoginScreen = () => {
           {/* Sign Up */}
           <View style={styles.signupContainer}>
             <Text style={{ color: theme.textSecondary, fontWeight: '500' }}>Don't have an account?</Text>
-            <TouchableOpacity onPress={() => router.push('/signup' as any)} disabled={loading}>
+            <TouchableOpacity onPress={() => router.push('/signup' as any)} disabled={isSubmitting}>
               <Text style={[styles.signupText, { color: theme.brandPrimary }]}>Sign Up</Text>
             </TouchableOpacity>
           </View>
 
           {/* Biometric */}
           <View style={styles.biometricContainer}>
-            <TouchableOpacity onPress={handleLogin} disabled={loading}>
+            <TouchableOpacity onPress={handleLogin} disabled={isSubmitting}>
                 {Platform.OS === 'ios' ? (
                     <ScanFace size={40} color={theme.textSecondary} />
                 ) : (
@@ -165,12 +167,29 @@ const styles = StyleSheet.create({
       fontSize: 16,
       fontWeight: '600'
   },
-  scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 16 },
+  scrollContent: { 
+    flexGrow: 1, 
+    justifyContent: 'center', 
+    padding: 24,
+    maxWidth: 600,
+    alignSelf: 'center',
+    width: '100%',
+  },
   headerContainer: { alignItems: 'center', marginBottom: 40 },
   logoContainer: { width: 60, height: 60, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 16, boxShadow: '0px 10px 10px rgba(0,0,0,0.2)', elevation: 5 },
   title: { fontSize: 28, fontWeight: '800' },
   subtitle: { marginTop: 6, fontWeight: '500' },
-  authCard: { width: '100%', borderRadius: 16, padding: 24, borderWidth: 1, marginBottom: 32, boxShadow: '0px 10px 20px rgba(0,0,0,0.08)', elevation: 5 },
+  authCard: { 
+    width: '100%', 
+    maxWidth: 450,
+    alignSelf: 'center',
+    borderRadius: 16, 
+    padding: 24, 
+    borderWidth: 1, 
+    marginBottom: 32, 
+    boxShadow: '0px 10px 20px rgba(0,0,0,0.08)', 
+    elevation: 5 
+  },
   inputGroup: { marginBottom: 20 },
   label: { fontSize: 14, fontWeight: '600', marginBottom: 8 },
   input: { width: '100%', height: 52, paddingHorizontal: 16, borderRadius: 12, borderWidth: 1, fontSize: 14 },
@@ -180,7 +199,12 @@ const styles = StyleSheet.create({
   dividerContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
   dividerLine: { flex: 1, height: 1 },
   dividerText: { marginHorizontal: 12, fontSize: 12, fontWeight: '700', letterSpacing: 2 },
-  socialContainer: { width: '100%', marginBottom: 24 },
+  socialContainer: { 
+    width: '100%', 
+    maxWidth: 450,
+    alignSelf: 'center',
+    marginBottom: 24 
+  },
   socialButton: { width: '100%', height: 52, borderRadius: 12, borderWidth: 1, marginBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   socialButtonText: { fontWeight: '600', marginLeft: 10 },
   signupContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 24 },

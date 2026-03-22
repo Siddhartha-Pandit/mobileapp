@@ -190,9 +190,15 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 140,
+    maxWidth: 800,
+    alignSelf: 'center',
+    width: '100%',
   },
   container: {
     padding: 24,
+    maxWidth: 600,
+    alignSelf: 'center',
+    width: '100%',
   },
   progressContainer: {
     marginBottom: 24,
@@ -331,5 +337,7 @@ const styles = StyleSheet.create({
   },
   footerInner: {
     width: '100%',
+    maxWidth: 550,
+    alignSelf: 'center',
   },
 });

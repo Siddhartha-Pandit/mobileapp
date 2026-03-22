@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   },
   maxContainer: {
     flex: 1,
-    maxWidth: 420,
+    maxWidth: 1000,
     alignSelf: 'center',
     width: '100%',
   },
@@ -208,6 +208,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
     borderWidth: 0,
     elevation: 8,
+    maxWidth: 600,
+    alignSelf: 'center',
+    width: '100%',
   },
   summaryLabel: {
     color: "rgba(255,255,255,0.7)",
@@ -248,6 +251,9 @@ const styles = StyleSheet.create({
   loanList: {
     gap: 14,
     marginTop: 8,
+    maxWidth: 700,
+    alignSelf: 'center',
+    width: '100%',
   },
   filterWrapper: {
     marginTop: 20,

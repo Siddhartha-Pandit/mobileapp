@@ -28,6 +28,7 @@ import { MiniSparkline } from "../../components/charts/MiniSparkline";
 
 export default function AnalyticsScreen() {
   const { theme } = useTheme();
+  const { width: windowWidth } = useWindowDimensions();
   const isDark = theme.background === "#121212";
   const [activeRange, setActiveRange] = React.useState("1M");
 
@@ -87,7 +88,7 @@ export default function AnalyticsScreen() {
           />
         </ScrollView>
 
-        <View style={styles.mainContent}>
+        <View style={[styles.mainContent, { maxWidth: windowWidth > 768 ? 1000 : 420 }]}>
           {/* TOTAL PORTFOLIO AREA CHART */}
           <Card theme={theme} style={styles.card}>
             <CardContent theme={theme} style={styles.cardContent}>
@@ -290,6 +291,8 @@ const styles = StyleSheet.create({
   mainContent: {
     paddingHorizontal: 20,
     gap: 20,
+    alignSelf: 'center',
+    width: '100%',
   },
   card: {
     padding: 0,

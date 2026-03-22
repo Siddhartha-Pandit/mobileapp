@@ -92,7 +92,7 @@ export default function DashboardScreen() {
         </View>
 
         {/* QUICK ACTIONS */}
-        <View style={styles.actionsContainer}>
+        <View style={[styles.actionsContainer, { maxWidth: SCREEN_WIDTH > 768 ? 600 : 420 }]}>
           {quickActions.map((action, i) => {
             const Icon = action.icon;
             return (
@@ -108,16 +108,16 @@ export default function DashboardScreen() {
                     }
                   ]}
                 >
-                  <Icon size={24} color={action.textColor || "white"} />
+                  <Icon size={SCREEN_WIDTH > 768 ? 28 : 24} color={action.textColor || "white"} />
                 </TouchableOpacity>
-                <Text style={[styles.actionLabel, { color: theme.textSecondary }]}>{action.label}</Text>
+                <Text style={[styles.actionLabel, { color: theme.textSecondary, fontSize: SCREEN_WIDTH > 768 ? 12 : 11 }]}>{action.label}</Text>
               </View>
             );
           })}
         </View>
 
         {/* MAIN CONTENT */}
-        <View style={styles.mainContent}>
+        <View style={[styles.mainContent, { maxWidth: SCREEN_WIDTH > 768 ? 1000 : 420 }]}>
           
           {/* BUDGET SUMMARY CARD */}
           <Card theme={theme} style={styles.budgetCard}>
@@ -250,6 +250,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 32,
     marginTop: 16,
+    maxWidth: 800,
+    alignSelf: 'center',
+    width: '100%',
   },
   profileRow: {
     flexDirection: 'row',
@@ -295,13 +298,13 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   balanceWrapper: {
-    maxWidth: 400,
+    maxWidth: 800,
     alignSelf: 'center',
     width: '100%',
   },
   actionsContainer: {
     width: '100%',
-    maxWidth: 420,
+    maxWidth: 600,
     alignSelf: 'center',
     paddingHorizontal: 24,
     marginTop: -44,

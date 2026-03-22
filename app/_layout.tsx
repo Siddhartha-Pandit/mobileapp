@@ -3,6 +3,7 @@ import { useRouter, useSegments } from 'expo-router';
 import { Slot } from 'expo-router';
 import { ThemeProvider } from '@/context/ThemeProvider';
 import SplashScreen from '../components/SplashScreen'; // Corrected import path
+import { GlobalLoader } from '../components/GlobalLoader';
 
 // This is a placeholder for your actual authentication logic
 const useAuth = () => {
@@ -59,6 +60,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       {showSplash ? <SplashScreen /> : <Slot />}
+      <GlobalLoader />
     </ThemeProvider>
   );
 }

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Switch,
   Platform,
+  useWindowDimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { 
@@ -39,6 +40,7 @@ import type { AppTheme } from "../../constants/theme";
 
 export default function SettingsPage() {
   const { theme, themeType, setThemeType } = useTheme();
+  const { width: windowWidth } = useWindowDimensions();
   const router = useRouter();
   const isDark = theme.background === "#121212";
   
@@ -261,7 +263,7 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   maxContainer: {
-    maxWidth: 430,
+    maxWidth: 1000,
     alignSelf: 'center',
     width: '100%',
     paddingHorizontal: 20,
