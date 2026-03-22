@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../hooks/useTheme';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -7,7 +7,7 @@ import { LoadingSpinner } from './LoadingSpinner';
 export default function SplashScreen() {
   const { theme } = useTheme();
 
-  const { width, height } = Dimensions.get('window');
+  const { width, height } = useWindowDimensions();
   const isSmallDevice = width < 360;
 
   const logoSize = isSmallDevice ? 90 : 120;

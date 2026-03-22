@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, StyleProp, TextStyle } from 'react-native';
+import { View, Text, StyleSheet, StyleProp, TextStyle, TouchableOpacity } from 'react-native';
 import type { AppTheme } from '../constants/theme';
 
 interface SectionHeaderProps {
@@ -7,6 +7,8 @@ interface SectionHeaderProps {
   title: string;
   icon?: React.ReactNode;
   rightComponent?: React.ReactNode;
+  rightLabel?: string;
+  onRightPress?: () => void;
   variant?: 'header' | 'label';
   marginBottom?: number;
   paddingHorizontal?: number;
@@ -20,6 +22,8 @@ export const SectionHeader = ({
   title,
   icon,
   rightComponent,
+  rightLabel,
+  onRightPress,
   variant = 'header',
   marginBottom = 16,
   paddingHorizontal = 0,
@@ -72,9 +76,15 @@ export const SectionHeader = ({
         </Text>
       </View>
 
-      {rightComponent && (
+      {(rightComponent || rightLabel) && (
         <View>
-          {rightComponent}
+          {rightComponent || (
+            <TouchableOpacity onPress={onRightPress} activeOpacity={0.7}>
+              <Text style={[styles.rightLabel, { color: theme.brandPrimary }]}>
+                {rightLabel}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </View>
@@ -96,5 +106,10 @@ const styles = StyleSheet.create({
   },
   title: {
     lineHeight: undefined
+  },
+  rightLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   }
 });

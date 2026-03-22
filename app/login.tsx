@@ -27,10 +27,7 @@ const LoginScreen = () => {
   const handleLogin = () => {
     if (loading) return;
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      router.replace('/(tabs)/home' as any);
-    }, 2000);
+      router.replace('/(tabs)/home');
   };
 
   const handleSocialLogin = () => {
@@ -38,9 +35,9 @@ const LoginScreen = () => {
     setLoading(true);
     setTimeout(() => {
         setLoading(false);
-        router.replace('/(tabs)/home' as any);
-    }, 2000)
-  }
+        router.replace('/(tabs)/home');
+    }, 1500);
+  };
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>

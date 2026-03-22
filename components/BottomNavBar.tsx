@@ -23,11 +23,11 @@ export const BottomNavBar = ({ theme }: Props) => {
     isActive ? theme.brandPrimary : theme.textSecondary;
 
   const tabs = [
-    { href: '/dashboard', icon: Home, name: 'Dashboard' },
-    { href: '/analytics', icon: BarChart2, name: 'Analytics' },
-    { href: '/portfolio-list', icon: Wallet, name: 'Portfolio' },
-    { href: '/loans', icon: HandCoins, name: 'Loans' },
-    { href: '/privacy-security', icon: Settings, name: 'Settings' },
+    { href: '/(tabs)/home', icon: Home, name: 'Home' },
+    { href: '/(tabs)/analytics', icon: BarChart2, name: 'Analytics' },
+    { href: '/(tabs)/portfolio-list', icon: Wallet, name: 'Portfolio' },
+    { href: '/(tabs)/loans', icon: HandCoins, name: 'Loans' },
+    { href: '/(tabs)/settings', icon: Settings, name: 'Settings' },
   ] as const;
 
   return (
@@ -42,7 +42,10 @@ export const BottomNavBar = ({ theme }: Props) => {
       ]}
     >
       {tabs.map((tab) => {
-        const isActive = pathname === tab.href;
+        // Robust matching for Expo Router pathnames which might strip group names
+        const isActive = pathname === tab.href || 
+                        pathname === tab.href.replace('/(tabs)', '') ||
+                        (pathname === '/' && tab.href === '/(tabs)/home');
         const Icon = tab.icon;
 
         return (

@@ -5,41 +5,51 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useTheme } from '@/hooks/useTheme';
 
+import { BottomNavBar } from '@/components/BottomNavBar';
+
 export default function TabLayout() {
   const { theme } = useTheme();
 
   return (
     <Tabs
+      tabBar={() => <BottomNavBar theme={theme} />}
       screenOptions={{
-        tabBarActiveTintColor: theme.brandPrimary,
-        tabBarInactiveTintColor: theme.textSecondary,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarStyle: {
-          backgroundColor: theme.surface,
-          borderTopColor: theme.border,
-          borderTopWidth: 1,
-        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          href: null, // Hide index from tab bar as it's a redirect
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="home"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Home',
+        }}
+      />
+      <Tabs.Screen
+        name="analytics"
+        options={{
+          title: 'Analytics',
+        }}
+      />
+      <Tabs.Screen
+        name="portfolio-list"
+        options={{
+          title: 'Portfolio',
+        }}
+      />
+      <Tabs.Screen
+        name="loans"
+        options={{
+          title: 'Loans',
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="gear" color={color} />,
         }}
       />
     </Tabs>

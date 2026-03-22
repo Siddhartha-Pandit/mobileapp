@@ -6,9 +6,8 @@ import SplashScreen from '../components/SplashScreen'; // Corrected import path
 
 // This is a placeholder for your actual authentication logic
 const useAuth = () => {
-  // For now, we'll pretend the user is NOT authenticated to test the onboarding flow.
-  // Change this to `true` to test the main authenticated app.
-  return { isAuthenticated: false };
+  // For testing purposes, we'll set this to true so the home page is accessible.
+  return { isAuthenticated: true };
 };
 
 export default function RootLayout() {

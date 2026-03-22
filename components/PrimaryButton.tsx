@@ -9,9 +9,10 @@ interface Props {
   isLoading?: boolean;
   disabled?: boolean;
   fullWidth?: boolean;
+  style?: any;
 }
 
-export const PrimaryButton = ({ title, onPress, theme, isLoading, disabled, fullWidth }: Props) => {
+export const PrimaryButton = ({ title, onPress, theme, isLoading, disabled, fullWidth, style }: Props) => {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -20,13 +21,14 @@ export const PrimaryButton = ({ title, onPress, theme, isLoading, disabled, full
         { backgroundColor: theme.brandPrimary },
         fullWidth && styles.fullWidth,
         (disabled || isLoading) && styles.disabled,
+        style,
       ]}
       disabled={disabled || isLoading}
     >
       {isLoading ? (
-        <ActivityIndicator color={theme.background} />
+        <ActivityIndicator color="#FFFFFF" />
       ) : (
-        <Text style={[styles.text, { color: theme.background }]}>{title}</Text>
+        <Text style={[styles.text, { color: '#FFFFFF' }]}>{title}</Text>
       )}
     </TouchableOpacity>
   );
