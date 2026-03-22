@@ -1,27 +1,26 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
   ScrollView,
   Modal,
   TouchableWithoutFeedback
 } from 'react-native';
 import { Calendar, ChevronDown } from 'lucide-react-native';
-import type { AppTheme } from '../constants/theme';
+import { useTheme } from '@/hooks/useTheme';
 
 interface Props {
-  theme: AppTheme;
   variant?: "short" | "long";
   onDateChange?: (month: string, year: number) => void;
 }
 
 export const MonthYearSelector = ({
-  theme,
   variant = "long",
   onDateChange,
 }: Props) => {
+  const { theme } = useTheme(); // Use the theme hook
   const [open, setOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState("February");
   const [selectedYear, setSelectedYear] = useState(2026);
@@ -80,17 +79,16 @@ export const MonthYearSelector = ({
         </View>
       </TouchableOpacity>
 
-      {/* Dropdown Modal: We use a centered Modal instead of absolute positioning 
-          to prevent clipping issues in React Native layouts. */}
+      {/* Dropdown Modal */}
       <Modal
         visible={open}
         transparent
         animationType="fade"
         onRequestClose={() => setOpen(false)}
       >
-        <TouchableOpacity 
-          style={styles.modalOverlay} 
-          activeOpacity={1} 
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
           onPress={() => setOpen(false)}
         >
           <TouchableWithoutFeedback>
@@ -109,8 +107,8 @@ export const MonthYearSelector = ({
                 <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
                   MONTH
                 </Text>
-                
-                <ScrollView 
+
+                <ScrollView
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={styles.scrollContent}
                 >
@@ -127,7 +125,7 @@ export const MonthYearSelector = ({
                           }
                         ]}
                       >
-                        <Text 
+                        <Text
                           style={[
                             styles.optionText,
                             {
@@ -160,16 +158,16 @@ export const MonthYearSelector = ({
                         style={[
                           styles.optionItem,
                           {
-                            backgroundColor: isSelected ? `${theme.brandNavy}15` : 'transparent',
+                            backgroundColor: isSelected ? `${theme.brandPrimary}15` : 'transparent',
                           }
                         ]}
                       >
-                        <Text 
+                        <Text
                           style={[
                             styles.optionText,
                             {
                               fontWeight: isSelected ? '800' : '500',
-                              color: isSelected ? theme.brandNavy : theme.textPrimary,
+                              color: isSelected ? theme.brandPrimary : theme.textPrimary,
                             }
                           ]}
                         >
@@ -187,8 +185,8 @@ export const MonthYearSelector = ({
                   style={[
                     styles.applyButton,
                     {
-                      backgroundColor: theme.brandNavy,
-                      shadowColor: theme.brandNavy,
+                      backgroundColor: theme.brandPrimary,
+                      shadowColor: theme.brandPrimary,
                     }
                   ]}
                 >
@@ -225,14 +223,14 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)', // Dim the background to focus on the menu
+    backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   dropdownOptions: {
     flexDirection: 'row',
     width: 320,
-    height: 380, // Allow slightly more height so lists render cleanly
+    height: 380,
     borderRadius: 24,
     overflow: 'hidden',
     shadowColor: '#000',

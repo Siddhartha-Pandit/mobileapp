@@ -20,9 +20,8 @@ import {
   Plus,
   CreditCard,
 } from 'lucide-react-native';
-import type { AppTheme } from '../constants/theme';
+import { useTheme } from '@/hooks/useTheme';
 
-// 1. Map for backend strings to Lucide components
 const ICON_MAP: Record<string, LucideIcon> = {
   shopping: ShoppingCart,
   salary: Wallet,
@@ -36,7 +35,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 interface Props {
-  theme: AppTheme;
   title: string;
   date: string;
   amount: number;
@@ -46,7 +44,6 @@ interface Props {
 }
 
 export const TransactionItem = ({ 
-  theme, 
   title, 
   date, 
   amount, 
@@ -54,9 +51,9 @@ export const TransactionItem = ({
   customIcon: CustomIcon, 
   onPress 
 }: Props) => {
+  const { theme } = useTheme();
   const isIncome = amount > 0;
 
-  // 2. Logic to determine which icon to display
   const getIcon = (): LucideIcon => {
     if (CustomIcon) return CustomIcon;
     if (iconKey && ICON_MAP[iconKey]) return ICON_MAP[iconKey];
@@ -73,7 +70,6 @@ export const TransactionItem = ({
 
   const IconToRender = getIcon();
 
-  // 3. Dynamic Styling variables
   const statusColor = isIncome ? theme.brandPrimary : '#EF4444';
   const iconBg = isIncome ? `${theme.brandPrimary}15` : '#EF444415';
 
@@ -85,12 +81,11 @@ export const TransactionItem = ({
         {
           backgroundColor: theme.surface,
           borderColor: `${theme.border}50`,
-          shadowColor: '#000', // Added for shadow
+          shadowColor: '#000',
         },
       ]}
     >
       <View style={styles.leftContent}>
-        {/* Icon Circle Container */}
         <View style={[
           styles.iconContainer,
           { backgroundColor: iconBg, borderColor: statusColor },
@@ -98,14 +93,12 @@ export const TransactionItem = ({
           <IconToRender color={statusColor} size={22} strokeWidth={2.5} />
         </View>
 
-        {/* Transaction Text Info */}
         <View style={styles.textContainer}>
           <Text style={[styles.title, { color: theme.textPrimary }]}>{title}</Text>
           <Text style={[styles.date, { color: theme.textSecondary }]}>{date}</Text>
         </View>
       </View>
 
-      {/* Amount Display */}
       <Text style={[styles.amount, { color: statusColor }]}>
         {isIncome ? '+' : '-'} ₨ {Math.abs(amount).toLocaleString()}
       </Text>
@@ -123,11 +116,9 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     marginBottom: 10,
-    // Shadow for iOS
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.02,
     shadowRadius: 12,
-    // Shadow for Android
     elevation: 3,
   },
   leftContent: {
@@ -138,7 +129,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 46,
     height: 46,
-    borderRadius: 23, // half of width/height
+    borderRadius: 23,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
@@ -160,9 +151,6 @@ const styles = StyleSheet.create({
   amount: {
     fontWeight: '800',
     fontSize: 16,
-    // React Native doesn't have a universal monospace font by default.
-    // On iOS, 'Menlo' or 'Courier' can be used. On Android, 'monospace'.
-    // Using a consistent font for numbers usually requires custom font loading.
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
 });

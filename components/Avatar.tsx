@@ -31,7 +31,7 @@ export const Avatar = ({
   const hasImage = Boolean(imageUrl);
 
   // Dynamic shadow properties to match your web version mapping depending on the theme
-  const isDark = theme.background === '#121212';
+  const isDark = theme.background === '#000000';
   const shadowProps = Platform.select({
     ios: {
       shadowColor: '#000',
@@ -75,7 +75,7 @@ export const Avatar = ({
         </View>
       ) : (
         <LinearGradient
-          colors={[theme.brandPrimary, theme.brandNavy]}
+          colors={[theme.brandPrimary, theme.brandSecondary]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={[
