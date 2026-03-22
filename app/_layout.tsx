@@ -48,8 +48,13 @@ export default function RootLayout() {
       'custom-goal',
     ]);
     const inPublicRoute = publicRoutes.has(segments[0] as string);
+    
+    // Auth-only public routes (logged-in users shouldn't see these)
+    const authRoutes = new Set([
+      'onboarding', 'login', 'signup', 'forgot-password', 'verify-otp', 'reset-password'
+    ]);
 
-    if (isAuthenticated && !inTabsGroup) {
+    if (isAuthenticated && authRoutes.has(segments[0] as string)) {
       router.replace('/(tabs)/home');
     } else if (!isAuthenticated && !inPublicRoute) {
       // Only redirect unauthenticated users away from protected routes

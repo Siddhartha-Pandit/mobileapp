@@ -221,10 +221,12 @@ export default function PortfolioListPage() {
 
         {/* Floating Create Button */}
         <View style={styles.floatingAction}>
-          <TouchableOpacity style={[styles.createBtn, { backgroundColor: theme.brandPrimary }]}>
-            <PlusCircle size={20} color="#fff" />
-            <Text style={styles.createBtnText}>Create New Portfolio</Text>
-          </TouchableOpacity>
+          <PrimaryButton
+            title="Create New Portfolio"
+            onPress={() => {}}
+            theme={theme}
+            style={{ borderRadius: 30, paddingHorizontal: 32 }}
+          />
         </View>
       </View>
     </View>
@@ -579,7 +581,7 @@ const styles = StyleSheet.create({
   },
   floatingAction: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 72,
     left: 0,
     right: 0,
     alignItems: 'center',

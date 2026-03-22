@@ -10,6 +10,7 @@ interface DonutChartProps {
   centerLabelText?: string;
   radius?: number;
   innerRadius?: number;
+  innerCircleColor?: string;
 }
 
 export const DonutChart = ({
@@ -19,6 +20,7 @@ export const DonutChart = ({
   centerLabelText = 'TOTAL',
   radius = 80,
   innerRadiusSize,
+  innerCircleColor,
 }: any) => {
   const isDark = theme.background === '#121212';
   const defaultInnerRadius = radius * 0.75;
@@ -30,7 +32,7 @@ export const DonutChart = ({
         donut
         radius={radius}
         innerRadius={innerRadiusSize || defaultInnerRadius}
-        innerCircleColor={theme.surface}
+        innerCircleColor={innerCircleColor || theme.surface}
         centerLabelComponent={() => (
           <View style={styles.centerLabel}>
             <Text style={[styles.centerLabelText, { color: theme.textSecondary }]}>

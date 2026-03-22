@@ -52,6 +52,35 @@ export default function TabLayout() {
           title: 'Settings',
         }}
       />
+      <Tabs.Screen name="add-expense" options={{ href: null }} />
+      <Tabs.Screen name="add-money" options={{ href: null }} />
+      <Tabs.Screen name="transfer" options={{ href: null }} />
+      <Tabs.Screen name="transaction-detail" options={{ href: null }} />
+      <Tabs.Screen name="transactions-list" options={{ href: null }} />
+      
+      <Tabs.Screen name="edit-profile" options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
+      <Tabs.Screen name="more" options={{ href: null }} />
+      <Tabs.Screen name="budget-breakdown" options={{ href: null }} />
+      <Tabs.Screen name="accounts-list" options={{ href: null }} />
+      <Tabs.Screen name="account-detail" options={{ href: null }} />
+      
+      {/* New Pages Request */}
+      <Tabs.Screen name="add-account" options={{ href: null }} />
+      <Tabs.Screen name="buy-securities" options={{ href: null }} />
+      <Tabs.Screen name="sell-securities" options={{ href: null }} />
+      <Tabs.Screen name="buy-gold" options={{ href: null }} />
+      <Tabs.Screen name="sell-gold" options={{ href: null }} />
+      <Tabs.Screen name="screener" options={{ href: null }} />
+      <Tabs.Screen name="recurring-transactions" options={{ href: null }} />
+      <Tabs.Screen name="recurring-detail" options={{ href: null }} />
+      <Tabs.Screen name="add-recurring" options={{ href: null }} />
+      <Tabs.Screen name="add-loan" options={{ href: null }} />
+      <Tabs.Screen name="loan-detail" options={{ href: null }} />
+      <Tabs.Screen name="emi-calc" options={{ href: null }} />
+      <Tabs.Screen name="people-list" options={{ href: null }} />
+      <Tabs.Screen name="add-people" options={{ href: null }} />
+      <Tabs.Screen name="person-detail" options={{ href: null }} />
     </Tabs>
   );
 }
