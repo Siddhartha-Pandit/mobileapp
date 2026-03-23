@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Tag, ChevronRight, X } from 'lucide-react-native';
+import { Tag, ChevronRight, ChevronLeft } from 'lucide-react-native';
 import { useTheme } from '../hooks/useTheme';
 import { Card, CardContent } from '../components/Card';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -56,7 +56,7 @@ export default function CreateCustomCategoryScreen() {
             onPress={() => router.back()} 
             style={[styles.headerButton, { borderColor: `${theme.border}80`, backgroundColor: theme.surface }]}
           >
-            <X size={20} color={theme.textPrimary} />
+            <ChevronLeft size={22} color={theme.textPrimary} />
           </TouchableOpacity>
         }
       />

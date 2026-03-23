@@ -6,24 +6,33 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
+  Dimensions,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  ChevronLeft,
   Users,
   Target,
   Wallet,
   LayoutGrid,
   User,
   Plus,
+  FileText,
+  Calendar,
 } from "lucide-react-native";
 import { useTheme } from "../../hooks/useTheme";
 import { SectionHeader } from "../../components/SectionHeader";
 import HeaderBar from "../../components/HeaderBar";
 import { Card, CardContent } from "../../components/Card";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { AmountInput } from "../../components/AmountInput";
+import { FormInput } from "../../components/FormInput";
+import { FormSelect } from "../../components/FormSelect";
+import { FormDatePicker } from "../../components/FormDatePicker";
 import type { AppTheme } from "../../constants/theme";
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface Goal {
   id: string;
@@ -45,7 +54,11 @@ export default function AddExpenseScreen() {
 
   // --- STATE ---
   const [totalAmount, setTotalAmount] = useState<string>("");
+  const [description, setDescription] = useState("");
+  const [account, setAccount] = useState("Standard Chartered Bank");
   const [category, setCategory] = useState("Food");
+  const [expenseDate, setExpenseDate] = useState(new Date());
+  
   const [availablePeople, setAvailablePeople] = useState<Person[]>([
     { id: "1", name: "Ankit", amountContributed: 0 },
     { id: "2", name: "Suman", amountContributed: 0 },
@@ -93,89 +106,62 @@ export default function AddExpenseScreen() {
     }
   }, [totalAmount, selectedPeopleIds]);
 
-  // --- ACTIONS ---
-  const addNewPerson = () => {
-    // Basic mock since prompt doesn't exist in React Native similarly
-    const newPerson = {
-      id: Date.now().toString(),
-      name: "New Person",
-      amountContributed: 0,
-    };
-    setAvailablePeople((prev) => [...prev, newPerson]);
-    setSelectedPeopleIds((prev) => [...prev, newPerson.id]);
-    router.push('/add-person' as any);
-  };
-
-  const togglePerson = (id: string) => {
-    setSelectedPeopleIds((p) =>
-      p.includes(id) ? p.filter((x) => x !== id) : [...p, id]
-    );
-  };
-
   return (
     <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* ================= HEADER BAR ================= */}
       <HeaderBar
         theme={theme}
-        leftContent={
-          <TouchableOpacity onPress={() => router.back()} style={[styles.iconButton, { borderColor: theme.border, backgroundColor: theme.surface }]}>
-            <ChevronLeft size={22} color={theme.textPrimary} />
-          </TouchableOpacity>
-        }
-        title={
-          <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
-            Add Expense
-          </Text>
-        }
-        rightContent={<View style={{ width: 40 }} />}
+        title="Add Expense"
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* ================= AMOUNT INPUT ================= */}
-        <View style={[styles.amountCard, { backgroundColor: theme.surface, borderColor: `${theme.border}50` }]}>
-          <Text style={[styles.amountLabel, { color: theme.textSecondary }]}>
-            Expense Amount
-          </Text>
-          <View style={styles.amountInputRow}>
-            <Text style={[styles.currencySymbol, { color: theme.danger }]}>₨</Text>
-            <TextInput
-              keyboardType="numeric"
-              placeholder="0"
-              placeholderTextColor={theme.textSecondary}
-              value={totalAmount}
-              onChangeText={setTotalAmount}
-              style={[styles.amountInput, { color: theme.textPrimary }]}
-            />
-          </View>
-        </View>
+        <AmountInput
+          theme={theme}
+          label="Expense Amount"
+          value={totalAmount}
+          onChangeText={setTotalAmount}
+          color={theme.danger}
+          autoFocus
+        />
 
-        {/* ================= DETAILS ================= */}
+        {/* ================= CORE DETAILS ================= */}
         <View style={styles.detailsGroup}>
-          <View>
-            <SectionHeader
-              theme={theme}
-              variant="label"
-              title="Account"
-              icon={<Wallet size={16} color={theme.textSecondary} />}
-              marginBottom={8}
-            />
-            <TouchableOpacity style={[styles.selectBox, { backgroundColor: theme.surface, borderColor: `${theme.border}80` }]}>
-              <Text style={[styles.selectText, { color: theme.textPrimary }]}>Standard Chartered Bank</Text>
-            </TouchableOpacity>
-          </View>
+          <FormSelect
+            label="Account"
+            value={account}
+            onSelect={setAccount}
+            options={["Standard Chartered Bank", "HDFC Savings", "Cash Wallet"]}
+            theme={theme}
+            icon={<Wallet />}
+          />
 
-          <View>
-            <SectionHeader
-              theme={theme}
-              variant="label"
-              title="Category"
-              icon={<LayoutGrid size={16} color={theme.textSecondary} />}
-              marginBottom={8}
-            />
-            <TouchableOpacity style={[styles.selectBox, { backgroundColor: theme.surface, borderColor: `${theme.border}80` }]}>
-              <Text style={[styles.selectText, { color: theme.textPrimary }]}>{category}</Text>
-            </TouchableOpacity>
-          </View>
+          <FormSelect
+            label="Category"
+            value={category}
+            onSelect={setCategory}
+            options={["Food", "Utilities", "Rent", "Shopping", "Transport", "Other"]}
+            theme={theme}
+            icon={<LayoutGrid />}
+          />
+
+          <FormDatePicker
+            label="Expense Date"
+            value={expenseDate}
+            onChange={setExpenseDate}
+            theme={theme}
+          />
+
+          <FormInput
+            label="Description / Paid To"
+            value={description}
+            onChangeText={setDescription}
+            theme={theme}
+            placeholder="e.g. Weekly Groceries"
+            icon={<FileText />}
+          />
         </View>
 
         {/* ================= CONTRIBUTORS ================= */}
@@ -192,11 +178,13 @@ export default function AddExpenseScreen() {
               key={p.id}
               person={p}
               isSelected={selectedPeopleIds.includes(p.id)}
-              onClick={() => togglePerson(p.id)}
+              onClick={() => setSelectedPeopleIds(prev => 
+                prev.includes(p.id) ? prev.filter(id => id !== p.id) : [...prev, p.id]
+              )}
               theme={theme}
             />
           ))}
-          <TouchableOpacity onPress={addNewPerson} style={styles.addPersonWrap}>
+          <TouchableOpacity onPress={() => router.push('/add-person')} style={styles.addPersonWrap}>
             <View style={[styles.addPersonCircle, { borderColor: theme.border }]}>
               <Plus size={24} color={theme.textSecondary} />
             </View>
@@ -206,11 +194,11 @@ export default function AddExpenseScreen() {
 
         {/* ================= DYNAMIC SPLITS ================= */}
         {selectedPeopleIds.length > 0 && (
-          <View style={[styles.splitsCard, { backgroundColor: theme.surface, borderColor: `${theme.border}50` }]}>
+          <View style={[styles.splitsCard, { backgroundColor: theme.surface, borderColor: `${theme.border}40` }]}>
             {availablePeople
               .filter((p) => selectedPeopleIds.includes(p.id))
               .map((p) => (
-                <View key={p.id} style={[styles.splitRow, { borderBottomColor: `${theme.border}30` }]}>
+                <View key={p.id} style={[styles.splitRow, { borderBottomColor: `${theme.border}20` }]}>
                   <Text style={[styles.splitName, { color: theme.textPrimary }]}>{p.name}</Text>
                   <InputWrapper
                     value={p.amountContributed}
@@ -272,30 +260,18 @@ export default function AddExpenseScreen() {
       </ScrollView>
 
       {/* ================= FOOTER BUTTON ================= */}
-      <View style={[styles.footer, { position: "absolute", bottom: 72, backgroundColor: theme.background, borderTopColor: `${theme.border}30` }]}>
+      <View style={[styles.footer, { backgroundColor: theme.background, borderTopColor: `${theme.border}30` }]}>
         <PrimaryButton
           theme={theme}
           title="Add Expense"
           onPress={() => router.back()}
-          fullWidth
         />
       </View>
     </SafeAreaView>
   );
 }
 
-// --- REFINED SUB-COMPONENTS ---
-const AvatarItem = ({
-  person,
-  isSelected,
-  onClick,
-  theme,
-}: {
-  person: Person;
-  isSelected: boolean;
-  onClick: () => void;
-  theme: AppTheme;
-}) => (
+const AvatarItem = ({ person, isSelected, onClick, theme }: any) => (
   <TouchableOpacity onPress={onClick} style={styles.avatarWrap}>
     <View
       style={[
@@ -303,12 +279,11 @@ const AvatarItem = ({
         {
           backgroundColor: isSelected ? theme.danger : theme.surface,
           borderColor: isSelected ? 'transparent' : `${theme.border}80`,
-          borderWidth: isSelected ? 0 : 1,
-          shadowColor: isSelected ? theme.danger : 'transparent',
+          borderWidth: isSelected ? 0 : 1.5,
         },
       ]}
     >
-      <User size={30} color={isSelected ? "#fff" : theme.textSecondary} />
+      <User size={28} color={isSelected ? "#fff" : theme.textSecondary} />
     </View>
     <Text
       style={[
@@ -321,16 +296,14 @@ const AvatarItem = ({
   </TouchableOpacity>
 );
 
-const InputWrapper = ({
-  value,
-  theme,
-  onChange,
-}: {
+interface InputWrapperProps {
   value: number;
   theme: AppTheme;
   onChange: (v: string) => void;
-}) => (
-  <View style={[styles.inputWrap, { backgroundColor: theme.background, borderColor: `${theme.border}50` }]}>
+}
+
+const InputWrapper = ({ value, theme, onChange }: InputWrapperProps) => (
+  <View style={[styles.inputWrap, { backgroundColor: theme.background, borderColor: `${theme.border}40` }]}>
     <Text style={[styles.inputCurrency, { color: theme.danger }]}>₨</Text>
     <TextInput
       keyboardType="numeric"
@@ -345,88 +318,53 @@ const InputWrapper = ({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+  scrollContent: { 
+    padding: 24, 
+    paddingBottom: 24, 
+    width: '100%',
+    maxWidth: 500,
+    alignSelf: 'center',
   },
-  headerTitle: { fontSize: 18, fontWeight: "800", letterSpacing: -0.5 },
-  scrollContent: { padding: 24, paddingBottom: 100 },
-  amountCard: {
-    paddingVertical: 32,
-    paddingHorizontal: 24,
-    borderRadius: 30,
-    alignItems: "center",
-    marginBottom: 32,
-    borderWidth: 1,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.02,
-    shadowRadius: 30,
-    elevation: 2,
-  },
-  amountLabel: { fontSize: 13, fontWeight: "700", textTransform: "uppercase", letterSpacing: 1 },
-  amountInputRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 12 },
-  currencySymbol: { fontSize: 32, fontWeight: "800", marginRight: 8 },
-  amountInput: { fontSize: 48, fontWeight: "800", minWidth: 180, maxWidth: 250, textAlign: 'center' },
-  detailsGroup: { gap: 20, marginBottom: 32 },
-  selectBox: {
-    width: "100%",
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    borderRadius: 18,
-    borderWidth: 1,
-  },
-  selectText: { fontSize: 15, fontWeight: "600" },
-  peopleScroll: { paddingVertical: 8, paddingHorizontal: 4, gap: 16, marginBottom: 24 },
+  detailsGroup: { marginBottom: 32 },
+  peopleScroll: { paddingVertical: 12, paddingHorizontal: 4, gap: 16, marginBottom: 32 },
   avatarWrap: { alignItems: "center", gap: 10 },
   avatarCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 68,
+    height: 68,
+    borderRadius: 22, // Modern squircle-like radius
     alignItems: "center",
     justifyContent: "center",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 4,
+    boxShadow: '0 8px 16px rgba(0,0,0,0.05)',
   },
-  avatarName: { fontSize: 13, fontWeight: "700" },
+  avatarName: { fontSize: 13, fontWeight: "800" },
   addPersonWrap: { alignItems: "center", gap: 10 },
   addPersonCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 68,
+    height: 68,
+    borderRadius: 22,
     borderWidth: 2,
     borderStyle: "dashed",
     alignItems: "center",
     justifyContent: "center",
   },
-  addPersonText: { fontSize: 13, fontWeight: "700" },
+  addPersonText: { fontSize: 13, fontWeight: "800" },
   splitsCard: { borderRadius: 24, paddingHorizontal: 20, paddingVertical: 8, marginBottom: 32, borderWidth: 1 },
-  splitRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 12, borderBottomWidth: 1 },
-  splitName: { fontSize: 15, fontWeight: "700" },
-  goalsCard: { marginBottom: 20 },
+  splitRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 16, borderBottomWidth: 1 },
+  splitName: { fontSize: 15, fontWeight: "800" },
+  goalsCard: { borderRadius: 24, marginBottom: 20 },
   goalsContent: { paddingHorizontal: 20, paddingVertical: 8 },
-  goalRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 16 },
-  goalInfo: { gap: 2 },
-  goalName: { fontSize: 15, fontWeight: "700" },
-  goalLabel: { fontSize: 11, fontWeight: "500", textTransform: "uppercase" },
-  inputWrap: { flexDirection: "row", alignItems: "center", paddingVertical: 8, paddingHorizontal: 12, borderRadius: 12, borderWidth: 1 },
-  inputCurrency: { fontSize: 12, fontWeight: "800", marginRight: 4 },
-  smallInput: { fontWeight: "700", width: 60, textAlign: "right", fontSize: 14, minHeight: 24 },
-  footer: { padding: 24, paddingTop: 20, borderTopWidth: 1, position: "absolute", bottom: 90, width: "100%" },
-  submitButton: {
-    width: "100%",
-    padding: 20,
-    borderRadius: 18,
-    alignItems: "center",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.4,
-    shadowRadius: 24,
-    elevation: 8,
+  goalRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 20 },
+  goalInfo: { gap: 4 },
+  goalName: { fontSize: 15, fontWeight: "800" },
+  goalLabel: { fontSize: 10, fontWeight: "800", letterSpacing: 1, textTransform: "uppercase" },
+  inputWrap: { flexDirection: "row", alignItems: "center", paddingVertical: 10, paddingHorizontal: 16, borderRadius: 14, borderWidth: 1 },
+  inputCurrency: { fontSize: 13, fontWeight: "900", marginRight: 6 },
+  smallInput: { fontWeight: "800", width: 70, textAlign: "right", fontSize: 16, minHeight: 24 },
+  footer: { 
+    padding: 24,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    borderTopWidth: 1,
+    zIndex: 100,
+    marginBottom: 80,
   },
-  submitButtonText: { color: "#fff", fontWeight: "800", fontSize: 16 },
 });

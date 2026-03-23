@@ -1,18 +1,35 @@
-import React from "react";
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
-import { ChevronLeft, MoreVertical, Calendar, Clock, CreditCard, History, PauseCircle, Trash2, ExternalLink, ShieldCheck } from "lucide-react-native";
+import { 
+  ChevronLeft, 
+  MoreVertical, 
+  Calendar, 
+  Clock, 
+  CreditCard, 
+  History, 
+  PauseCircle, 
+  Trash2, 
+  ExternalLink, 
+  ShieldCheck,
+  Edit2,
+  Trash,
+  X 
+} from "lucide-react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Modal } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
 
 // Types & Components
 import { useTheme } from "../../hooks/useTheme";
 import type { AppTheme } from "../../constants/theme";
 import { Card, CardContent } from "../../components/Card";
+import HeaderBar from "../../components/HeaderBar";
+import { HeaderActionMenu } from "../../components/HeaderActionMenu";
 
 export default function RecurringDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { theme } = useTheme();
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
 
   // Mock data
   const data = {
@@ -30,19 +47,22 @@ export default function RecurringDetailScreen() {
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.background }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 100, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
-        
-        {/* ================= HEADER ================= */}
-        <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 10, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <HeaderBar
+        theme={theme}
+        leftContent={
           <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn(theme)}>
-            <ChevronLeft size={22} color={theme.textPrimary} />
+            <ChevronLeft size={20} color={theme.textPrimary} />
           </TouchableOpacity>
-          <Text style={{ fontSize: 16, fontWeight: "800", color: theme.textPrimary }}>Subscription Detail</Text>
-          <TouchableOpacity style={styles.iconBtn(theme)}>
-            <MoreVertical size={20} color={theme.textPrimary} />
+        }
+        title={<Text style={{ fontSize: 18, fontWeight: "800", color: theme.textPrimary }}>Detail View</Text>}
+        rightContent={
+          <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.iconBtn(theme)}>
+            <MoreVertical size={22} color={theme.textPrimary} />
           </TouchableOpacity>
-        </View>
+        }
+      />
 
+      <ScrollView contentContainerStyle={{ paddingBottom: 100, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
         <View style={{ padding: 20, gap: 24 }}>
           
           {/* ================= MAIN VISUAL CARD ================= */}
@@ -130,6 +150,30 @@ export default function RecurringDetailScreen() {
 
         </View>
       </ScrollView>
+
+      <HeaderActionMenu
+        visible={isMenuVisible}
+        onClose={() => setIsMenuVisible(false)}
+        theme={theme}
+        items={[
+          {
+            label: "Edit Subscription",
+            icon: <Edit2 size={18} color={theme.textPrimary} />,
+            onPress: () => {
+              // router.push(`/edit-recurring?id=${id}`)
+            }
+          },
+          {
+            label: "Delete Subscription",
+            icon: <Trash2 size={18} color={theme.danger} />,
+            isDestructive: true,
+            onPress: () => {
+              // Handle delete
+            }
+          }
+        ]}
+        anchorPosition={{ top: 70, right: 20 }}
+      />
     </SafeAreaView>
   );
 }
@@ -153,7 +197,7 @@ const InfoRow = ({ icon, label, value, theme, isLast }: any) => (
 
 const styles = {
   iconBtn: (theme: AppTheme) => ({
-    width: 42, height: 42, borderRadius: 14, borderWidth: 1, borderColor: `${theme.border}80`,
+    width: 32, height: 32, borderRadius: 10, borderWidth: 1, borderColor: `${theme.border}80`,
     backgroundColor: theme.surface, alignItems: "center" as const, justifyContent: "center" as const,
   }),
   logoWrapper: (theme: AppTheme) => ({
@@ -174,3 +218,4 @@ const styles = {
     paddingVertical: 18, borderRadius: 20, flexDirection: "row" as const, alignItems: "center" as const, justifyContent: "center" as const
   }
 };
+

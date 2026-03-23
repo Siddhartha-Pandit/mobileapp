@@ -7,10 +7,11 @@ import type { AppTheme } from '../constants/theme';
 interface Props {
   theme: AppTheme;
   balance: number;
-  growth?: number; // Added growth prop
+  growth?: number;
+  onDetailPress?: () => void;
 }
 
-export const BalanceCard = ({ theme, balance, growth = 12.5 }: Props) => {
+export const BalanceCard = ({ theme, balance, growth = 12.5, onDetailPress }: Props) => {
   const [showBalance, setShowBalance] = React.useState(true);
   const isPositive = growth >= 0;
   const growthColor = isPositive ? theme.brandPrimary : theme.danger;
@@ -53,7 +54,10 @@ export const BalanceCard = ({ theme, balance, growth = 12.5 }: Props) => {
               </Text>
             </View>
           </View>
-          <TouchableOpacity style={[styles.detailsBtn, { backgroundColor: 'rgba(255, 255, 255, 0.1)' }]}>
+          <TouchableOpacity 
+            onPress={onDetailPress}
+            style={[styles.detailsBtn, { backgroundColor: 'rgba(255, 255, 255, 0.1)' }]}
+          >
             <Text style={styles.detailsText}>Details</Text>
           </TouchableOpacity>
         </View>

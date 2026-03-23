@@ -6,6 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   useWindowDimensions,
+  Modal,
+  TextInput,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
@@ -15,6 +18,11 @@ import {
   ChevronLeft,
   Info,
   Sparkles,
+  X,
+  Activity,
+  ShieldCheck,
+  AlertCircle,
+  ChevronRight,
 } from "lucide-react-native";
 import { DonutChart } from "../../components/charts/DonutChart";
 import { MiniBarChart } from "../../components/charts/MiniBarChart";
@@ -32,6 +40,8 @@ export default function PortfolioListPage() {
   const router = useRouter();
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const [activeTab, setActiveTab] = useState<string>("portfolios");
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [newPortfolioName, setNewPortfolioName] = useState("");
 
   const tabOptions = [
     { value: "portfolios", label: "Portfolios" },
@@ -66,7 +76,10 @@ export default function PortfolioListPage() {
             </TouchableOpacity>
           }
           rightContent={
-            <TouchableOpacity style={styles.iconBtn}>
+            <TouchableOpacity 
+              onPress={() => setIsAddModalVisible(true)}
+              style={styles.iconBtn}
+            >
               <Plus size={22} color={theme.brandPrimary} />
             </TouchableOpacity>
           }
@@ -127,6 +140,7 @@ export default function PortfolioListPage() {
                 changeColor={statusColors.gain}
                 equityWidth="75%"
                 profitAmount="+NPR 1,45,000"
+                onPress={() => router.push({ pathname: "/portfolio-detail", params: { title: "Long Term Investment" } })}
               />
 
               <PortfolioCard
@@ -140,6 +154,7 @@ export default function PortfolioListPage() {
                 changeColor={statusColors.loss}
                 equityWidth="40%"
                 profitAmount="+NPR 67,000"
+                onPress={() => router.push({ pathname: "/portfolio-detail", params: { title: "Trading Portfolio" } })}
               />
             </View>
           ) : (
@@ -200,34 +215,104 @@ export default function PortfolioListPage() {
                 rightComponent={<View style={styles.realtimeBadge}><Text style={styles.realtimeBadgeText}>REAL-TIME</Text></View>}
               />
               <View style={styles.advisorList}>
-                <AdvisorCard
-                  theme={theme}
-                  title="Reduce NABIL Bank exposure"
-                  confidence="92% Confidence"
-                  desc="Sell NPR 50,000 to rebalance sector risk and capture current gains."
-                  statusColors={statusColors}
+                <TouchableOpacity style={[styles.advisorBannerList, { backgroundColor: `${theme.brandPrimary}08`, borderColor: `${theme.brandPrimary}15` }]}>
+                  <View style={styles.tabAdvisorIcon}>
+                    <Activity size={20} color={theme.brandPrimary} />
+                  </View>
+                  <View style={styles.advisorTextBody}>
+                    <Text style={[styles.advisorTitleText, { color: theme.brandPrimary }]}>Reduce NABIL Bank exposure</Text>
+                    <Text style={[styles.advisorDescText, { color: theme.textSecondary }]}>Sell NPR 50,000 to rebalance sector risk and capture current gains.</Text>
+                  </View>
+                  <ChevronRight size={18} color={theme.brandPrimary} />
+                </TouchableOpacity>
+
+                <TouchableOpacity style={[styles.advisorBannerList, { backgroundColor: `${theme.brandPrimary}08`, borderColor: `${theme.brandPrimary}15` }]}>
+                   <View style={styles.tabAdvisorIcon}>
+                    <Activity size={20} color={theme.brandPrimary} />
+                  </View>
+                  <View style={styles.advisorTextBody}>
+                    <Text style={[styles.advisorTitleText, { color: theme.brandPrimary }]}>Increase Hydro Exposure</Text>
+                    <Text style={[styles.advisorDescText, { color: theme.textSecondary }]}>Add NPR 30,000 in SHL to capitalize on upcoming production peaks.</Text>
+                  </View>
+                  <ChevronRight size={18} color={theme.brandPrimary} />
+                </TouchableOpacity>
+              </View>
+
+              <SectionHeader theme={theme} title="Detailed Health Analysis" uppercase={true} paddingHorizontal={24} marginBottom={12} />
+              <View style={styles.detailedMetricsList}>
+                <HealthMetric 
+                  theme={theme} 
+                  icon={<Activity size={20} color={theme.brandPrimary} />} 
+                  label="Diversification" 
+                  value="Optimal" 
+                  desc="Portfolio is well-diversified across 4 major sectors."
                 />
-                <AdvisorCard
-                  theme={theme}
-                  title="Increase Hydro Exposure"
-                  confidence="88% Confidence"
-                  desc="Add NPR 30,000 in SHL to capitalize on upcoming rainy season production peaks."
-                  statusColors={statusColors}
+                <HealthMetric 
+                  theme={theme} 
+                  icon={<ShieldCheck size={20} color="#10b981" />} 
+                  label="Risk Profile" 
+                  value="Market Neutral" 
+                  desc="Your beta of 1.05 matches the NEPSE market movement."
+                />
+                <HealthMetric 
+                  theme={theme} 
+                  icon={<AlertCircle size={20} color="#f59e0b" />} 
+                  label="Concentration" 
+                  value="Slightly High" 
+                  desc="Banking sector exposure (40%) exceeds recommended 30%."
                 />
               </View>
             </View>
           )}
         </ScrollView>
 
-        {/* Floating Create Button */}
-        <View style={styles.floatingAction}>
-          <PrimaryButton
-            title="Create New Portfolio"
-            onPress={() => {}}
-            theme={theme}
-            style={{ borderRadius: 30, paddingHorizontal: 32 }}
-          />
-        </View>
+        {/* Add Portfolio Modal */}
+        <Modal
+          visible={isAddModalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setIsAddModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
+              <View style={styles.modalHeader}>
+                <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>New Portfolio</Text>
+                <TouchableOpacity onPress={() => setIsAddModalVisible(false)} style={styles.closeBtn}>
+                  <X size={20} color={theme.textSecondary} />
+                </TouchableOpacity>
+              </View>
+              
+              <View style={styles.modalBody}>
+                <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>PORTFOLIO NAME</Text>
+                <TextInput
+                  style={[styles.input, { 
+                    backgroundColor: theme.background, 
+                    color: theme.textPrimary,
+                    borderColor: theme.border
+                  }]}
+                  placeholder="e.g. Retirement Fund"
+                  placeholderTextColor={theme.textSecondary}
+                  value={newPortfolioName}
+                  onChangeText={setNewPortfolioName}
+                  autoFocus
+                />
+                
+                <PrimaryButton
+                  title="Create Portfolio"
+                  onPress={() => {
+                    // Logic to create portfolio would go here
+                    setIsAddModalVisible(false);
+                    setNewPortfolioName("");
+                  } }
+                  theme={theme}
+                  fullWidth
+                  style={{ marginTop: 24 }}
+                  disabled={!newPortfolioName.trim()}
+                />
+              </View>
+            </View>
+          </View>
+        </Modal>
       </View>
     </View>
   );
@@ -249,9 +334,23 @@ const LegendItem = ({ color, label, value, theme }: any) => (
   </View>
 );
 
-const PortfolioCard = ({ title, stocks, risk, riskColor, value, todayChange, changeColor, equityWidth, profitAmount, theme }: any) => {
+const HealthMetric = ({ theme, icon, label, value, desc }: any) => (
+  <View style={[styles.metricItemInList, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+    <View style={styles.metricTopPart}>
+        <View style={styles.metricLabelArea}>
+            {icon}
+            <Text style={[styles.metricLabelText, { color: theme.textSecondary }]}>{label}</Text>
+        </View>
+        <Text style={[styles.metricValueText, { color: theme.textPrimary }]}>{value}</Text>
+    </View>
+    <Text style={[styles.metricDescText, { color: theme.textSecondary }]}>{desc}</Text>
+  </View>
+);
+
+const PortfolioCard = ({ theme, title, stocks, risk, riskColor, value, todayChange, changeColor, equityWidth, profitAmount, onPress }: any) => {
   const handlePress = () => {
     Haptics.selectionAsync();
+    onPress && onPress();
   };
 
   return (
@@ -282,23 +381,6 @@ const PortfolioCard = ({ title, stocks, risk, riskColor, value, todayChange, cha
   );
 };
 
-const AdvisorCard = ({ title, confidence, desc, theme, statusColors }: any) => (
-  <View style={[styles.advisorCard, { backgroundColor: `${theme.brandPrimary}08`, borderColor: `${theme.brandPrimary}20` }]}>
-    <View style={styles.advisorTop}>
-      <Text style={[styles.advisorTitle, { color: theme.textPrimary }]}>{title}</Text>
-      <Text style={[styles.confidence, { color: statusColors.emerald }]}>{confidence}</Text>
-    </View>
-    <Text style={[styles.advisorDesc, { color: theme.textSecondary }]}>{desc}</Text>
-    <PrimaryButton
-      theme={theme}
-      title="Simulate Trade"
-      onPress={() => {}}
-      fullWidth
-      style={{ marginTop: 16 }}
-    />
-  </View>
-);
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -319,7 +401,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingVertical: 16,
-    paddingTop: 40, // Viewing zone (One UI style)
+    paddingTop: 40, 
     paddingBottom: 150,
   },
   tabContent: {
@@ -350,10 +432,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: 4,
     height: 48,
-  },
-  miniBar: {
-    width: 10,
-    borderRadius: 2,
   },
   cardDivider: {
     padding: 12,
@@ -398,10 +476,6 @@ const styles = StyleSheet.create({
   scoreTextOverlay: {
     position: 'absolute',
     alignItems: 'center',
-  },
-  scoreLarge: {
-    fontSize: 36,
-    fontWeight: '800',
   },
   scoreStatus: {
     fontSize: 12,
@@ -543,63 +617,113 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
   },
-  advisorCard: {
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
-    borderRadius: 16,
-    borderWidth: 1,
-    marginBottom: 16,
   },
-  advisorTop: {
+  modalContent: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 24,
+    padding: 24,
+    elevation: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+  },
+  modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  modalBody: {
+    gap: 12,
+  },
+  inputLabel: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  input: {
+    height: 56,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    borderWidth: 1,
+  },
+  advisorBannerList: {
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  tabAdvisorIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  advisorTextBody: {
+    flex: 1,
+  },
+  advisorTitleText: {
+    fontSize: 14,
+    fontWeight: '800',
+    marginBottom: 2,
+  },
+  advisorDescText: {
+    fontSize: 11,
+    lineHeight: 16,
+  },
+  detailedMetricsList: {
+    paddingHorizontal: 24,
+    gap: 12,
+    marginBottom: 30,
+  },
+  metricItemInList: {
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  metricTopPart: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
   },
-  advisorTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  confidence: {
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  advisorDesc: {
-    fontSize: 12,
-    lineHeight: 18,
-    marginBottom: 16,
-  },
-  simulateBtn: {
-    width: '100%',
-    padding: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-  },
-  simulateText: {
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  floatingAction: {
-    position: 'absolute',
-    bottom: 72,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    zIndex: 90,
-  },
-  createBtn: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 30,
+  metricLabelArea: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    elevation: 8,
-    boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
   },
-  createBtnText: {
-    color: '#fff',
-    fontSize: 14,
+  metricLabelText: {
+    fontSize: 13,
     fontWeight: '700',
+  },
+  metricValueText: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  metricDescText: {
+    fontSize: 11,
+    lineHeight: 16,
   },
 });

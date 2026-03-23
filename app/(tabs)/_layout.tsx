@@ -81,6 +81,16 @@ export default function TabLayout() {
       <Tabs.Screen name="people-list" options={{ href: null }} />
       <Tabs.Screen name="add-people" options={{ href: null }} />
       <Tabs.Screen name="person-detail" options={{ href: null }} />
+      <Tabs.Screen name="portfolio-detail" options={{ href: null }} />
+
+      <Tabs.Screen name="manage-security" options={{ href: null }} />
+      <Tabs.Screen name="manage-goal" options={{ href: null }} />
+      <Tabs.Screen name="manage-currency" options={{ href: null }} />
+      <Tabs.Screen name="manage-theme" options={{ href: null }} />
+      <Tabs.Screen name="export-data" options={{ href: null }} />
+      <Tabs.Screen name="subscriptions" options={{ href: null }} />
+      <Tabs.Screen name="manage-categories" options={{ href: null }} />
+      <Tabs.Screen name="manage-custom-category" options={{ href: null }} />
     </Tabs>
   );
 }

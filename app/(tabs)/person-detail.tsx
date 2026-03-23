@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { ChevronLeft, ArrowUpRight, ArrowDownLeft, MoreVertical, History } from "lucide-react-native";
+import { ChevronLeft, ArrowUpRight, ArrowDownLeft, MoreVertical, History, Edit2, Trash2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Card, CardContent } from "../../components/Card";
+import HeaderBar from "../../components/HeaderBar";
+import { HeaderActionMenu } from "../../components/HeaderActionMenu";
 import type { AppTheme } from "../../constants/theme";
 import { useTheme } from "../../hooks/useTheme";
 
@@ -12,6 +14,7 @@ export default function PersonDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { theme } = useTheme();
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
 
   // Mock Data
   const personInfo = {
@@ -31,18 +34,21 @@ export default function PersonDetailScreen() {
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.background }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 140, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
-        
-        {/* ================= TOP NAVIGATION ================= */}
-        <View style={{ padding: 20, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+      <HeaderBar 
+        theme={theme}
+        leftContent={
           <TouchableOpacity onPress={() => router.back()} style={styles.headerIconBtnStyle(theme)}>
             <ChevronLeft size={20} color={theme.textPrimary} />
           </TouchableOpacity>
-          <Text style={{ fontSize: 18, fontWeight: "800", color: theme.textPrimary }}>Settlement</Text>
-          <TouchableOpacity style={styles.headerIconBtnStyle(theme)}>
+        }
+        title={<Text style={{ fontSize: 18, fontWeight: "800", color: theme.textPrimary }}>Settlement</Text>}
+        rightContent={
+          <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.headerIconBtnStyle(theme)}>
             <MoreVertical size={20} color={theme.textPrimary} />
           </TouchableOpacity>
-        </View>
+        }
+      />
+      <ScrollView contentContainerStyle={{ paddingBottom: 140, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
 
         {/* ================= NET AMOUNT SUMMARY CARD ================= */}
         <View style={{ paddingHorizontal: 20, paddingBottom: 24 }}>
@@ -114,21 +120,46 @@ export default function PersonDetailScreen() {
         position: "absolute", bottom: 94, width: "100%", maxWidth: 500, alignSelf: 'center',
         flexDirection: "row", gap: 16, paddingHorizontal: 20, zIndex: 20
       }}>
-        <TouchableOpacity style={[styles.actionBtnStyle, { backgroundColor: "#ef4444", shadowColor: "#ef4444" }]}>
+        <TouchableOpacity 
+          onPress={() => router.push(`/add-person-transaction?personId=${id}&type=gave` as any)}
+          style={[styles.actionBtnStyle, { backgroundColor: "#ef4444", shadowColor: "#ef4444" }]}
+        >
           <Text style={{ color: "#FFF", fontSize: 16, fontWeight: "800" }}>I Gave</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionBtnStyle, { backgroundColor: theme.brandPrimary, shadowColor: theme.brandPrimary }]}>
+        <TouchableOpacity 
+          onPress={() => router.push(`/add-person-transaction?personId=${id}&type=got` as any)}
+          style={[styles.actionBtnStyle, { backgroundColor: theme.brandPrimary, shadowColor: theme.brandPrimary }]}
+        >
           <Text style={{ color: "#FFF", fontSize: 16, fontWeight: "800" }}>I Got</Text>
         </TouchableOpacity>
       </View>
 
+      <HeaderActionMenu
+        visible={isMenuVisible}
+        onClose={() => setIsMenuVisible(false)}
+        theme={theme}
+        items={[
+          {
+            label: "Edit Contact",
+            icon: <Edit2 size={18} color={theme.textPrimary} />,
+            onPress: () => {}
+          },
+          {
+            label: "Delete Contact",
+            icon: <Trash2 size={18} color={theme.danger} />,
+            isDestructive: true,
+            onPress: () => {}
+          }
+        ]}
+        anchorPosition={{ top: 70, right: 20 }}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = {
   headerIconBtnStyle: (theme: AppTheme) => ({
-    width: 44, height: 44, borderRadius: 14, borderWidth: 1, borderColor: `${theme.border}80`,
+    width: 32, height: 32, borderRadius: 10, borderWidth: 1, borderColor: `${theme.border}80`,
     backgroundColor: theme.surface, alignItems: "center" as const, justifyContent: "center" as const
   }),
   actionBtnStyle: {

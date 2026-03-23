@@ -18,6 +18,7 @@ import { useTheme } from "../../hooks/useTheme";
 import { TransactionItem } from "../../components/TransactionItem";
 import { Card } from "../../components/Card";
 import { SegmentTabs } from "../../components/SegmentTabs";
+import HeaderBar from "../../components/HeaderBar";
 
 interface Transaction {
   id: number;
@@ -61,18 +62,23 @@ export default function TransactionsListScreen() {
   return (
     <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.background }]}>
       {/* HEADER SECTION */}
-      <View style={[styles.header, { backgroundColor: theme.background }]}>
-        <View style={styles.topRow}>
+      <HeaderBar
+        theme={theme}
+        title="Transactions"
+        leftContent={
           <TouchableOpacity onPress={() => router.back()} style={[styles.iconBtn, { borderColor: `${theme.border}80`, backgroundColor: theme.surface }]}>
             <ChevronLeft size={22} color={theme.textPrimary} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Transactions</Text>
+        }
+        rightContent={
           <TouchableOpacity style={[styles.iconBtn, { borderColor: `${theme.border}80`, backgroundColor: theme.surface }]}>
             <Download size={18} color={theme.textPrimary} />
           </TouchableOpacity>
-        </View>
+        }
+      />
 
-        {/* SEARCH BOX */}
+      {/* SEARCH & TABS */}
+      <View style={[styles.filterSection, { backgroundColor: theme.background }]}>
         <View style={styles.searchWrapper}>
           <View style={styles.searchIcon}>
             <Search size={18} color={theme.textSecondary} />
@@ -86,7 +92,6 @@ export default function TransactionsListScreen() {
           />
         </View>
 
-        {/* FILTER CHIPS */}
         <View style={{ marginTop: 8 }}>
           <SegmentTabs
             theme={theme}
@@ -130,8 +135,7 @@ export default function TransactionsListScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center' },
-  header: { padding: 24, paddingBottom: 16, width: '100%', maxWidth: 500, zIndex: 10 },
-  topRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24 },
+  filterSection: { padding: 24, paddingBottom: 16, width: '100%', maxWidth: 500, zIndex: 10 },
   iconBtn: {
     width: 44,
     height: 44,
@@ -140,7 +144,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: { fontSize: 20, fontWeight: "800", letterSpacing: -0.5 },
   searchWrapper: { position: "relative", marginBottom: 20 },
   searchIcon: { position: "absolute", left: 18, top: "50%", marginTop: -9, zIndex: 2 },
   searchInput: {

@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import { 
+  View, 
+  Text, 
+  ScrollView, 
+  StyleSheet, 
+  Dimensions, 
+  Platform 
+} from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Landmark, Info, CreditCard, ShieldCheck } from "lucide-react-native";
+import { Landmark, Info, ShieldCheck, Briefcase, Percent, Clock } from "lucide-react-native";
 import { useTheme } from "../../hooks/useTheme";
-import type { AppTheme } from "../../constants/theme";
 
 // Components
 import HeaderBar from "../../components/HeaderBar";
 import { SectionHeader } from "../../components/SectionHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/Card";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { AmountInput } from "../../components/AmountInput";
+import { FormInput } from "../../components/FormInput";
+import { FormDatePicker } from "../../components/FormDatePicker";
+import { ToggleSwitch } from "../../components/ToggleSwitch";
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function AddLoanScreen() {
   const router = useRouter();
@@ -22,7 +34,7 @@ export default function AddLoanScreen() {
   const [rate, setRate] = useState("");
   const [tenure, setTenure] = useState("");
   const [autoDeduct, setAutoDeduct] = useState(true);
-  const [dueDate, setDueDate] = useState(new Date().toISOString().split("T")[0]);
+  const [dueDate, setDueDate] = useState(new Date());
   const [emi, setEmi] = useState(0);
 
   // --- LOGIC: SIMPLE EMI CALCULATION ---
@@ -40,98 +52,79 @@ export default function AddLoanScreen() {
   }, [principal, rate, tenure]);
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.background }}>
-      {/* ================= HEADER BAR ================= */}
+    <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: theme.background }]}>
       <HeaderBar
         theme={theme}
-        leftContent={
-          <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn(theme)}>
-            <ChevronLeft size={20} color={theme.textPrimary} />
-          </TouchableOpacity>
-        }
-        title={<Text style={{ fontSize: 18, fontWeight: "800", color: theme.textPrimary }}>New Loan</Text>}
-        rightContent={<View style={{ width: 44 }} />}
+        title="New Loan"
       />
 
-      {/* ================= CONTENT ================= */}
-      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 140, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
-        
-        {/* LOAN INFO CARD */}
-        <SectionHeader theme={theme} title="Loan Details" icon={<Landmark size={18} color={theme.textSecondary} />} marginBottom={16} />
-        <Card theme={theme} style={{ marginBottom: 24, borderRadius: 24 }}>
-          <CardContent theme={theme} style={{ paddingTop: 24 }}>
-            <View style={{ marginBottom: 20 }}>
-              <Text style={styles.labelStyle(theme)}>Provider Name</Text>
-              <TextInput 
-                style={styles.modernInputStyle(theme)} 
-                value={provider}
-                onChangeText={setProvider}
-                placeholder="e.g. Nabil Bank" 
-                placeholderTextColor={theme.textSecondary}
-              />
-            </View>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* PRINCIPAL AMOUNT HERO */}
+        <AmountInput
+          theme={theme}
+          label="Principal Amount"
+          value={principal}
+          onChangeText={setPrincipal}
+        />
 
-            <View style={{ marginBottom: 20 }}>
-              <Text style={styles.labelStyle(theme)}>Principal Amount</Text>
-              <View style={{ justifyContent: 'center' }}>
-                <TextInput 
-                  style={[styles.modernInputStyle(theme), { paddingLeft: 40 }]} 
-                  keyboardType="numeric"
-                  value={principal}
-                  onChangeText={setPrincipal}
-                  placeholder="0.00" 
-                  placeholderTextColor={theme.textSecondary}
-                />
-                <Text style={{ position: "absolute", left: 16, color: theme.brandPrimary, fontWeight: "700" }}>₨</Text>
-              </View>
-            </View>
+        {/* LOAN INFO */}
+        <SectionHeader theme={theme} title="Loan Terms" icon={<Landmark size={18} color={theme.textSecondary} />} marginBottom={16} />
+        <View style={styles.termsGroup}>
+          <FormInput
+            label="Provider Name"
+            value={provider}
+            onChangeText={setProvider}
+            theme={theme}
+            placeholder="e.g. Nabil Bank"
+            icon={<Briefcase />}
+          />
 
-            <View style={{ flexDirection: "row", gap: 16 }}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.labelStyle(theme)}>Interest (%)</Text>
-                <TextInput 
-                  style={styles.modernInputStyle(theme)} 
-                  keyboardType="numeric"
-                  value={rate}
-                  onChangeText={setRate}
-                  placeholder="12.5" 
-                  placeholderTextColor={theme.textSecondary}
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.labelStyle(theme)}>Tenure (Mo)</Text>
-                <TextInput 
-                  style={styles.modernInputStyle(theme)} 
-                  keyboardType="numeric"
-                  value={tenure}
-                  onChangeText={setTenure}
-                  placeholder="24" 
-                  placeholderTextColor={theme.textSecondary}
-                />
-              </View>
-            </View>
-          </CardContent>
-        </Card>
+          <View style={styles.row}>
+            <FormInput
+              label="Interest (%)"
+              value={rate}
+              onChangeText={setRate}
+              theme={theme}
+              placeholder="12.5"
+              keyboardType="numeric"
+              icon={<Percent />}
+              containerStyle={{ flex: 1 }}
+            />
+            <FormInput
+              label="Tenure (Mo)"
+              value={tenure}
+              onChangeText={setTenure}
+              theme={theme}
+              placeholder="24"
+              keyboardType="numeric"
+              icon={<Clock />}
+              containerStyle={{ flex: 1 }}
+            />
+          </View>
+        </View>
 
-        {/* EMI PREVIEW HERO */}
-        <Card theme={theme} style={{ backgroundColor: `${theme.brandPrimary}08`, borderColor: `${theme.brandPrimary}40`, borderWidth: 1, borderStyle: 'dashed', marginBottom: 32, borderRadius: 24 }}>
-          <CardHeader theme={theme} style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        {/* EMI PREVIEW CARD */}
+        <Card theme={theme} style={styles.emiCard}>
+          <CardHeader theme={theme} style={styles.emiHeader}>
+            <View style={styles.emiLabelRow}>
               <Info size={16} color={theme.brandPrimary} />
-              <CardTitle theme={theme} style={{ fontSize: 12, textTransform: 'uppercase', color: theme.brandPrimary }}>EMI Calculation</CardTitle>
+              <CardTitle theme={theme} style={[styles.emiTitle, { color: theme.brandPrimary }]}>EMI ESTIMATION</CardTitle>
             </View>
           </CardHeader>
-          <CardContent theme={theme} style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <CardContent theme={theme} style={styles.emiContent}>
+            <View style={styles.emiMainRow}>
               <View>
-                <Text style={{ fontSize: 13, color: theme.textSecondary, fontWeight: "600" }}>Monthly Installment</Text>
-                <Text style={{ marginTop: 4, fontSize: 28, fontWeight: "900", color: theme.textPrimary }}>
+                <Text style={[styles.emiLabel, { color: theme.textSecondary }]}>Monthly Installment</Text>
+                <Text style={[styles.emiAmount, { color: theme.textPrimary }]}>
                   ₨ {emi.toLocaleString("en-NP", { maximumFractionDigits: 2 })}
                 </Text>
               </View>
-              <View style={{ alignItems: 'flex-end' }}>
-                 <Text style={{ fontSize: 11, color: theme.textSecondary, fontWeight: "600" }}>Total Payback</Text>
-                 <Text style={{ fontSize: 15, fontWeight: "700", color: theme.textPrimary }}>
+              <View style={styles.paybackBox}>
+                 <Text style={[styles.emiLabel, { color: theme.textSecondary }]}>Total Payback</Text>
+                 <Text style={[styles.paybackAmount, { color: theme.textPrimary }]}>
                    ₨ {(emi * (parseFloat(tenure) || 0)).toLocaleString("en-NP", { maximumFractionDigits: 0 })}
                  </Text>
               </View>
@@ -140,59 +133,31 @@ export default function AddLoanScreen() {
         </Card>
 
         {/* REPAYMENT SETTINGS */}
-        <SectionHeader theme={theme} title="Repayment" icon={<CreditCard size={18} color={theme.textSecondary} />} marginBottom={16} />
-        <Card theme={theme} style={{ borderRadius: 24 }}>
-          <CardContent theme={theme} style={{ paddingTop: 24 }}>
-            <View style={{ marginBottom: 20 }}>
-              <Text style={styles.labelStyle(theme)}>Due Date</Text>
-              <TextInput 
-                  style={styles.modernInputStyle(theme)} 
-                  value={dueDate} 
-                  onChangeText={setDueDate}
-              />
-            </View>
+        <SectionHeader theme={theme} title="Repayment" icon={<ShieldCheck size={18} color={theme.textSecondary} />} marginBottom={16} />
+        <View style={styles.repaymentGroup}>
+          <FormDatePicker
+            label="First EMI Due Date"
+            value={dueDate}
+            onChange={setDueDate}
+            theme={theme}
+          />
 
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: theme.background, padding: 16, borderRadius: 16 }}>
-              <View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <ShieldCheck size={14} color={theme.brandPrimary} />
-                  <Text style={{ fontSize: 14, fontWeight: "700", color: theme.textPrimary }}>Auto-Deduct</Text>
-                </View>
-                <Text style={{ fontSize: 11, color: theme.textSecondary, marginTop: 2 }}>Automatic monthly payment</Text>
-              </View>
-              <TouchableOpacity 
-                activeOpacity={0.8}
-                onPress={() => setAutoDeduct(!autoDeduct)}
-                style={{ 
-                  width: 44, height: 24, borderRadius: 20, 
-                  backgroundColor: autoDeduct ? theme.brandPrimary : theme.border,
-                  justifyContent: 'center'
-                }}
-              >
-                <View style={{ 
-                  width: 18, height: 18, borderRadius: 9, backgroundColor: "#FFF",
-                  position: "absolute", left: autoDeduct ? 23 : 3,
-                  shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 2
-                }} />
-              </TouchableOpacity>
+          <View style={[styles.toggleBox, { backgroundColor: theme.surface, borderColor: `${theme.border}40` }]}>
+            <View>
+              <Text style={[styles.toggleTitle, { color: theme.textPrimary }]}>Auto-Deduct</Text>
+              <Text style={[styles.toggleSubtitle, { color: theme.textSecondary }]}>Automatic monthly payment</Text>
             </View>
-          </CardContent>
-        </Card>
+            <ToggleSwitch checked={autoDeduct} onChange={setAutoDeduct} theme={theme} />
+          </View>
+        </View>
       </ScrollView>
 
-      {/* ================= FIXED FOOTER ================= */}
-      <View style={{ 
-        position: 'absolute', bottom: 72, paddingHorizontal: 24, paddingVertical: 20, backgroundColor: theme.background, 
-        borderTopWidth: 1, borderTopColor: `${theme.border}40`, width: '100%', maxWidth: 500, alignSelf: 'center'
-      }}>
+      {/* FIXED FOOTER */}
+      <View style={[styles.footer, { backgroundColor: theme.background, borderTopColor: `${theme.border}30` }]}>
         <PrimaryButton 
           theme={theme} 
           title="Activate Loan" 
-          fullWidth 
-          onPress={() => {
-            console.log("Loan Created");
-            router.back();
-          }}
+          onPress={() => router.back()}
           disabled={!provider || !principal}
         />
       </View>
@@ -200,20 +165,54 @@ export default function AddLoanScreen() {
   );
 }
 
-/* ================= STYLES ================= */
-
-const styles = {
-  modernInputStyle: (theme: AppTheme) => ({
-    width: "100%" as const, height: 52, borderRadius: 14, borderWidth: 1, borderColor: theme.border,
-    paddingHorizontal: 16, fontSize: 16, fontWeight: "600" as const,
-    backgroundColor: theme.background, color: theme.textPrimary,
-  }),
-  labelStyle: (theme: AppTheme) => ({
-    fontSize: 12, fontWeight: "800" as const, color: theme.textSecondary,
-    textTransform: "uppercase" as const, letterSpacing: 0.5, marginBottom: 8,
-  }),
-  iconBtn: (theme: AppTheme) => ({
-    width: 40, height: 40, borderRadius: 12, borderWidth: 1, borderColor: `${theme.border}80`,
-    backgroundColor: theme.surface, alignItems: "center" as const, justifyContent: "center" as const
-  })
-};
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  scrollContent: { 
+    padding: 24, 
+    paddingBottom: 220, 
+    width: '100%',
+    maxWidth: 500,
+    alignSelf: 'center',
+  },
+  termsGroup: { marginBottom: 32 },
+  row: { flexDirection: 'row', gap: 16 },
+  emiCard: { 
+    backgroundColor: 'rgba(17, 82, 212, 0.05)', 
+    borderColor: 'rgba(17, 82, 212, 0.2)', 
+    borderWidth: 1.5, 
+    borderRadius: 28,
+    marginBottom: 40,
+    borderStyle: 'dashed',
+  },
+  emiHeader: { paddingHorizontal: 24, paddingTop: 20, paddingBottom: 8 },
+  emiLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  emiTitle: { fontSize: 11, fontWeight: '900', letterSpacing: 1 },
+  emiContent: { paddingHorizontal: 24, paddingBottom: 24 },
+  emiMainRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+  emiLabel: { fontSize: 12, fontWeight: "700", marginBottom: 4 },
+  emiAmount: { fontSize: 30, fontWeight: "900", letterSpacing: -1 },
+  paybackBox: { alignItems: 'flex-end' },
+  paybackAmount: { fontSize: 16, fontWeight: "800" },
+  repaymentGroup: { gap: 12 },
+  toggleBox: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    borderRadius: 22,
+    borderWidth: 1,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+  },
+  toggleTitle: { fontSize: 15, fontWeight: "800", marginBottom: 4 },
+  toggleSubtitle: { fontSize: 12, fontWeight: "600" },
+  footer: { 
+    position: "absolute", 
+    bottom: 72, 
+    left: 0, 
+    right: 0, 
+    padding: 24, 
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    borderTopWidth: 1,
+    zIndex: 100,
+  },
+});

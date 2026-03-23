@@ -1,19 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, CheckCircle2, Clock, Lock, Wallet, Download } from "lucide-react-native";
+import { ChevronLeft, CheckCircle2, Clock, Lock, Wallet, Download, MoreVertical, Edit2, Trash2 } from "lucide-react-native";
 
 import HeaderBar from "../../components/HeaderBar";
 import { SectionHeader } from "../../components/SectionHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/Card";
 import { useTheme } from "../../hooks/useTheme";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { HeaderActionMenu } from "../../components/HeaderActionMenu";
+import { CircularProgress } from "../../components/charts/CircularProgress";
 import type { AppTheme } from "../../constants/theme";
 
 export default function LoanDetailsScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+  const [isMenuVisible, setIsMenuVisible] = useState(false);
   
   const paidPercent = 65;
 
@@ -23,11 +26,15 @@ export default function LoanDetailsScreen() {
         theme={theme}
         leftContent={
           <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn(theme)}>
-            <ChevronLeft size={22} color={theme.textPrimary} />
+            <ChevronLeft size={20} color={theme.textPrimary} />
           </TouchableOpacity>
         }
         title={<Text style={{ fontSize: 18, fontWeight: "800", color: theme.textPrimary }}>Loan Details</Text>}
-        rightContent={<View style={{ width: 44 }} />}
+        rightContent={
+          <TouchableOpacity onPress={() => setIsMenuVisible(true)} style={styles.iconBtn(theme)}>
+            <MoreVertical size={22} color={theme.textPrimary} />
+          </TouchableOpacity>
+        }
       />
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 140, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
@@ -38,21 +45,14 @@ export default function LoanDetailsScreen() {
           
           <Card theme={theme} style={{ borderRadius: 24 }}>
             <CardContent theme={theme} style={{ paddingVertical: 32, paddingHorizontal: 20, alignItems: "center" }}>
-              {/* Circular Progress Mock - in real app, better to use svg/reanimated */}
-              <View style={{
-                width: 160, height: 160, borderRadius: 80,
-                backgroundColor: theme.brandPrimary, 
-                alignItems: "center", justifyContent: "center",
-                borderWidth: 10, borderColor: theme.border, // Mocking pie chart with border
-              }}>
-                <View style={{
-                  width: 140, height: 140, borderRadius: 70, backgroundColor: theme.surface,
-                  alignItems: "center", justifyContent: "center"
-                }}>
-                  <Text style={{ fontSize: 28, fontWeight: "800", color: theme.textPrimary }}>{paidPercent}%</Text>
-                  <Text style={{ fontSize: 10, fontWeight: "700", color: theme.textSecondary, textTransform: "uppercase" }}>Paid</Text>
-                </View>
-              </View>
+              <CircularProgress 
+                theme={theme}
+                percentage={paidPercent}
+                size={160}
+                strokeWidth={10}
+                centerLabel={`${paidPercent}%`}
+                centerSubLabel="Paid"
+              />
 
               <View style={{ marginTop: 24, flexDirection: "row", justifyContent: 'space-around', width: "100%" }}>
                 <View style={{ alignItems: "center" }}>
@@ -178,13 +178,32 @@ export default function LoanDetailsScreen() {
         </TouchableOpacity>
       </View>
 
+      <HeaderActionMenu
+        visible={isMenuVisible}
+        onClose={() => setIsMenuVisible(false)}
+        theme={theme}
+        items={[
+          {
+            label: "Edit Loan",
+            icon: <Edit2 size={18} color={theme.textPrimary} />,
+            onPress: () => {}
+          },
+          {
+            label: "Delete Loan",
+            icon: <Trash2 size={18} color={theme.danger} />,
+            isDestructive: true,
+            onPress: () => {}
+          }
+        ]}
+        anchorPosition={{ top: 70, right: 20 }}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = {
   iconBtn: (theme: AppTheme) => ({
-    width: 44, height: 44, borderRadius: 14, borderWidth: 1, borderColor: `${theme.border}80`,
+    width: 32, height: 32, borderRadius: 10, borderWidth: 1, borderColor: `${theme.border}80`,
     backgroundColor: theme.surface, alignItems: "center" as const, justifyContent: "center" as const
   })
 };

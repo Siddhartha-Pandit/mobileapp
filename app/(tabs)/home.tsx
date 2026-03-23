@@ -97,7 +97,11 @@ export default function DashboardScreen() {
             </View>
 
             <View style={styles.balanceWrapper}>
-              <BalanceCard theme={theme} balance={145000} />
+              <BalanceCard 
+                theme={theme} 
+                balance={145000} 
+                onDetailPress={() => router.push('/balance-detail' as any)}
+              />
             </View>
           </SafeAreaView>
         </View>

@@ -10,9 +10,12 @@ interface Props {
   disabled?: boolean;
   fullWidth?: boolean;
   style?: any;
+  textStyle?: any;
+  textColor?: string;
+  noShadow?: boolean;
 }
 
-export const PrimaryButton = ({ title, onPress, theme, isLoading, disabled, fullWidth, style }: Props) => {
+export const PrimaryButton = ({ title, onPress, theme, isLoading, disabled, fullWidth, style, textStyle, textColor, noShadow }: Props) => {
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress();
@@ -26,14 +29,15 @@ export const PrimaryButton = ({ title, onPress, theme, isLoading, disabled, full
         { backgroundColor: theme.brandPrimary },
         fullWidth && styles.fullWidth,
         (disabled || isLoading) && styles.disabled,
+        !noShadow && styles.shadow,
         style,
       ]}
       disabled={disabled || isLoading}
     >
       {isLoading ? (
-        <ActivityIndicator color="#FFFFFF" />
+        <ActivityIndicator color={textColor || "#FFFFFF"} />
       ) : (
-        <Text style={[styles.text, { color: '#FFFFFF' }]}>{title}</Text>
+        <Text style={[styles.text, { color: textColor || '#FFFFFF' }, textStyle]}>{title}</Text>
       )}
     </TouchableOpacity>
   );
@@ -47,6 +51,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 200,
+  },
+  shadow: {
     boxShadow: '0 8px 24px rgba(10, 169, 113, 0.25)',
   },
   fullWidth: {

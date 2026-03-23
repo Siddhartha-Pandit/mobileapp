@@ -28,7 +28,9 @@ import {
   ChevronRight,
   Sun,
   Moon,
-  Monitor
+  Monitor,
+  Lock as LucideLockIcon,
+  AlertTriangle
 } from "lucide-react-native";
 
 // Types & Components
@@ -37,6 +39,8 @@ import HeaderBar from "../../components/HeaderBar";
 import { SectionHeader } from "../../components/SectionHeader";
 import { Card, CardContent } from "../../components/Card";
 import type { AppTheme } from "../../constants/theme";
+import { PrimaryButton } from "../../components/PrimaryButton";
+import { Modal, ActivityIndicator } from "react-native";
 
 export default function SettingsPage() {
   const { theme, themeType, setThemeType } = useTheme();
@@ -51,10 +55,42 @@ export default function SettingsPage() {
     hideTransactions: false,
     analytics: true,
     crashReports: true,
+    autoLock: 'Immediately',
   });
+
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAutoLock, setShowAutoLock] = useState(false);
+
+  const autoLockOptions = ['Immediately', 'after 1 Minute', 'after 5 Minutes', 'after 15 Minutes'];
 
   const toggleSetting = (key: keyof typeof settings) => {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleGlobalSignOut = () => {
+    setActionLoading('Signing out from all devices...');
+    setTimeout(() => {
+      setActionLoading(null);
+      alert('Successfully signed out from all other devices.');
+    }, 2000);
+  };
+
+  const handleDeleteAccount = () => {
+    setShowDeleteConfirm(false);
+    setActionLoading('Deleting your account permanently...');
+    setTimeout(() => {
+      setActionLoading(null);
+      router.replace('/onboarding');
+    }, 3000);
+  };
+
+  const handleLogout = () => {
+    setActionLoading('Logging out...');
+    setTimeout(() => {
+      setActionLoading(null);
+      router.replace('/onboarding');
+    }, 1500);
   };
 
   const themeOptions = [
@@ -119,8 +155,14 @@ export default function SettingsPage() {
                     thumbColor="#FFF"
                   />
                 </SettingRow>
-                <SettingRow theme={theme} icon={Timer} title="App Auto-lock" isLast>
-                  <Text style={[styles.selectionText, { color: theme.brandPrimary }]}>Immediately</Text>
+                <SettingRow 
+                  theme={theme} 
+                  icon={Timer} 
+                  title="App Auto-lock" 
+                  isLast
+                  onClick={() => setShowAutoLock(true)}
+                >
+                  <Text style={[styles.selectionText, { color: theme.brandPrimary }]}>{settings.autoLock}</Text>
                 </SettingRow>
               </CardContent>
             </Card>
@@ -189,19 +231,25 @@ export default function SettingsPage() {
             <SectionHeader theme={theme} title="Account Integrity" uppercase marginBottom={12} />
             <Card theme={theme}>
               <CardContent theme={theme} style={styles.cardInternal}>
-                <SettingRow theme={theme} icon={ShieldCheck} title="Two-Factor Auth" onClick={() => {}}>
-                   <View style={styles.rowRight}>
-                     <Text style={styles.activeLabel}>ACTIVE</Text>
-                     <ChevronRight size={16} color={theme.textSecondary} />
-                   </View>
+                <SettingRow 
+                  theme={theme} 
+                  icon={ShieldCheck} 
+                  title="Two-Factor Auth" 
+                  onClick={() => router.push('/setup-2fa')}
+                >
+                  <View style={styles.rowRight}>
+                    <Text style={styles.activeLabel}>ACTIVE</Text>
+                    <ChevronRight size={16} color={theme.textSecondary} />
+                  </View>
                 </SettingRow>
-                <SettingRow theme={theme} icon={UserCheck} title="Active Sessions" isLast onClick={() => {}}>
-                   <View style={styles.rowRight}>
-                     <View style={[styles.sessionBadge, { backgroundColor: theme.brandPrimary }]}>
-                       <Text style={styles.sessionBadgeText}>3 DEVICES</Text>
-                     </View>
-                     <ChevronRight size={16} color={theme.textSecondary} />
-                   </View>
+                <SettingRow 
+                  theme={theme} 
+                  icon={LucideLockIcon} 
+                  title="Change Security PIN" 
+                  isLast 
+                  onClick={() => router.push('/change-pin')}
+                >
+                   <ChevronRight size={16} color={theme.textSecondary} />
                 </SettingRow>
               </CardContent>
             </Card>
@@ -213,17 +261,107 @@ export default function SettingsPage() {
             <Card theme={theme} style={{ borderColor: '#ef444444' }}>
               <CardContent theme={theme} style={[styles.cardInternal, { backgroundColor: '#ef444405' }]}>
                 <SettingRow theme={theme} icon={Eraser} title="Clear Local Cache" subtitle="Free up 124 MB of space" onClick={() => {}} />
-                <SettingRow theme={theme} icon={LogOut} title="Sign Out All Devices" onClick={() => {}}>
-                  <RotateCcw size={16} color={theme.textSecondary} />
+                <SettingRow 
+                  theme={theme} 
+                  icon={LogOut} 
+                  title="Sign Out All Devices" 
+                  onClick={handleGlobalSignOut}
+                >
+                  <ChevronRight size={16} color={theme.textSecondary} />
                 </SettingRow>
-                <SettingRow theme={theme} icon={Trash2} title="Delete Account" titleColor="#ef4444" subtitle="Permanently erase all data" isLast onClick={() => {}}>
+                <SettingRow 
+                  theme={theme} 
+                  icon={Trash2} 
+                  title="Delete Account" 
+                  titleColor="#ef4444" 
+                  subtitle="Permanently erase all data" 
+                  isLast 
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
                   <ChevronRight size={18} color="#ef4444" />
                 </SettingRow>
               </CardContent>
             </Card>
           </View>
+
+          {/* ================= LOGOUT ================= */}
+          <View style={[styles.section, { marginBottom: 40 }]}>
+            <PrimaryButton 
+              title="Log Out" 
+              theme={theme} 
+              onPress={handleLogout}
+              isLoading={actionLoading === 'Logging out...'}
+              style={{ backgroundColor: isDark ? '#2A2A2A' : '#FFF', borderWidth: 1, borderColor: theme.border }}
+              textColor="#EF4444"
+              fullWidth
+              noShadow
+            />
+          </View>
         </View>
       </ScrollView>
+
+      {/* ACTION LOADING MODAL */}
+      <Modal visible={!!actionLoading} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.loadingBox, { backgroundColor: theme.surface }]}>
+            <ActivityIndicator size="large" color={theme.brandPrimary} />
+            <Text style={[styles.loadingText, { color: theme.textPrimary }]}>{actionLoading}</Text>
+          </View>
+        </View>
+      </Modal>
+
+      {/* DELETE CONFIRM MODAL */}
+      <Modal visible={showDeleteConfirm} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.confirmBox, { backgroundColor: theme.surface }]}>
+            <View style={[styles.alertIconBox, { backgroundColor: '#EF444415' }]}>
+              <AlertTriangle size={32} color="#EF4444" />
+            </View>
+            <Text style={[styles.confirmTitle, { color: theme.textPrimary }]}>Delete Account?</Text>
+            <Text style={[styles.confirmSubtitle, { color: theme.textSecondary }]}>
+              This action is irreversible. All your data, including transactions and accounts, will be permanently deleted.
+            </Text>
+            <View style={styles.confirmActions}>
+              <TouchableOpacity 
+                onPress={() => setShowDeleteConfirm(false)}
+                style={[styles.cancelBtn, { borderColor: theme.border }]}
+              >
+                <Text style={{ color: theme.textSecondary, fontWeight: '700' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={handleDeleteAccount}
+                style={[styles.deleteBtn, { backgroundColor: '#EF4444' }]}
+              >
+                <Text style={{ color: '#FFF', fontWeight: '800' }}>Delete Forever</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* AUTO LOCK SELECTION MODAL */}
+      <Modal visible={showAutoLock} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <Card theme={theme} style={styles.selectionCardModal}>
+            <View style={styles.selectionHeader}>
+                <Text style={[styles.selectionTitle, { color: theme.textPrimary }]}>Auto-lock Settings</Text>
+                <TouchableOpacity onPress={() => setShowAutoLock(false)}>
+                    <Text style={{ color: theme.brandPrimary, fontWeight: '700' }}>Done</Text>
+                </TouchableOpacity>
+            </View>
+            {autoLockOptions.map((opt) => (
+                <TouchableOpacity 
+                    key={opt}
+                    onPress={() => { setSettings(s => ({ ...s, autoLock: opt })); setShowAutoLock(false); }}
+                    style={[styles.selectionRow, { borderBottomColor: `${theme.border}30` }]}
+                >
+                    <Text style={[styles.selectionRowText, { color: settings.autoLock === opt ? theme.brandPrimary : theme.textPrimary }]}>{opt}</Text>
+                    {settings.autoLock === opt && <ShieldCheck size={18} color={theme.brandPrimary} />}
+                </TouchableOpacity>
+            ))}
+          </Card>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -347,4 +485,19 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '900',
   },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  loadingBox: { padding: 32, borderRadius: 24, alignItems: 'center', gap: 16, width: '80%', maxWidth: 300 },
+  loadingText: { fontSize: 14, fontWeight: '700', textAlign: 'center' },
+  confirmBox: { padding: 32, borderRadius: 32, alignItems: 'center', width: '100%', maxWidth: 400 },
+  alertIconBox: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
+  confirmTitle: { fontSize: 20, fontWeight: '900', marginBottom: 12 },
+  confirmSubtitle: { fontSize: 14, textAlign: 'center', lineHeight: 22, marginBottom: 32, opacity: 0.8 },
+  confirmActions: { flexDirection: 'row', gap: 12, width: '100%' },
+  cancelBtn: { flex: 1, height: 54, borderRadius: 16, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  deleteBtn: { flex: 1, height: 54, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  selectionCardModal: { padding: 0, borderRadius: 24, width: '100%', maxWidth: 350, overflow: 'hidden' },
+  selectionHeader: { padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.05)' },
+  selectionTitle: { fontSize: 16, fontWeight: '800' },
+  selectionRow: { padding: 18, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1 },
+  selectionRowText: { fontSize: 14, fontWeight: '600' },
 });

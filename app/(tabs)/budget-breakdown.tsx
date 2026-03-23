@@ -12,6 +12,8 @@ import {
   TrendingUp,
   TrendingDown,
   ArrowRight,
+  Calendar,
+  ChevronDown
 } from "lucide-react-native";
 import { useTheme } from "../../hooks/useTheme";
 import HeaderBar from "../../components/HeaderBar";
@@ -32,6 +34,7 @@ interface FinanceItem {
 export default function BudgetBreakdown() {
   const router = useRouter();
   const { theme } = useTheme();
+  const [selectedMonth, setSelectedMonth] = React.useState("March 2026");
 
   const incomeSources: FinanceItem[] = [
     { label: "Main Salary", amount: 65000, icon: <Briefcase size={18} color="#22C55E" />, color: "#22C55E" },
@@ -54,13 +57,22 @@ export default function BudgetBreakdown() {
       {/* 1. HEADER BAR */}
       <HeaderBar
         theme={theme}
-        title={<Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Financial Analysis</Text>}
+        title={<Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Analysis</Text>}
         leftContent={
           <TouchableOpacity onPress={() => router.back()} style={[styles.iconBtn, { borderColor: `${theme.border}80`, backgroundColor: theme.surface }]}>
             <ChevronLeft size={22} color={theme.textPrimary} />
           </TouchableOpacity>
         }
-        rightContent={<View style={{ width: 44 }} />}
+        rightContent={
+          <TouchableOpacity 
+            style={[styles.monthSelector, { backgroundColor: theme.surface, borderColor: theme.border }]}
+            onPress={() => {}}
+          >
+            <Calendar size={14} color={theme.brandPrimary} />
+            <Text style={[styles.monthText, { color: theme.textPrimary }]}>{selectedMonth.split(' ')[0]}</Text>
+            <ChevronDown size={14} color={theme.textSecondary} />
+          </TouchableOpacity>
+        }
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -178,9 +190,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     padding: 24,
     marginBottom: 32,
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.3,
-    shadowRadius: 24,
+    boxShadow: '0 16px 32px rgba(0,0,0,0.25)',
     elevation: 8,
   },
 
@@ -203,4 +213,17 @@ const styles = StyleSheet.create({
   rowAmount: { fontSize: 16, fontWeight: "900" },
   progressBarBg: { height: 6, borderRadius: 3, marginTop: 14, overflow: "hidden" },
   progressBarFill: { height: "100%", borderRadius: 3 },
+  monthSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    gap: 6,
+  },
+  monthText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
 });

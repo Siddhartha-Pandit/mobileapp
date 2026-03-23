@@ -36,8 +36,8 @@ export default function PeopleListScreen() {
         }
         title={<Text style={{ fontSize: 18, fontWeight: "800", color: theme.textPrimary }}>My Contacts</Text>}
         rightContent={
-          <TouchableOpacity style={styles.headerButtonStyle(theme)}>
-            <Users size={18} color={theme.textPrimary} />
+          <TouchableOpacity onPress={() => router.push("/add-person")} style={styles.headerButtonStyle(theme)}>
+            <Plus size={22} color={theme.textPrimary} />
           </TouchableOpacity>
         }
       />
@@ -111,32 +111,13 @@ export default function PeopleListScreen() {
           })}
         </View>
       </ScrollView>
-
-      {/* FLOATING ACTION BUTTON */}
-      <View style={{ 
-        position: "absolute", bottom: 100, width: "100%", maxWidth: 500, alignSelf: 'center',
-        paddingHorizontal: 20, alignItems: "center", zIndex: 10
-      }}>
-        <TouchableOpacity 
-          activeOpacity={0.8}
-          onPress={() => router.push("/add-people")}
-          style={{ 
-            backgroundColor: theme.brandNavy, flexDirection: "row", alignItems: "center", gap: 12,
-            paddingVertical: 16, paddingHorizontal: 28, borderRadius: 24,
-            shadowColor: theme.brandNavy, shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.4, shadowRadius: 25, elevation: 8
-          }}
-        >
-          <Plus size={20} color="#FFF" strokeWidth={3} />
-          <Text style={{ color: "#FFF", fontSize: 16, fontWeight: "800" }}>New Entry</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
 
 const styles = {
   headerButtonStyle: (theme: AppTheme) => ({
-    width: 40, height: 40, borderRadius: 12, borderWidth: 1, borderColor: `${theme.border}80`,
+    width: 32, height: 32, borderRadius: 10, borderWidth: 1, borderColor: `${theme.border}80`,
     backgroundColor: theme.surface, alignItems: "center" as const, justifyContent: "center" as const
   })
 };

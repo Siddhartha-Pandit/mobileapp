@@ -26,11 +26,11 @@ import {
   Wrench,
   ChevronLeft,
 } from 'lucide-react-native';
-import { useTheme } from '../hooks/useTheme';
-import { StepProgress } from '../components/StepProgress';
-import { PrimaryButton } from '../components/PrimaryButton';
-import { MultiSelectCategoryCard } from '../components/MultiSelectCategoryCard';
-import { SegmentTabs } from '../components/SegmentTabs';
+import { useTheme } from '@/hooks/useTheme';
+import { StepProgress } from '@/components/StepProgress';
+import { PrimaryButton } from '@/components/PrimaryButton';
+import { MultiSelectCategoryCard } from '@/components/MultiSelectCategoryCard';
+import { SegmentTabs } from '@/components/SegmentTabs';
 
 export default function ExpenseCategorySetupScreen() {
   const { theme } = useTheme();

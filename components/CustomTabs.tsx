@@ -88,19 +88,19 @@ export const CustomTabs = ({ theme, options, activeTab, onChange }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 44,
+    height: 52,
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 22,
+    borderRadius: 26,
     borderWidth: 1,
-    padding: 2,
+    padding: 3,
     position: 'relative',
     overflow: 'hidden',
   },
   indicator: {
     position: 'absolute',
-    height: 36,
-    borderRadius: 18,
+    height: 42,
+    borderRadius: 21,
     left: 0,
   },
   tab: {
@@ -111,7 +111,8 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   tabText: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: -0.2,
   },
 });

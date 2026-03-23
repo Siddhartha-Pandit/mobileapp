@@ -1,130 +1,167 @@
-import React from "react";
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  ChevronLeft, Users, PieChart, Settings as SettingsIcon, FileDown, ShieldCheck, 
-  Palette, Receipt, HeartHandshake, TrendingUp, Coins, Search, Briefcase, 
-  Landmark, Calculator, Timer, ShieldEllipsis, RefreshCw, CalendarClock, 
-  CreditCard, FolderKanban, TrendingDown, PiggyBank, Gem, Goal
+  Briefcase,
+  Calculator,
+  ChevronLeft,
+  Coins,
+  CreditCard,
+  FileDown,
+  FolderKanban,
+  Gem, 
+  Goal,
+  HeartHandshake,
+  Landmark,
+  Palette,
+  PieChart,
+  PiggyBank,
+  Receipt,
+  RefreshCw,
+  Search,
+  Settings,
+  Shield,
+  TrendingDown,
+  TrendingUp,
+  Users,
+  LogOut,
+  DollarSign
 } from "lucide-react-native";
-import { useTheme } from "../../hooks/useTheme";
+import React from "react";
+import { 
+  ScrollView, 
+  StyleSheet, 
+  Text, 
+  TouchableOpacity, 
+  View, 
+  Dimensions,
+  Platform
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import HeaderBar from "../../components/HeaderBar";
+import { useTheme } from "../../hooks/useTheme";
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function MoreScreen() {
   const router = useRouter();
   const { theme } = useTheme();
 
-  const menuGroups = [
+  const menuGroups: { title: string; items: { label: string; Icon: React.ComponentType<{ size: number; color: string }>; color: string; path: string }[] }[] = [
     {
       title: "Investments",
       items: [
-        { label: "Portfolio", icon: <Briefcase size={22} />, color: "#8B5CF6", path: "/portfolio-list" },
-        { label: "Buy Stocks", icon: <TrendingUp size={22} />, color: "#10B981", path: "/buy-securities" },
-        { label: "Sell Stocks", icon: <TrendingDown size={22} />, color: "#DC2626", path: "/sell-securities" },
-        { label: "Gold & Silver", icon: <Coins size={22} />, color: "#F59E0B", path: "/buy-gold" },
-        { label: "Sell Metal", icon: <Gem size={22} />, color: "#F59E0B", path: "/sell-gold" },
-        { label: "Screener", icon: <Search size={22} />, color: "#3B82F6", path: "/screener" },
+        { label: "Portfolio", Icon: Briefcase, color: "#8B5CF6", path: "/portfolio-list" },
+        { label: "Buy Stocks", Icon: TrendingUp, color: "#10B981", path: "/buy-securities" },
+        { label: "Sell Stocks", Icon: TrendingDown, color: "#DC2626", path: "/sell-securities" },
+        { label: "Gold & Silver", Icon: Coins, color: "#F59E0B", path: "/buy-gold" },
+        { label: "Sell Metal", Icon: Gem, color: "#F59E0B", path: "/sell-gold" },
+        { label: "Screener", Icon: Search, color: "#3B82F6", path: "/screener" },
       ]
     },
     {
       title: "Recurring Flows",
       items: [
-        { label: "Recurring", icon: <RefreshCw size={22} />, color: "#10B981", path: "/recurring-transactions" },
-        { label: "Subs", icon: <CreditCard size={22} />, color: "#6366F1", path: "/subscriptions" },
-        { label: "Bills", icon: <CalendarClock size={22} />, color: "#F43F5E", path: "/recurring-bills" },
+        { label: "Recurring", Icon: RefreshCw, color: "#10B981", path: "/recurring-transactions" },
+        { label: "Subs", Icon: CreditCard, color: "#6366F1", path: "/subscriptions" },
       ]
     },
     {
       title: "Loans & EMI",
       items: [
-        { label: "Loans", icon: <Landmark size={22} />, color: "#EF4444", path: "/loans" },
-        { label: "Upcoming", icon: <Timer size={22} />, color: "#F97316", path: "/emi-schedule" },
-        { label: "Calculator", icon: <Calculator size={22} />, color: theme.brandNavy, path: "/emi-calc" },
-        { label: "Credit Score", icon: <ShieldEllipsis size={22} />, color: "#06B6D4", path: "/credit-score" },
+        { label: "Loans", Icon: Landmark, color: "#EF4444", path: "/loans" },
+        { label: "Calculator", Icon: Calculator, color: "#334155", path: "/emi-calc" },
       ]
     },
     {
       title: "Social & Shared",
       items: [
-        { label: "People", icon: <Users size={22} />, color: "#6366F1", path: "/people-list" },
-        { label: "Split Bill", icon: <Receipt size={22} />, color: "#F59E0B", path: "/split-bill" },
-        { label: "Owed/Owe", icon: <HeartHandshake size={22} />, color: "#10B981", path: "/debt-tracker" },
+        { label: "People", Icon: Users, color: "#6366F1", path: "/people-list" },
+        { label: "Split Bill", Icon: Receipt, color: "#F59E0B", path: "/split-bill" },
+        { label: "Owed/Owe", Icon: HeartHandshake, color: "#10B981", path: "/debt-tracker" },
       ]
     },
     {
       title: "Account & Goals",
       items: [
-        { label: "Account", icon: <PiggyBank size={22} />, color: "#6366F1", path: "/accounts-list" },
-        { label: "Categories", icon: <FolderKanban size={22} />, color: "#F59E0B", path: "/expense-category" },
-        { label: "Goal", icon: <Goal size={22} />, color: "#10B981", path: "/budget-setup" },
+        { label: "Account", Icon: PiggyBank, color: "#6366F1", path: "/accounts-list" },
+        { label: "Categories", Icon: FolderKanban, color: "#F59E0B", path: "/manage-categories" },
+        { label: "Goal", Icon: Goal, color: "#10B981", path: "/manage-goal" },
+        { label: "Currency", Icon: DollarSign, color: "#8B5CF6", path: "/manage-currency" },
       ]
     },
     {
       title: "Analysis & Data",
       items: [
-        { label: "Insights", icon: <PieChart size={22} />, color: theme.brandPrimary, path: "/insights" },
-        { label: "Export", icon: <FileDown size={22} />, color: "#EC4899", path: "/export" },
+        { label: "Insights", Icon: PieChart, color: theme.brandPrimary, path: "/analytics" },
+        { label: "Export", Icon: FileDown, color: "#EC4899", path: "/export-data" },
       ]
     },
     {
       title: "App Settings",
       items: [
-        { label: "Theming", icon: <Palette size={22} />, color: theme.brandNavy, path: "/categories" },
-        { label: "Security", icon: <ShieldCheck size={22} />, color: "#64748B", path: "/security" },
-        { label: "Settings", icon: <SettingsIcon size={22} />, color: "#94A3B8", path: "/settings" },
+        { label: "Theme", Icon: Palette, color: "#EC4899", path: "/manage-theme" },
+        { label: "Security", Icon: Shield, color: "#8B5CF6", path: "/manage-security" },
+        { label: "Settings", Icon: Settings, color: "#64748B", path: "/settings" },
       ]
     }
   ];
 
+  const handleLogout = () => {
+    console.log("Logging out...");
+    router.replace('/login' as any);
+  };
+
+  const isTablet = SCREEN_WIDTH > 600;
+
   return (
-    <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* ================= HEADER BAR ================= */}
+    <SafeAreaView edges={['top', 'bottom']} style={[styles.container, { backgroundColor: theme.background }]}>
       <HeaderBar
         theme={theme}
-        title={<Text style={[styles.headerTitle, { color: theme.textPrimary }]}>More</Text>}
-        leftContent={
-          <TouchableOpacity onPress={() => router.back()} style={[styles.iconBtn, { borderColor: `${theme.border}80`, backgroundColor: theme.surface }]}>
-            <ChevronLeft size={22} color={theme.textPrimary} />
-          </TouchableOpacity>
-        }
-        rightContent={<View style={{ width: 44 }} />}
+        title="More"
       />
 
-      {/* ================= MAIN CONTENT ================= */}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* Intro Subtitle */}
-        <View style={styles.introBox}>
-          <Text style={[styles.introText, { color: theme.textSecondary }]}>
-            Wealth, recurring flows, and app management
-          </Text>
-        </View>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.contentWrapper}>
+          {menuGroups.map((group, idx) => (
+            <View key={idx} style={styles.groupContainer}>
+              <Text style={[styles.groupTitle, { color: theme.textSecondary }]}>
+                {group.title}
+              </Text>
 
-        {menuGroups.map((group, idx) => (
-          <View key={idx} style={styles.groupContainer}>
-            <Text style={[styles.groupTitle, { color: theme.textSecondary }]}>
-              {group.title}
-            </Text>
-
-            <View style={styles.gridContainer}>
-              {group.items.map((item, i) => (
-                <TouchableOpacity
-                  key={i}
-                  onPress={() => router.push(item.path as any)}
-                  style={styles.gridItem}
-                >
-                  <View style={[styles.iconWrapper, { backgroundColor: theme.surface, borderColor: `${theme.border}40` }]}>
-                    {React.cloneElement(item.icon, { color: item.color })}
-                  </View>
-                  <Text style={[styles.itemLabel, { color: theme.textPrimary }]} numberOfLines={2}>
-                    {item.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              <View style={styles.gridContainer}>
+                {group.items.map((item, i) => (
+                  <TouchableOpacity
+                    key={i}
+                    onPress={() => router.push(item.path as any)}
+                    activeOpacity={0.7}
+                    style={styles.gridItem}
+                  >
+                    <View style={[styles.iconWrapper, { backgroundColor: theme.surface, borderColor: `${theme.border}40` }]}>
+                      <item.Icon size={22} color={item.color} />
+                    </View>
+                    <Text style={[styles.itemLabel, { color: theme.textPrimary }]} numberOfLines={2}>
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
+          ))}
+
+          {/* LOGOUT BUTTON */}
+          <View style={styles.logoutSection}>
+            <TouchableOpacity 
+              onPress={handleLogout}
+              activeOpacity={0.8}
+              style={[styles.logoutButton, { backgroundColor: `${theme.danger}08`, borderColor: `${theme.danger}30` }]}
+            >
+              <LogOut size={20} color={theme.danger} />
+              <Text style={[styles.logoutText, { color: theme.danger }]}>Sign Out</Text>
+            </TouchableOpacity>
           </View>
-        ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -132,50 +169,66 @@ export default function MoreScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  headerTitle: { fontSize: 20, fontWeight: "800" },
-  iconBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
+  scrollContent: { 
+    padding: 24, 
+    paddingBottom: 40,
   },
-  scrollContent: { padding: 24, paddingBottom: 100, maxWidth: 500, alignSelf: 'center', width: '100%' },
-  introBox: { marginBottom: 32, paddingLeft: 4 },
-  introText: { fontSize: 13, fontWeight: "600" },
-  groupContainer: { marginBottom: 36 },
+  contentWrapper: {
+    width: '100%',
+    maxWidth: 800, // Wider for the grid layout
+    alignSelf: 'center',
+  },
+  groupContainer: { marginBottom: 40 },
   groupTitle: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "900",
     textTransform: "uppercase",
-    letterSpacing: 1.2,
-    marginBottom: 16,
+    letterSpacing: 1.5,
+    marginBottom: 20,
     paddingLeft: 4,
   },
-  gridContainer: { flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-start", gap: 12 },
+  gridContainer: { 
+    flexDirection: "row", 
+    flexWrap: "wrap", 
+    gap: 8,
+  },
   gridItem: {
-    width: '22%',
+    // Each row: 4 items with gap 8 between = (100% - 3*8) / 4
+    // Use flex basis so items fill rows without trailing right gap
+    flexBasis: '22%',
+    flexGrow: 1,
+    maxWidth: '25%',
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 20,
   },
   iconWrapper: {
-    width: 58,
-    height: 58,
-    borderRadius: 20,
+    width: 64,
+    height: 64,
+    borderRadius: 22,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
   },
   itemLabel: {
-    fontSize: 10,
-    fontWeight: "700",
+    fontSize: 11,
+    fontWeight: "800",
     textAlign: "center",
     lineHeight: 14,
+  },
+  logoutSection: { marginTop: 20, paddingHorizontal: 4 },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    borderRadius: 22,
+    borderWidth: 1,
+    gap: 12,
+  },
+  logoutText: {
+    fontSize: 16,
+    fontWeight: '800',
   },
 });

@@ -121,8 +121,8 @@ export default function RecurringTransactionsScreen() {
         }
         title={<Text style={{ fontSize: 20, fontWeight: "800", color: theme.textPrimary }}>Recurring</Text>}
         rightContent={
-          <TouchableOpacity onPress={() => router.push("/add-recurring")} style={styles.primaryIconBtn(theme)}>
-            <Plus size={20} color="white" />
+          <TouchableOpacity onPress={() => router.push("/add-recurring")} style={styles.iconBtn(theme)}>
+            <Plus size={22} color={theme.textPrimary} />
           </TouchableOpacity>
         }
       />
@@ -161,12 +161,7 @@ export default function RecurringTransactionsScreen() {
 
 const styles = {
   iconBtn: (theme: AppTheme) => ({
-    width: 40, height: 40, borderRadius: 12, borderWidth: 1, borderColor: `${theme.border}80`,
+    width: 32, height: 32, borderRadius: 10, borderWidth: 1, borderColor: `${theme.border}80`,
     backgroundColor: theme.surface, alignItems: "center" as const, justifyContent: "center" as const
   }),
-  primaryIconBtn: (theme: AppTheme) => ({
-    width: 40, height: 40, borderRadius: 12, backgroundColor: theme.brandPrimary,
-    alignItems: "center" as const, justifyContent: "center" as const,
-    shadowColor: theme.brandPrimary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 5
-  })
 };
