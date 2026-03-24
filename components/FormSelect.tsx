@@ -8,6 +8,7 @@ import {
   FlatList,
   ViewStyle,
   Pressable,
+  Platform,
 } from 'react-native';
 import { ChevronDown, X, Check } from 'lucide-react-native';
 import { AppTheme } from '../constants/theme';
@@ -83,8 +84,7 @@ export const FormSelect: React.FC<FormSelectProps> = ({
         onRequestClose={() => setIsVisible(false)}
       >
         <Pressable style={styles.modalOverlay} onPress={() => setIsVisible(false)}>
-          <Pressable>
-          <Card theme={theme} style={styles.modalCard}>
+          <View style={[styles.modalCard, { paddingBottom: Platform.OS === 'ios' ? 40 : 24, backgroundColor: theme.surface }]}>
             <View style={[styles.modalHeader, { borderBottomColor: `${theme.border}40` }]}>
               <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>{label}</Text>
               <TouchableOpacity onPress={() => setIsVisible(false)}>
@@ -105,23 +105,22 @@ export const FormSelect: React.FC<FormSelectProps> = ({
                     onPress={() => handleSelect(itemValue)}
                     style={[
                       styles.optionItem,
-                      isSelected && { backgroundColor: `${theme.brandPrimary}10` }
+                      isSelected && { backgroundColor: `${theme.textPrimary}10` }
                     ]}
                   >
                     <Text style={[
                       styles.optionText, 
-                      { color: isSelected ? theme.brandPrimary : theme.textPrimary }
+                      { color: theme.textPrimary, fontWeight: isSelected ? '800' : '600' }
                     ]}>
                       {itemLabel}
                     </Text>
-                    {isSelected && <Check size={18} color={theme.brandPrimary} />}
+                    {isSelected && <Check size={18} color={theme.textPrimary} />}
                   </TouchableOpacity>
                 );
               }}
               contentContainerStyle={styles.listContent}
             />
-          </Card>
-          </Pressable>
+          </View>
         </Pressable>
       </Modal>
     </View>
@@ -182,7 +181,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   listContent: {
-    paddingBottom: 40,
+    paddingBottom: 10,
   },
   optionItem: {
     flexDirection: 'row',
@@ -193,6 +192,5 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 16,
-    fontWeight: '600',
   },
 });

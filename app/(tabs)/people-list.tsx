@@ -36,8 +36,8 @@ export default function PeopleListScreen() {
         }
         title={<Text style={{ fontSize: 18, fontWeight: "800", color: theme.textPrimary }}>My Contacts</Text>}
         rightContent={
-          <TouchableOpacity onPress={() => router.push("/add-person")} style={styles.headerButtonStyle(theme)}>
-            <Plus size={22} color={theme.textPrimary} />
+          <TouchableOpacity onPress={() => router.push("/add-person")} style={[{ width: 44, height: 44, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' }, { borderColor: `${theme.border}40`, backgroundColor: theme.surface }]}>
+            <Plus size={20} color={theme.textSecondary} />
           </TouchableOpacity>
         }
       />

@@ -72,23 +72,20 @@ export default function SubscriptionsScreen() {
             </View>
           </View>
 
-          {/* EMPTY STATE FOR BILLS (REMOVED as per request) */}
+          {/* EMPTY STATE FOR BILLS OR MANAGE ACTION */}
           <Card theme={theme} style={styles.manageCard}>
-            <CardContent theme={theme} style={styles.manageContent}>
-               <View style={[styles.iconBox, { backgroundColor: `${theme.brandPrimary}10` }]}>
-                  <RefreshCw size={20} color={theme.brandPrimary} />
-               </View>
-               <View style={{ flex: 1 }}>
-                  <Text style={[styles.manageTitle, { color: theme.textPrimary }]}>Manage All Recurrings</Text>
-                  <Text style={[styles.manageDesc, { color: theme.textSecondary }]}>View and edit your payment cycles</Text>
-               </View>
-               <PrimaryButton 
-                  theme={theme} 
-                  title="View" 
-                  onPress={() => router.push('/recurring-transactions' as any)}
-                  style={{ width: 80, height: 40, paddingVertical: 0, borderRadius: 12 }}
-               />
-            </CardContent>
+            <TouchableOpacity onPress={() => router.push('/recurring-transactions' as any)} activeOpacity={0.7}>
+              <CardContent theme={theme} style={styles.manageContent}>
+                 <View style={[styles.iconBox, { backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.border }]}>
+                    <RefreshCw size={20} color={theme.textPrimary} />
+                 </View>
+                 <View style={{ flex: 1, paddingRight: 8, flexShrink: 1 }}>
+                    <Text style={[styles.manageTitle, { color: theme.textPrimary }]} numberOfLines={1}>Manage All Recurrings</Text>
+                    <Text style={[styles.manageDesc, { color: theme.textSecondary }]} numberOfLines={1}>View and edit your payment cycles</Text>
+                 </View>
+                 <ChevronRight size={20} color={theme.textSecondary} />
+              </CardContent>
+            </TouchableOpacity>
           </Card>
         </View>
       </ScrollView>

@@ -90,8 +90,8 @@ export default function LoanDashboardScreen() {
           }
           title="Loans & EMIs"
           rightContent={
-            <TouchableOpacity onPress={() => router.push('/add-loan' as any)} style={[styles.headerBtn, { borderColor: `${theme.border}80`, backgroundColor: theme.surface }]}>
-              <Plus size={20} color={theme.textPrimary} />
+            <TouchableOpacity onPress={() => router.push('/add-loan' as any)} style={[{ width: 44, height: 44, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' }, { borderColor: `${theme.border}40`, backgroundColor: theme.surface }]}>
+              <Plus size={20} color={theme.textSecondary} />
             </TouchableOpacity>
           }
         />

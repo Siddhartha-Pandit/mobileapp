@@ -141,10 +141,10 @@ export default function SplitBillScreen() {
           </TouchableOpacity>
         }
         title={<Text style={{ fontSize: 25, fontWeight: "800", color: theme.textPrimary, letterSpacing: -0.5 }}>Split Bill</Text>}
-        rightContent={<View style={{ width: 44 }} />}
+        pageInfo="Easily split bills among friends with equal, percentage, or exact share tracking."
       />
 
-      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 150, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
+      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 220, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
 
         {/* ================= AMOUNT HERO ================= */}
         <AmountInput

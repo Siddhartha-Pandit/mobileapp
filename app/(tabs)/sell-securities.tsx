@@ -11,6 +11,7 @@ import {
   Percent,
   Folder,
   Calendar,
+  Info,
 } from "lucide-react-native";
 import { useTheme } from "../../hooks/useTheme";
 import type { AppTheme } from "../../constants/theme";
@@ -73,7 +74,7 @@ export default function SellSecuritiesScreen() {
             <ChevronLeft size={22} color={theme.textPrimary} />
           </TouchableOpacity>
         }
-        rightContent={<View style={{ width: 44 }} />}
+        pageInfo="Calculate net capital gain from selling your securities after broker, SEBON and tax charges."
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 20, fontWeight: "800" },
   iconBtn: { width: 44, height: 44, borderRadius: 14, borderWidth: 1, alignItems: "center", justifyContent: "center" },
   
-  scrollContent: { padding: 24, paddingBottom: 120, maxWidth: 500, alignSelf: 'center', width: '100%' },
+  scrollContent: { padding: 24, paddingBottom: 180, maxWidth: 500, alignSelf: 'center', width: '100%' },
   
   bigCard: { padding: 20, borderRadius: 20, borderWidth: 1, alignItems: "center", marginVertical: 12 },
   bigCardLabel: { fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1 },

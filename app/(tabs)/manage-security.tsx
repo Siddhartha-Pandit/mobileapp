@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Modal,
   Platform,
+  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -26,7 +27,6 @@ import { useTheme } from '@/hooks/useTheme';
 import HeaderBar from '@/components/HeaderBar';
 import { Card, CardContent } from '@/components/Card';
 import { PrimaryButton } from '@/components/PrimaryButton';
-import { ToggleSwitch } from '@/components/ToggleSwitch';
 
 export default function ManageSecurityScreen() {
   const { theme } = useTheme();
@@ -76,10 +76,11 @@ export default function ManageSecurityScreen() {
                 title="Biometric Authentication" 
                 subtitle="Use FaceID or Fingerprint"
               >
-                <ToggleSwitch
-                  checked={settings.biometric}
-                  onChange={(val) => setSettings(prev => ({ ...prev, biometric: val }))}
-                  theme={theme}
+                <Switch
+                  value={settings.biometric}
+                  onValueChange={(val) => setSettings(prev => ({ ...prev, biometric: val }))}
+                  trackColor={{ false: theme.border, true: theme.brandPrimary }}
+                  thumbColor="#FFF"
                 />
               </SecurityRow>
               <SecurityRow 
@@ -96,7 +97,7 @@ export default function ManageSecurityScreen() {
           </Card>
 
           {/* ACCOUNT PROTECTION */}
-          <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginTop: 40 }]}>ACCOUNT PROTECTION</Text>
+          <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginTop: 24 }]}>ACCOUNT PROTECTION</Text>
           <Card theme={theme} style={styles.sectionCard}>
             <CardContent theme={theme} style={styles.cardContent}>
               <SecurityRow 
@@ -122,7 +123,7 @@ export default function ManageSecurityScreen() {
           </Card>
 
           {/* SESSION MANAGEMENT */}
-          <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginTop: 40 }]}>SESSION MANAGEMENT</Text>
+          <Text style={[styles.sectionLabel, { color: theme.textSecondary, marginTop: 24 }]}>SESSION MANAGEMENT</Text>
           <Card theme={theme} style={styles.sectionCard}>
             <CardContent theme={theme} style={styles.cardContent}>
               <SecurityRow 

@@ -167,7 +167,7 @@ export default function ManageGoalScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  scrollContent: { paddingBottom: 120 },
+  scrollContent: { paddingBottom: 220 },
   container: { padding: 24, gap: 32 },
   section: { gap: 12 },
   sectionLabel: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.8 },

@@ -135,7 +135,7 @@ export default function BalanceDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scrollContent: { paddingBottom: 40, width: '100%', maxWidth: 500, alignSelf: 'center' },
+  scrollContent: { paddingBottom: 120, width: '100%', maxWidth: 500, alignSelf: 'center' },
   iconBtn: {
     width: 44,
     height: 44,

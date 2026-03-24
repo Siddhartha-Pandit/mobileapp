@@ -76,7 +76,7 @@ export default function MoreScreen() {
       items: [
         { label: "People", Icon: Users, color: "#6366F1", path: "/people-list" },
         { label: "Split Bill", Icon: Receipt, color: "#F59E0B", path: "/split-bill" },
-        { label: "Owed/Owe", Icon: HeartHandshake, color: "#10B981", path: "/debt-tracker" },
+        { label: "Owed/Owe", Icon: HeartHandshake, color: "#10B981", path: "/loans" },
       ]
     },
     {
@@ -150,17 +150,6 @@ export default function MoreScreen() {
             </View>
           ))}
 
-          {/* LOGOUT BUTTON */}
-          <View style={styles.logoutSection}>
-            <TouchableOpacity 
-              onPress={handleLogout}
-              activeOpacity={0.8}
-              style={[styles.logoutButton, { backgroundColor: `${theme.danger}08`, borderColor: `${theme.danger}30` }]}
-            >
-              <LogOut size={20} color={theme.danger} />
-              <Text style={[styles.logoutText, { color: theme.danger }]}>Sign Out</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -171,7 +160,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { 
     padding: 24, 
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   contentWrapper: {
     width: '100%',

@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  scrollContent: { padding: 24, paddingBottom: 140, maxWidth: 500, alignSelf: 'center', width: '100%' },
+  scrollContent: { padding: 24, paddingBottom: 200, maxWidth: 500, alignSelf: 'center', width: '100%' },
   avatarSection: { alignItems: "center", marginVertical: 32 },
   formGroup: { gap: 24 },
   cardPadding: { padding: 24 },

@@ -168,7 +168,7 @@ export default function AnalyticsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scrollContent: { paddingBottom: 60 },
+  scrollContent: { paddingBottom: 120 },
   accountsScroll: { paddingHorizontal: 20, paddingVertical: 16, gap: 16 },
   accountCard: { width: 300, borderRadius: 28 },
   mainContent: { paddingHorizontal: 20, gap: 20, alignSelf: 'center', width: '100%', maxWidth: 800 },

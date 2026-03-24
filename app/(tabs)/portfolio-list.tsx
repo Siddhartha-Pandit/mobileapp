@@ -78,9 +78,9 @@ export default function PortfolioListPage() {
           rightContent={
             <TouchableOpacity 
               onPress={() => setIsAddModalVisible(true)}
-              style={styles.iconBtn}
+              style={[{ width: 44, height: 44, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' }, { borderColor: `${theme.border}40`, backgroundColor: theme.surface }]}
             >
-              <Plus size={22} color={theme.brandPrimary} />
+              <Plus size={20} color={theme.textSecondary} />
             </TouchableOpacity>
           }
         />

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -30,8 +31,20 @@ export default function ManageCurrencyScreen() {
   ];
 
   const handleSave = () => {
-    console.log('Currency saved:', currency);
-    router.back();
+    Alert.alert(
+      "Confirm Currency Change",
+      "Changing the currency will convert the amount to today's conversion rate.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "OK", 
+          onPress: () => {
+            console.log('Currency saved:', currency);
+            router.back();
+          } 
+        }
+      ]
+    );
   };
 
   return (

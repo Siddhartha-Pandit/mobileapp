@@ -12,6 +12,7 @@ import {
   Coins,
   Percent,
   Folder,
+  Info,
 } from "lucide-react-native";
 import { useTheme } from "../../hooks/useTheme";
 import type { AppTheme } from "../../constants/theme";
@@ -78,7 +79,7 @@ export default function BuySecuritiesScreen() {
             <ChevronLeft size={22} color={theme.textPrimary} />
           </TouchableOpacity>
         }
-        rightContent={<View style={{ width: 44 }} />}
+        pageInfo="Buy securities and track your portfolio. Ensure your broker and SEBON fees are accurate."
       />
 
       {/* TABS */}
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
   
 
   
-  scrollContent: { padding: 24, paddingBottom: 120, maxWidth: 500, alignSelf: 'center', width: '100%' },
+  scrollContent: { padding: 24, paddingBottom: 180, maxWidth: 500, alignSelf: 'center', width: '100%' },
   
   bigCard: { padding: 20, borderRadius: 20, borderWidth: 1, alignItems: "center", marginVertical: 12 },
   bigCardLabel: { fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1 },

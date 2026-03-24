@@ -224,7 +224,8 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     height: "100%",
-  },
+    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
+  } as any,
   keyboardView: {
     flex: 1,
   },

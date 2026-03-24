@@ -37,7 +37,7 @@ export default function LoanDetailsScreen() {
         }
       />
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 140, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 220, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
         
         {/* ================= PROGRESS VISUALIZATION ================= */}
         <View style={{ marginTop: 24 }}>

@@ -2,17 +2,19 @@ import React, { useState, useMemo } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Coins, Scale, TrendingUp, Calendar, Landmark, Tag } from "lucide-react-native";
+import { ChevronLeft, Coins, Scale, TrendingUp, Calendar, Landmark, Tag, Info, Layers } from "lucide-react-native";
 import { useTheme } from "../../hooks/useTheme";
 import type { AppTheme } from "../../constants/theme";
 import HeaderBar from "../../components/HeaderBar";
 import { SectionHeader } from "../../components/SectionHeader";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { FormSelect } from "../../components/FormSelect";
 
 export default function BuyGoldScreen() {
   const router = useRouter();
   const { theme } = useTheme();
 
+  const [assetType, setAssetType] = useState("Gold");
   const [unit, setUnit] = useState<"tola" | "gram">("tola");
   const [rate, setRate] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -34,21 +36,32 @@ export default function BuyGoldScreen() {
     router.back();
   };
 
+  const assetPrices = { Gold: "1,65,000", Silver: "1,800" };
+
   return (
     <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.background }]}>
       <HeaderBar
         theme={theme}
-        title={<Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Buy Gold</Text>}
+        title={<Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Buy {assetType}</Text>}
         leftContent={
           <TouchableOpacity onPress={() => router.back()} style={[styles.iconBtn, { borderColor: `${theme.border}80`, backgroundColor: theme.surface }]}>
             <ChevronLeft size={22} color={theme.textPrimary} />
           </TouchableOpacity>
         }
-        rightContent={<View style={{ width: 44 }} />}
+        pageInfo={`Today's Rate:\nGold: ₨ 1,65,000\nSilver: ₨ 1,800\n\nBuy gold and silver securely and automatically track your metal investments.`}
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <BigAmountCard theme={theme} amount={totalCost} label="Total Investment" />
+
+        <FormSelect
+          theme={theme}
+          label="Asset Type"
+          value={assetType}
+          onSelect={setAssetType}
+          options={["Gold", "Silver"]}
+          icon={<Layers size={18} color={theme.textSecondary} />}
+        />
 
         <SectionHeader theme={theme} variant="label" title="Unit Type" icon={<Scale size={16} color={theme.brandPrimary} />} marginBottom={8} />
         <View style={styles.chipRow}>
@@ -108,7 +121,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 20, fontWeight: "800" },
   iconBtn: { width: 44, height: 44, borderRadius: 14, borderWidth: 1, alignItems: "center", justifyContent: "center" },
   
-  scrollContent: { padding: 24, paddingBottom: 120, maxWidth: 500, alignSelf: 'center', width: '100%' },
+  scrollContent: { padding: 24, paddingBottom: 180, maxWidth: 500, alignSelf: 'center', width: '100%' },
   
   bigCard: { padding: 20, borderRadius: 20, borderWidth: 1, alignItems: "center", marginVertical: 12 },
   bigCardLabel: { fontSize: 11, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1 },
@@ -125,6 +138,15 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     marginBottom: 16,
+  },
+  
+  priceBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
   },
   
   footer: { padding: 24, borderTopWidth: 1, width: '100%', maxWidth: 500, alignSelf: 'center' }

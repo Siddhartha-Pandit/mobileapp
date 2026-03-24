@@ -51,10 +51,10 @@ export default function CalculatorScreen() {
           </TouchableOpacity>
         }
         title={<Text style={{ fontSize: 18, fontWeight: "800", color: theme.textPrimary }}>EMI Calculator</Text>}
-        rightContent={<View style={{ width: 44 }} />}
+        pageInfo="Calculate your Equated Monthly Installment (EMI) quickly and know how much interest you will pay overall."
       />
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 180, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
         
         {/* RESULT CARD (High Contrast) */}
         <View style={{ 

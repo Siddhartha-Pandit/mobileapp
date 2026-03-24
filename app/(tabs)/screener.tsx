@@ -76,9 +76,9 @@ export default function DhukutiScreener() {
         rightContent={
           <TouchableOpacity 
             onPress={() => setIsFilterModalVisible(true)}
-            style={styles.iconBtn}
+            style={[{ width: 44, height: 44, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' }, { borderColor: `${theme.border}40`, backgroundColor: theme.surface }]}
           >
-            <Plus size={22} color={theme.brandPrimary} />
+            <Plus size={20} color={theme.textSecondary} />
           </TouchableOpacity>
         }
       />
@@ -87,7 +87,7 @@ export default function DhukutiScreener() {
 
       {/* CONTENT */}
       <ScrollView contentContainerStyle={{ paddingBottom: 160, maxWidth: 500, alignSelf: 'center', width: '100%' }}>
-        <View style={{ marginTop: 12 }}>
+        <View style={{ marginTop: 12, paddingHorizontal: 40 }}>
           <CustomTabs 
             theme={theme}
             options={[
@@ -306,7 +306,7 @@ const RangeCard = ({ theme, title, value, onChange, minLimit, maxLimit, onRemove
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  iconBtn: { width: 32, height: 32, borderRadius: 10, borderWidth: 1, alignItems: "center", justifyContent: "center" },
+  iconBtn: { width: 44, height: 44, borderRadius: 14, borderWidth: 1, alignItems: "center", justifyContent: "center" },
   title: { fontSize: 20, fontWeight: "800" },
   
 

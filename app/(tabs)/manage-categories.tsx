@@ -18,12 +18,13 @@ import {
 } from 'lucide-react-native';
 import React from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card, CardContent } from '@/components/Card';
 import HeaderBar from '@/components/HeaderBar';
 import { useTheme } from '@/hooks/useTheme';
@@ -55,11 +56,9 @@ export default function ManageCategoriesScreen() {
         theme={theme}
         title="Categories"
         rightContent={
-          <Plus 
-            size={24} 
-            color={theme.brandPrimary} 
-            onPress={() => router.push('/manage-custom-category')}
-          />
+          <TouchableOpacity onPress={() => router.push('/manage-custom-category')} style={[{ width: 44, height: 44, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' }, { borderColor: `${theme.border}40`, backgroundColor: theme.surface }]}>
+            <Plus size={20} color={theme.textSecondary} />
+          </TouchableOpacity>
         }
       />
 
@@ -95,7 +94,7 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   scrollContent: { 
     padding: 24, 
-    paddingBottom: 60,
+    paddingBottom: 120,
     width: '100%',
     maxWidth: 500,
     alignSelf: 'center',

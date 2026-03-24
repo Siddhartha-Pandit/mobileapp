@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-nati
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  Plus, MoreVertical, TrendingUp, TrendingDown, Wallet, History, ShoppingCart, Car, ChevronLeft
+  Plus, MoreVertical, TrendingUp, TrendingDown, Wallet, History, ShoppingCart, Car, ChevronLeft, ChevronRight
 } from "lucide-react-native";
 import HeaderBar from "../../components/HeaderBar";
 import { Card, CardContent } from "../../components/Card";
@@ -86,9 +86,9 @@ export default function AccountsDashboard() {
         rightContent={
           <TouchableOpacity 
              onPress={() => router.push('/add-account' as any)} 
-             style={[styles.addBtn, { backgroundColor: theme.surface, borderColor: theme.brandPrimary }]}
+             style={[{ width: 44, height: 44, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' }, { borderColor: `${theme.border}40`, backgroundColor: theme.surface }]}
           >
-             <Plus size={20} color={theme.brandPrimary} />
+             <Plus size={20} color={theme.textSecondary} />
           </TouchableOpacity>
         }
       />
@@ -169,7 +169,7 @@ const AccountCard = ({ account, theme }: { account: AccountItem; theme: AppTheme
             </View>
           </View>
           <TouchableOpacity>
-            <MoreVertical size={18} color={theme.textSecondary} />
+            <ChevronRight size={20} color={theme.textSecondary} />
           </TouchableOpacity>
         </View>
 

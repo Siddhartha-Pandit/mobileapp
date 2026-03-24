@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TextInput, StyleSheet, TextStyle, ViewStyle } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TextStyle, ViewStyle, Platform } from 'react-native';
 import { SectionHeader } from './SectionHeader';
 import { Card, CardContent } from './Card';
 import type { AppTheme } from '../constants/theme';
@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
     minWidth: 120,
     textAlign: 'center',
     padding: 0,
-  },
+    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
+  } as any,
 });
 
