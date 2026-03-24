@@ -49,11 +49,7 @@ export default function BalanceDetailScreen() {
       <HeaderBar
         theme={theme}
         title="Total Balance"
-        leftContent={
-          <TouchableOpacity onPress={() => router.back()} style={[styles.iconBtn, { borderColor: `${theme.border}80`, backgroundColor: theme.surface }]}>
-            <ChevronLeft size={22} color={theme.textPrimary} />
-          </TouchableOpacity>
-        }
+        pageInfo="View your total net worth and asset allocation across all bank accounts, savings, and investments."
       />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -75,7 +71,7 @@ export default function BalanceDetailScreen() {
                 <DonutChart 
                   theme={theme} 
                   data={allocationData} 
-                  radius={SCREEN_WIDTH * 0.22}
+                  radius={SCREEN_WIDTH * 0.3}
                   centerLabelText="TOTAL"
                   centerLabelValue={`रू 1.4L`}
                 />
@@ -135,7 +131,7 @@ export default function BalanceDetailScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scrollContent: { paddingBottom: 120, width: '100%', maxWidth: 500, alignSelf: 'center' },
+  scrollContent: { paddingBottom: 160, width: '100%', maxWidth: 500, alignSelf: 'center' },
   iconBtn: {
     width: 44,
     height: 44,

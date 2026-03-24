@@ -21,6 +21,8 @@ import { useTheme } from "../../hooks/useTheme";
 import { SectionHeader } from "../../components/SectionHeader";
 import HeaderBar from "../../components/HeaderBar";
 import { PrimaryButton } from "../../components/PrimaryButton";
+import { FormDatePicker } from "../../components/FormDatePicker";
+import { Platform } from "react-native";
 
 export default function TransferMoneyScreen() {
   const router = useRouter();
@@ -51,17 +53,8 @@ export default function TransferMoneyScreen() {
       {/* ================= HEADER BAR ================= */}
       <HeaderBar
         theme={theme}
-        leftContent={
-          <TouchableOpacity onPress={() => router.back()} style={[styles.iconButton, { borderColor: theme.border, backgroundColor: theme.surface }]}>
-            <ChevronLeft size={22} color={theme.textPrimary} />
-          </TouchableOpacity>
-        }
-        title={
-          <Text style={[styles.headerTitle, { color: theme.textPrimary }]}>
-            Transfer
-          </Text>
-        }
-        rightContent={<View style={{ width: 40 }} />}
+        title="Transfer"
+        pageInfo="Move money between your own accounts or transfer to other financial destinations. Ensure both accounts are correctly selected before confirming."
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -86,7 +79,11 @@ export default function TransferMoneyScreen() {
         {/* ================= TRANSFER FLOW ================= */}
         <View style={styles.flowContainer}>
           {/* FROM ACCOUNT */}
-          <View style={[styles.accountSelector, { backgroundColor: theme.surface, borderColor: `${theme.border}40` }]}>
+          <TouchableOpacity 
+            activeOpacity={0.7}
+            onPress={() => {/* Open account selector */}}
+            style={[styles.accountSelector, { backgroundColor: theme.surface, borderColor: `${theme.border}40` }]}
+          >
              <SectionHeader
                theme={theme}
                variant="label"
@@ -94,10 +91,10 @@ export default function TransferMoneyScreen() {
                icon={<Wallet size={16} color={theme.textSecondary} />}
                marginBottom={8}
              />
-             <TouchableOpacity style={styles.selectBtn}>
+             <View style={styles.selectBtn}>
                <Text style={[styles.selectText, { color: theme.textPrimary }]}>{fromAccount}</Text>
-             </TouchableOpacity>
-          </View>
+             </View>
+          </TouchableOpacity>
 
           {/* SWAP BUTTON */}
           <View style={styles.swapBtnWrapper}>
@@ -107,7 +104,11 @@ export default function TransferMoneyScreen() {
           </View>
 
           {/* TO ACCOUNT */}
-          <View style={[styles.accountSelector, { backgroundColor: theme.surface, borderColor: `${theme.border}40` }]}>
+          <TouchableOpacity 
+            activeOpacity={0.7}
+            onPress={() => {/* Open account selector */}}
+            style={[styles.accountSelector, { backgroundColor: theme.surface, borderColor: `${theme.border}40` }]}
+          >
              <SectionHeader
                theme={theme}
                variant="label"
@@ -115,30 +116,20 @@ export default function TransferMoneyScreen() {
                icon={<ArrowRightLeft size={16} color={theme.textSecondary} />}
                marginBottom={8}
              />
-             <TouchableOpacity style={styles.selectBtn}>
+             <View style={styles.selectBtn}>
                <Text style={[styles.selectText, { color: theme.textPrimary }]}>{toAccount}</Text>
-             </TouchableOpacity>
-          </View>
+             </View>
+          </TouchableOpacity>
         </View>
 
         {/* ================= ADDITIONAL DETAILS ================= */}
         <View style={styles.detailsGroup}>
-          <View>
-            <SectionHeader
-               theme={theme}
-               variant="label"
-               title="Transfer Date"
-               icon={<Calendar size={16} color={theme.textSecondary} />}
-               marginBottom={8}
-             />
-             <View style={[styles.inputBox, { backgroundColor: theme.surface, borderColor: `${theme.border}40` }]}>
-               <TextInput 
-                 value={date}
-                 onChangeText={setDate}
-                 style={[styles.inputText, { color: theme.textPrimary }]}
-               />
-             </View>
-          </View>
+          <FormDatePicker
+            label="Transfer Date"
+            value={new Date(date)}
+            onChange={(d) => setDate(d.toISOString().split("T")[0])}
+            theme={theme}
+          />
 
           <View>
             <SectionHeader
@@ -161,10 +152,13 @@ export default function TransferMoneyScreen() {
              </View>
           </View>
         </View>
+        
+        {/* Added extra padding for the fixed footer */}
+        <View style={{ height: 200 }} />
       </ScrollView>
 
       {/* ================= FOOTER BUTTON ================= */}
-      <View style={[styles.footer, { position: "absolute", bottom: 72, backgroundColor: theme.background, borderTopColor: `${theme.border}30` }]}>
+      <View style={[styles.footer, { backgroundColor: theme.background, borderTopColor: `${theme.border}30` }]}>
         <PrimaryButton theme={theme} title="Confirm Transfer" onPress={handleConfirm} fullWidth />
       </View>
     </SafeAreaView>
@@ -182,7 +176,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   headerTitle: { fontSize: 20, fontWeight: "800", letterSpacing: -0.5 },
-  scrollContent: { padding: 24, paddingBottom: 100 },
+  scrollContent: { padding: 24, paddingBottom: 40, width: '100%', maxWidth: 500, alignSelf: 'center' },
   amountCard: {
     paddingVertical: 32,
     paddingHorizontal: 24,
@@ -222,7 +216,15 @@ const styles = StyleSheet.create({
   inputBox: { paddingVertical: 16, paddingHorizontal: 18, borderRadius: 18, borderWidth: 1 },
   textAreaBox: { paddingVertical: 12, paddingHorizontal: 18, borderRadius: 18, borderWidth: 1 },
   inputText: { fontSize: 15, fontWeight: "600" },
-  footer: { padding: 24, paddingTop: 20, borderTopWidth: 1, position: "absolute", bottom: 90, width: "100%" },
+  footer: { 
+    padding: 24, 
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24, 
+    borderTopWidth: 1, 
+    position: "absolute", 
+    bottom: 80, 
+    width: "100%",
+    zIndex: 100,
+  },
   submitButton: {
     width: "100%",
     padding: 20,
