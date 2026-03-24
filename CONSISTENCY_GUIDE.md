@@ -1,75 +1,49 @@
-
 # Application Consistency Guide
 
-This document outlines the rules and guidelines to maintain consistency across the application. Following these guidelines will ensure a cohesive user experience, streamlined development, and a high-quality product.
+This document outlines the rules and guidelines to maintain consistency across the Dhukuti application. Following these guidelines ensures a cohesive user experience, especially dealing with cross-platform (iOS/Android/Web) nuances.
 
 ## 1. Guiding Principles
 
-- **User-Centric:** Always prioritize the user's experience. The app should be intuitive, easy to navigate, and forgiving of errors.
-- **Consistency over Convention:** While we adhere to platform conventions (iOS and Android), consistency within the app is paramount.
-- **Offline-First:** The app must be functional without an internet connection. All actions should be saved to a local database first and then synced with the server when a connection is available.
-- **One-Handed Usability:** Design for one-handed use. Critical UI elements should be within easy reach of the thumb.
-- **Responsive and Adaptive:** The UI should adapt to different screen sizes, from small phones to tablets.
+- **Premium UI/UX:** The app must feel high-quality, utilizing generous padding, large rounded corners (`borderRadius: 20-30`), and soft shadows to create depth.
+- **Cross-Platform Compatibility:** Features must work elegantly on iOS, Android, and Web without horizontal scrolling or visual breakage.
+- **One-Handed Usability:** Critical UI elements (like the Bottom Navigation Bar and primary CTAs) should be within easy reach at the bottom of the screen.
 
 ## 2. UI/UX Style Guide
 
 ### Colors
 
-- **Primary:** `(brandPrimary)` - Used for primary actions, buttons, and highlights.
-- **Secondary:** `(brandSecondary)` - Used for secondary actions and information.
-- **Accent:** `(accent)` - Used for floating action buttons and special highlights.
-- **Text Primary:** `(textPrimary)` - For main body text.
-- **Text Secondary:** `(textSecondary)` - For less important text, subtitles, and hints.
-- **Background:** `(background)` - The main background color of the app.
-- **Surface:** `(surface)` - For card backgrounds and sheets.
-- **Error:** `(error)` - For error messages and destructive actions.
-
-*Note: These color names should be part of a theme that is applied throughout the app. Use the `useTheme` hook to access these colors.*
-
-### Typography
-
-- **Heading 1:** 24pt, Bold
-- **Heading 2:** 20pt, Bold
-- **Body:** 16pt, Regular
-- **Subtitle:** 14pt, Medium
-- **Caption:** 12pt, Regular
+- Theme colors are defined centrally and MUST be accessed via the `useTheme()` hook. 
+- Avoid hardcoding hex colors for text/backgrounds to ensure Dark Mode compatibility.
+- Example usage: `backgroundColor: theme.surface`, `color: theme.textPrimary`.
 
 ### Component Library
 
-Use the shared components from the `components/` directory whenever possible. If a new component is needed, it should be designed to be reusable and added to the library.
+Use the shared components from the `components/` directory:
+- **Buttons:** Use `PrimaryButton` for main calls-to-action. Do not use raw `TouchableOpacity` with text unless building a custom list item.
+- **Cards:** Use `Card` and `CardContent` to wrap visual sections.
+- **Inputs:** Use `AmountInput` or custom text inputs that adhere to the visual style.
+- **Headers:** Always use `HeaderBar` with `leftContent` representing a back button when deeply navigated.
 
-- **Buttons:** Use the `PrimaryButton` for main CTAs.
-- **Cards:** Use the `Card` component for displaying content in a structured manner.
-- **Input Fields:** Use `SelectField` and other custom input components.
+### Layout & Spacing Rules
 
-## 3. API Implementation
+- **Safe Areas:** Always wrap main screens in `SafeAreaView` from `react-native-safe-area-context` to avoid notches and status bars.
+- **Bottom Navigation Offset [CRITICAL]:** Any main screen with a `ScrollView` that is accessible while the `BottomNavBar` is visible MUST have a `contentContainerStyle` with at least `paddingBottom: 120`. This prevents list items from being permanently hidden behind the floating navbar element.
+- **Sticky Footers:** Absolute positioned footers (e.g., Save Buttons) should sit above the bottom edge, using `bottom: 72` or `bottom: 90` depending on the surrounding context.
 
-- **Offline Sync:** All data mutations (create, update, delete) must be handled by the offline-first sync mechanism.
-  1.  When a user performs an action, the data is written to the local database (e.g., WatermelonDB or SQLite).
-  2.  The UI is updated immediately based on the local data.
-  3.  The change is added to a sync queue.
-  4.  When an internet connection is available, the sync queue is processed, and the changes are sent to the server.
-- **API Endpoints:** API endpoints should be versioned (e.g., `/api/v1/...`).
-- **Error Handling:** Gracefully handle API errors. Display a non-intrusive message to the user and log the error for debugging.
+## 3. React Native Web Specifics
 
-## 4. Database
+Since this app runs heavily on the web (`npm run web`), special styling care must be taken:
 
-- **Schema:** The database schema is defined in `src/db/schema.ts`. All schema changes must be versioned and migrated properly.
-- **Queries:** All database queries should be efficient and optimized for performance.
+- **Shadows:** React Native's legacy shadow props (`shadowOffset`, `shadowOpacity`, `shadowRadius`) trigger deprecation warnings on the web. Always use the modern CSS-like `boxShadow` string instead (e.g., `boxShadow: '0 8px 16px rgba(0,0,0,0.25)'`) in conjunction with `elevation` for Android.
+- **Text Input Outlines:** Desktop browsers automatically draw a harsh focus ring (outline) around focused inputs. If building a custom input UI (like `AmountInput`), you MUST append ` outlineStyle: 'none' ` conditionally for the web platform to prevent this visual artifact:
+  ```typescript
+  ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {})
+  ```
 
-## 5. Mobile and Responsive Design
+## 4. Code Style and Conventions
 
-- **Layout:** Use Flexbox for creating responsive layouts. Avoid fixed dimensions where possible.
-- **Breakpoints:** For tablet and larger screens, consider using a multi-pane layout.
-- **One-Handed Use:**
-  - Primary navigation (like the bottom tab bar) should be at the bottom of the screen.
-  - Frequently used actions should be placed in the lower half of the screen.
-  - Use gestures to supplement navigation where it makes sense.
+- **File Naming:** Use kebab-case for Expo Router screen files (e.g., `user-profile.tsx`, `manage-categories.tsx`).
+- **Component Naming:** Use PascalCase for standard React components (e.g., `HeaderBar`, `AmountInput`).
+- **Icons:** Always use `lucide-react-native`.
 
-## 6. Code Style and Conventions
-
-- **File Naming:** Use kebab-case for file names (e.g., `user-profile.tsx`).
-- **Component Naming:** Use PascalCase for component names (e.g., `UserProfile`).
-- **Linting:** Adhere to the ESLint rules defined in `eslint.config.js`. Run the linter before committing code.
-
-By following these guidelines, we can build a consistent, robust, and user-friendly application.
+By following these exact guidelines, we ensure that new routes and features integrate seamlessly into the existing Dhukuti ecosystem without breaking layout or styling rules.

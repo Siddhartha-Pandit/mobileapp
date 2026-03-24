@@ -1,21 +1,26 @@
-# Dukuti - Personal Finance App
+# Dhukuti - Personal Finance App
 
-Dukuti is a mobile-first personal finance application designed for simplicity, security, and a seamless user experience. It helps you manage your money with ease, providing tools for budgeting, expense tracking, and financial planning.
+Dhukuti is a premium, mobile-first personal finance application designed for simplicity, comprehensive tracking, and a seamless user experience. It provides a complete suite of tools for budgeting, expense tracking, portfolio management, and financial planning.
 
 ## ✨ Key Features
 
-- **Offline-First:** The app is built to work offline, ensuring you can always access your financial data. All data is stored locally and synchronized with the server when a connection is available.
-- **One-Handed Usability:** The UI is designed for easy one-handed use, making it convenient to manage your finances on the go.
-- **Biometric Security:** Secure your financial data with biometric authentication (Face ID/Touch ID).
-- **Themed Interface:** The app supports both light and dark modes, with a consistent and visually appealing design.
-- **Cross-Platform:** Built with React Native and Expo, Dukuti runs on both Android and iOS devices.
+- **Comprehensive Account Management:** Track diverse financial sources including Bank Accounts, Cash, Credit Cards, and Investments.
+- **Goal & Budget Tracking:** Implement the 50/30/20 budgeting rule, set custom category limits, and track your progress in real time.
+- **Investment Portfolios:** Monitor your external investments, securely tracking assets like Gold and Securities.
+- **Split Bills & IOUs:** Easily manage shared expenses with contacts and keep track of who owes whom.
+- **Recurring Transactions:** Automate and track your subscriptions, rent, and recurring bills.
+- **Advanced Analytics:** Visualize your wealth distribution and growth with built-in Donut and Line charts.
+- **Customizable Categories:** Categorize your spending with system-wide defaults or create your own custom categories with personalized icons and colors.
+- **Premium Themed Interface:** Built-in Light and Dark mode using a centralized, stylish design system.
+- **Cross-Platform:** Built with React Native and Expo, Dhukuti runs beautifully on Android, iOS, and the Web.
 
 ## 🚀 Tech Stack
 
 - **Framework:** React Native with Expo
 - **Language:** TypeScript
-- **Routing:** Expo Router (File-based)
-- **UI:** Custom components with support for theming
+- **Routing:** Expo Router (File-based routing)
+- **Icons:** `lucide-react-native`
+- **UI Architecture:** Custom-built React Native components (`Card`, `PrimaryButton`, `AmountInput`) with Web-compatibility support.
 
 ## 🏁 Getting Started
 
@@ -23,11 +28,7 @@ Follow these steps to get the project up and running on your local machine.
 
 ### Prerequisites
 
-Make sure you have Node.js and the Expo CLI installed on your system.
-
-```bash
-npm install -g expo-cli
-```
+Make sure you have Node.js installed on your system.
 
 ### Installation & Setup
 
@@ -35,7 +36,7 @@ npm install -g expo-cli
 
     ```bash
     git clone <your-repository-url>
-    cd dhukuti-mobileapp
+    cd dhukuti/mobileapp
     ```
 
 2.  **Install dependencies:**
@@ -54,8 +55,8 @@ This will open the Expo DevTools in your browser. You can then run the app on:
 
 -   An Android emulator or physical device
 -   An iOS simulator or physical device
--   In your web browser
+-   In your web browser (using `npm run web`)
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please refer to the `CONSISTENCY_GUIDE.md` for design principles, coding conventions, and API guidelines before submitting a pull request.
+Contributions are welcome! Please thoroughly review the `CONSISTENCY_GUIDE.md` for design principles, component usage, and React Native Web styling conventions before submitting a pull request.
