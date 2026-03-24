@@ -11,6 +11,7 @@ Dhukuti is a premium, mobile-first personal finance application designed for sim
 - **Recurring Transactions:** Automate and track your subscriptions, rent, and recurring bills.
 - **Advanced Analytics:** Visualize your wealth distribution and growth with built-in Donut and Line charts.
 - **Customizable Categories:** Categorize your spending with system-wide defaults or create your own custom categories with personalized icons and colors.
+- **Admin Scripts & Cron Jobs:** Secure, administrative UI to manually trigger background data workers (e.g. Stock and Gold scrapers).
 - **Premium Themed Interface:** Built-in Light and Dark mode using a centralized, stylish design system.
 - **Cross-Platform:** Built with React Native and Expo, Dhukuti runs beautifully on Android, iOS, and the Web.
 

@@ -23,7 +23,8 @@ import {
   TrendingUp,
   Users,
   LogOut,
-  DollarSign
+  DollarSign,
+  Server
 } from "lucide-react-native";
 import React from "react";
 import { 
@@ -44,6 +45,9 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function MoreScreen() {
   const router = useRouter();
   const { theme } = useTheme();
+
+  // Mock admin state (TODO: Map to actual user role state)
+  const isAdmin = true;
 
   const menuGroups: { title: string; items: { label: string; Icon: React.ComponentType<{ size: number; color: string }>; color: string; path: string }[] }[] = [
     {
@@ -104,6 +108,15 @@ export default function MoreScreen() {
       ]
     }
   ];
+
+  if (isAdmin) {
+    menuGroups.push({
+      title: "Admin Tools",
+      items: [
+        { label: "Cron Jobs", Icon: Server, color: "#EF4444", path: "/admin-cron" },
+      ]
+    });
+  }
 
   const handleLogout = () => {
     console.log("Logging out...");
