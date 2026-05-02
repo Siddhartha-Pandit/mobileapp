@@ -12,10 +12,23 @@ interface Props {
   style?: any;
   textStyle?: any;
   textColor?: string;
+  backgroundColor?: string;
   noShadow?: boolean;
 }
 
-export const PrimaryButton = ({ title, onPress, theme, isLoading, disabled, fullWidth, style, textStyle, textColor, noShadow }: Props) => {
+export const PrimaryButton = ({ 
+  title, 
+  onPress, 
+  theme, 
+  isLoading, 
+  disabled, 
+  fullWidth, 
+  style, 
+  textStyle, 
+  textColor, 
+  backgroundColor,
+  noShadow 
+}: Props) => {
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress();
@@ -26,7 +39,7 @@ export const PrimaryButton = ({ title, onPress, theme, isLoading, disabled, full
       onPress={handlePress}
       style={[
         styles.button,
-        { backgroundColor: theme.brandPrimary },
+        { backgroundColor: backgroundColor || theme.brandPrimary },
         fullWidth && styles.fullWidth,
         (disabled || isLoading) && styles.disabled,
         !noShadow && styles.shadow,

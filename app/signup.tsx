@@ -18,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLoadingStore } from '../src/store/useLoadingStore';
 import { useAuthStore } from '../src/store/useAuthStore';
 import { ChartNoAxesCombined, User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { MessageModal, MessageType } from '../components/MessageModal';
 
 const SignUpScreen = () => {
   const { theme } = useTheme();
@@ -31,16 +32,55 @@ const SignUpScreen = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [accepted, setAccepted] = useState(false);
 
+  // Modal State
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalConfig, setModalConfig] = useState<{
+    type: MessageType;
+    title: string;
+    message: string;
+  }>({
+    type: 'error',
+    title: '',
+    message: '',
+  });
+
   const { showLoading, hideLoading } = useLoadingStore();
   const signupAuth = useAuthStore(state => state.signup);
 
+  const showError = (title: string, message: string) => {
+    setModalConfig({ type: 'error', title, message });
+    setModalVisible(true);
+  };
+
   const handleSignUp = async () => {
+    // 1. Basic empty check
     if (!email || !password || !fullName) {
-      Alert.alert('Error', 'Please fill all required fields');
+      showError('Required Fields', 'Please fill in all the required fields to create your account.');
       return;
     }
+
+    // 2. Full Name validation
+    if (fullName.trim().length < 2) {
+      showError('Invalid Name', 'Your full name must be at least 2 characters long.');
+      return;
+    }
+
+    // 3. Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      showError('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    // 4. Password length validation (matching backend)
+    if (password.length < 8) {
+      showError('Weak Password', 'Your password must be at least 8 characters long for better security.');
+      return;
+    }
+
+    // 5. Password match
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      showError('Password Mismatch', 'The passwords you entered do not match. Please try again.');
       return;
     }
     
@@ -57,7 +97,7 @@ const SignUpScreen = () => {
       } as any);
     } catch (e: any) {
       hideLoading();
-      Alert.alert('Signup Failed', e.message || 'An error occurred during sign up.');
+      showError('Signup Failed', e.message || 'An error occurred during sign up.');
     }
   };
 
@@ -154,6 +194,15 @@ const SignUpScreen = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <MessageModal
+        visible={modalVisible}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        onClose={() => setModalVisible(false)}
+        theme={theme}
+      />
     </SafeAreaView>
   );
 };

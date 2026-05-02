@@ -20,6 +20,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Wallet, Eye, EyeOff, Fingerprint, ScanFace } from 'lucide-react-native';
 import { GoogleIcon, AppleIcon } from '../components/BrandIcons';
+import { MessageModal, MessageType } from '../components/MessageModal';
 
 const LoginScreen = () => {
   const { theme } = useTheme();
@@ -31,10 +32,27 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Modal State
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalConfig, setModalConfig] = useState<{
+    type: MessageType;
+    title: string;
+    message: string;
+  }>({
+    type: 'error',
+    title: '',
+    message: '',
+  });
+
+  const showError = (title: string, message: string) => {
+    setModalConfig({ type: 'error', title, message });
+    setModalVisible(true);
+  };
+
   const handleLogin = async () => {
     if (isSubmitting) return;
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter email and password');
+      showError('Required Fields', 'Please enter your email and password to continue.');
       return;
     }
     
@@ -49,7 +67,7 @@ const LoginScreen = () => {
     } catch (e: any) {
         hideLoading();
         setIsSubmitting(false);
-        Alert.alert('Login Failed', e.message || 'An error occurred during login.');
+        showError('Login Failed', e.message || 'An error occurred during login.');
     }
   };
 
@@ -166,6 +184,15 @@ const LoginScreen = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <MessageModal
+        visible={modalVisible}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        onClose={() => setModalVisible(false)}
+        theme={theme}
+      />
     </SafeAreaView>
   );
 };
