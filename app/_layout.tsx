@@ -4,18 +4,22 @@ import { Slot } from 'expo-router';
 import { ThemeProvider } from '@/context/ThemeProvider';
 import SplashScreen from '../components/SplashScreen'; // Corrected import path
 import { GlobalLoader } from '../components/GlobalLoader';
-
-// This is a placeholder for your actual authentication logic
-const useAuth = () => {
-  // For testing purposes, we'll set this to true so the home page is accessible.
-  return { isAuthenticated: true };
-};
+import { useAuthStore } from '../src/store/useAuthStore';
 
 export default function RootLayout() {
   const [showSplash, setShowSplash] = useState(true);
-  const { isAuthenticated } = useAuth();
+  
+  const isAuthenticated = useAuthStore(state => !!state.accessToken);
+  const isHydrated = useAuthStore(state => state.isHydrated);
+  const hydrate = useAuthStore(state => state.hydrate);
+
   const segments = useSegments();
   const router = useRouter();
+
+  // Load auth session from local storage on startup
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -26,7 +30,8 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (showSplash) return;
+    // Don't redirect until splash is done and auth state is loaded from SQLite
+    if (showSplash || !isHydrated) return;
 
     const inTabsGroup = segments[0] === '(tabs)';
 
@@ -60,7 +65,7 @@ export default function RootLayout() {
       // Only redirect unauthenticated users away from protected routes
       router.replace('/onboarding' as any);
     }
-  }, [isAuthenticated, segments, router, showSplash]);
+  }, [isAuthenticated, isHydrated, segments, router, showSplash]);
 
   return (
     <ThemeProvider>

@@ -9,7 +9,7 @@
  */
 
 // ---------- in-memory store ----------
-type User = { id: number; name: string; email: string; synced: boolean | null };
+type User = { id: number; name: string; email: string; accessToken?: string; refreshToken?: string; synced: boolean | null };
 type Metric = { id: number; value: number; timestamp: number; synced: boolean | null };
 
 let _users: User[] = [];
@@ -37,6 +37,9 @@ export const db = {
           // is effectively what we're simulating.
           return Promise.resolve(data.filter(item => (item as any).synced === false));
         },
+        limit: (n: number) => {
+           return Promise.resolve(data.slice(0, n));
+        },
         // Make it thenable so select().from() also works if called without where
         then: (onfulfilled?: (value: any[]) => any) => Promise.resolve(data).then(onfulfilled)
       };
@@ -48,7 +51,7 @@ export const db = {
     const tableName = (table as any)?._?.name ?? (table as any)?.tableName ?? '';
     if (tableName === 'users') {
       return {
-        values: (row: Omit<User, 'id'>) => {
+        values: (row: any) => {
           _users.push({ id: _userId++, ...row, synced: row.synced ?? false });
           return Promise.resolve();
         },
@@ -56,13 +59,13 @@ export const db = {
     }
     if (tableName === 'metrics') {
       return {
-        values: (row: Omit<Metric, 'id'>) => {
+        values: (row: any) => {
           _metrics.push({ id: _metricId++, ...row, synced: row.synced ?? false });
           return Promise.resolve();
         },
       };
     }
-    return { values: (_row: unknown) => Promise.resolve() };
+    return { values: (_row: any) => Promise.resolve() };
   },
 
   update: (table: { _?: { name?: string }; tableName?: string }) => {
@@ -79,6 +82,19 @@ export const db = {
         }
       })
     };
+  },
+
+  delete: (table: { _?: { name?: string }; tableName?: string }) => {
+    const tableName = (table as any)?._?.name ?? (table as any)?.tableName ?? '';
+    // To support `await db.delete(table)` we return a promise.
+    // If you add .where() support later, you'd return an object that is thenable.
+    return Promise.resolve().then(() => {
+      if (tableName === 'users') {
+        _users = [];
+      } else if (tableName === 'metrics') {
+        _metrics = [];
+      }
+    });
   }
 };
 

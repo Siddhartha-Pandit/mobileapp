@@ -41,6 +41,7 @@ import { Card, CardContent } from "../../components/Card";
 import type { AppTheme } from "../../constants/theme";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Modal, ActivityIndicator } from "react-native";
+import { useAuthStore } from "../../src/store/useAuthStore";
 
 export default function SettingsPage() {
   const { theme, themeType, setThemeType } = useTheme();
@@ -68,12 +69,19 @@ export default function SettingsPage() {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleGlobalSignOut = () => {
+  const { logout, logoutAll } = useAuthStore();
+
+  const handleGlobalSignOut = async () => {
     setActionLoading('Signing out from all devices...');
-    setTimeout(() => {
-      setActionLoading(null);
-      alert('Successfully signed out from all other devices.');
-    }, 2000);
+    try {
+        await logoutAll();
+        setActionLoading(null);
+        alert('Successfully signed out from all other devices.');
+        router.replace('/login');
+    } catch (e) {
+        setActionLoading(null);
+        alert('Failed to sign out from all devices.');
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -85,12 +93,16 @@ export default function SettingsPage() {
     }, 3000);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setActionLoading('Logging out...');
-    setTimeout(() => {
-      setActionLoading(null);
-      router.replace('/onboarding');
-    }, 1500);
+    try {
+        await logout();
+        setActionLoading(null);
+        router.replace('/login');
+    } catch (e) {
+        setActionLoading(null);
+        alert('Failed to log out.');
+    }
   };
 
   const themeOptions = [

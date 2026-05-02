@@ -10,10 +10,12 @@ import {
   Platform,
   ActivityIndicator,
   Modal,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../hooks/useTheme';
 import { useLoadingStore } from '../src/store/useLoadingStore';
+import { useAuthStore } from '../src/store/useAuthStore';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Wallet, Eye, EyeOff, Fingerprint, ScanFace } from 'lucide-react-native';
@@ -23,20 +25,32 @@ const LoginScreen = () => {
   const { theme } = useTheme();
   const router = useRouter();
   const { showLoading, hideLoading } = useLoadingStore();
+  const loginAuth = useAuthStore(state => state.login);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (isSubmitting) return;
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter email and password');
+      return;
+    }
+    
     setIsSubmitting(true);
     showLoading('Checking credentials...');
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+        await loginAuth(email, password);
         hideLoading();
         setIsSubmitting(false);
         router.replace('/(tabs)/home');
-    }, 1500);
+    } catch (e: any) {
+        hideLoading();
+        setIsSubmitting(false);
+        Alert.alert('Login Failed', e.message || 'An error occurred during login.');
+    }
   };
 
   const handleSocialLogin = () => {
@@ -81,6 +95,8 @@ const LoginScreen = () => {
                 autoCapitalize="none"
                 style={[styles.input, { borderColor: theme.border, backgroundColor: theme.background, color: theme.textPrimary }]}
                 editable={!isSubmitting}
+                value={email}
+                onChangeText={setEmail}
               />
             </View>
 
@@ -94,6 +110,8 @@ const LoginScreen = () => {
                   secureTextEntry={!showPassword}
                   style={[styles.input, { borderColor: theme.border, backgroundColor: theme.background, color: theme.textPrimary, paddingRight: 48 }]}
                   editable={!isSubmitting}
+                  value={password}
+                  onChangeText={setPassword}
                 />
                 <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)} disabled={isSubmitting}>
                   {showPassword ? <EyeOff size={20} color={theme.textSecondary} /> : <Eye size={20} color={theme.textSecondary} />}

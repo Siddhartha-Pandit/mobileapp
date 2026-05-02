@@ -31,23 +31,19 @@ export const useSyncStore = create<SyncState>((set, get) => ({
 
     try {
       // Fetch unsynced data
-      const unsyncedUsers = await db.select().from(users).where(eq(users.synced, false));
       const unsyncedMetrics = await db.select().from(metrics).where(eq(metrics.synced, false));
 
-      if (unsyncedUsers.length === 0 && unsyncedMetrics.length === 0) {
+      if (unsyncedMetrics.length === 0) {
         set({ syncPending: false });
         return;
       }
 
-      console.log('Uploading unsynced data...', { unsyncedUsers, unsyncedMetrics });
+      console.log('Uploading unsynced data...', { unsyncedMetrics });
 
       // SIMULATE UPLOAD TO CLOUD:
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // After successful upload, mark them as synced
-      if (unsyncedUsers.length > 0) {
-        await db.update(users).set({ synced: true }).where(eq(users.synced, false));
-      }
       if (unsyncedMetrics.length > 0) {
         await db.update(metrics).set({ synced: true }).where(eq(metrics.synced, false));
       }

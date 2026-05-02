@@ -9,12 +9,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   Switch,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../hooks/useTheme';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLoadingStore } from '../src/store/useLoadingStore';
+import { useAuthStore } from '../src/store/useAuthStore';
 import { ChartNoAxesCombined, User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react-native';
 
 const SignUpScreen = () => {
@@ -30,26 +32,30 @@ const SignUpScreen = () => {
   const [accepted, setAccepted] = useState(false);
 
   const { showLoading, hideLoading } = useLoadingStore();
+  const signupAuth = useAuthStore(state => state.signup);
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!email || !password || !fullName) {
-      // Basic validation for demo
-      console.log('Please fill all required fields');
+      Alert.alert('Error', 'Please fill all required fields');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
       return;
     }
     
     showLoading('Creating your account...');
     
-    // Simulate delay
-    setTimeout(() => {
+    try {
+      await signupAuth(fullName, email, password);
       hideLoading();
-      console.log('Sign up initiated for:', email);
-      // Navigate to OTP verification with signup flow
-      router.push({
-        pathname: '/verify-otp',
-        params: { email, flow: 'signup' }
-      } as any);
-    }, 1500);
+      
+      // Proceed to the first step of the onboarding setup flow
+      router.replace('/currency-setup');
+    } catch (e: any) {
+      hideLoading();
+      Alert.alert('Signup Failed', e.message || 'An error occurred during sign up.');
+    }
   };
 
   return (
