@@ -15,6 +15,8 @@ import { useTheme } from '../hooks/useTheme';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Lock } from 'lucide-react-native';
+import { useAuthStore } from '../src/store/useAuthStore';
+import { useLoadingStore } from '../src/store/useLoadingStore';
 
 const CODE_LENGTH = 6;
 
@@ -60,29 +62,49 @@ const VerifyOtpScreen = () => {
   };
 
   const flow = params.flow as string || 'forgot';
+  const verifyAuthOtp = useAuthStore(state => state.verifyOtp);
+  const resendAuthOtp = useAuthStore(state => state.resendOtp);
+  const { showLoading, hideLoading } = useLoadingStore();
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const enteredOtp = otp.join('');
     setError('');
-    // For demo: 123456 is always correct
-    if (enteredOtp.length === CODE_LENGTH && enteredOtp === '123456') {
-        console.log(`Verifying OTP Success for flow: ${flow}`, enteredOtp);
+    
+    if (enteredOtp.length !== CODE_LENGTH) {
+      setError('Please enter a 6-digit code.');
+      return;
+    }
+
+    showLoading('Verifying code...');
+    try {
         if (flow === 'signup') {
-            router.push('/currency-setup' as any);
+            await verifyAuthOtp(email, enteredOtp);
+            hideLoading();
+            router.replace('/currency-setup' as any);
         } else {
+            // Handle forgot password flow here later
+            hideLoading();
             router.push('/reset-password' as any);
         }
-    } else {
-      setError('Invalid code. Please check and try again.');
+    } catch (e: any) {
+        hideLoading();
+        setError(e.message || 'Invalid code. Please check and try again.');
     }
   };
 
-  const handleResend = () => {
+  const handleResend = async () => {
     if (resendCooldown === 0) {
-      console.log('Resending OTP...');
-      setResendCooldown(60);
-      setOtp(new Array(CODE_LENGTH).fill(''));
-      inputsRef.current[0]?.focus();
+      showLoading('Sending new code...');
+      try {
+          await resendAuthOtp(email);
+          hideLoading();
+          setResendCooldown(60);
+          setOtp(new Array(CODE_LENGTH).fill(''));
+          inputsRef.current[0]?.focus();
+      } catch (e: any) {
+          hideLoading();
+          setError(e.message || 'Failed to resend code');
+      }
     }
   };
 

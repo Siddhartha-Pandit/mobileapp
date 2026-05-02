@@ -56,7 +56,7 @@ export default function RootLayout() {
     
     // Auth-only public routes (logged-in users shouldn't see these)
     const authRoutes = new Set([
-      'onboarding', 'login', 'signup', 'forgot-password', 'verify-otp', 'reset-password'
+      'onboarding', 'login', 'signup', 'forgot-password', 'reset-password'
     ]);
 
     if (isAuthenticated && authRoutes.has(segments[0] as string)) {

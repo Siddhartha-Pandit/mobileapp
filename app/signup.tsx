@@ -50,8 +50,11 @@ const SignUpScreen = () => {
       await signupAuth(fullName, email, password);
       hideLoading();
       
-      // Proceed to the first step of the onboarding setup flow
-      router.replace('/currency-setup');
+      // Route to verify-otp and pass the email
+      router.push({
+        pathname: '/verify-otp',
+        params: { email, flow: 'signup' }
+      } as any);
     } catch (e: any) {
       hideLoading();
       Alert.alert('Signup Failed', e.message || 'An error occurred during sign up.');

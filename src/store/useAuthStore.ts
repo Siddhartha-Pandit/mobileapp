@@ -26,6 +26,8 @@ interface AuthState {
   setTokens: (accessToken: string, refreshToken: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   signup: (fullName: string, email: string, password: string) => Promise<void>;
+  verifyOtp: (email: string, otp: string) => Promise<void>;
+  resendOtp: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   logoutAll: () => Promise<void>;
 }
@@ -125,13 +127,35 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       throw new Error(data.message || 'Registration failed');
     }
 
+    // Do NOT set tokens here. User must verify OTP first!
+  },
+
+  verifyOtp: async (email: string, otp: string) => {
+    const netInfo = await NetInfo.fetch();
+    if (!netInfo.isConnected) {
+      throw new Error('Internet connection required to verify OTP.');
+    }
+
+    const meta = await getClientMeta();
+
+    const response = await fetch(`${API_URL}/auth/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp, ...meta }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'OTP Verification failed');
+    }
+
     const data = await response.json();
 
     try {
       // Clear previous users
       await db.delete(users);
       await db.insert(users).values({
-        name: fullName,
+        name: data.user.fullName || data.user.email.split('@')[0],
         email: data.user.email,
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
@@ -142,6 +166,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     set({ user: data.user, accessToken: data.accessToken, refreshToken: data.refreshToken });
+  },
+
+  resendOtp: async (email: string) => {
+    const netInfo = await NetInfo.fetch();
+    if (!netInfo.isConnected) {
+      throw new Error('Internet connection required.');
+    }
+
+    const response = await fetch(`${API_URL}/auth/resend-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Failed to resend OTP');
+    }
   },
 
   logout: async () => {
