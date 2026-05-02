@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Modal,
   Alert,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '../hooks/useTheme';
@@ -178,7 +179,14 @@ const LoginScreen = () => {
               <Text style={[styles.socialButtonText, { color: theme.textPrimary }]}>Continue with Google</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.socialButton, { backgroundColor: theme.textPrimary, borderColor: theme.textPrimary }]} onPress={handleSocialLogin} disabled={isSubmitting}>
-              <AppleIcon size={22} color={theme.background} />
+              <Image 
+                source={require('../assets/images/apple.png')} 
+                style={{ 
+                  width: 22, 
+                  height: 22, 
+                  tintColor: theme.background 
+                }} 
+              />
               <Text style={[styles.socialButtonText, { color: theme.background }]}>Continue with Apple</Text>
             </TouchableOpacity>
           </View>
