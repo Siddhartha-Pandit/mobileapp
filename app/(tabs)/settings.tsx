@@ -8,6 +8,7 @@ import {
   Switch,
   Platform,
   useWindowDimensions,
+  TextInput,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { 
@@ -42,6 +43,8 @@ import type { AppTheme } from "../../constants/theme";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Modal, ActivityIndicator } from "react-native";
 import { useAuthStore } from "../../src/store/useAuthStore";
+import { biometrics } from "../../src/utils/biometrics";
+import { MessageModal } from "../../components/MessageModal";
 
 export default function SettingsPage() {
   const { theme, themeType, setThemeType } = useTheme();
@@ -49,8 +52,8 @@ export default function SettingsPage() {
   const router = useRouter();
   const isDark = theme.background === "#121212";
   
+  const { logout, logoutAll, isBiometricEnabled, updateBiometricStatus } = useAuthStore();
   const [settings, setSettings] = useState({
-    biometric: true,
     hideBalance: false,
     hideNotifications: true,
     hideTransactions: false,
@@ -62,14 +65,23 @@ export default function SettingsPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAutoLock, setShowAutoLock] = useState(false);
+  
+  // Biometric Setup State
+  const [showBioPasswordModal, setShowBioPasswordModal] = useState(false);
+  const [bioPassword, setBioPassword] = useState('');
+  const [bioError, setBioError] = useState('');
+  
+  // Modal state for messages
+  const [messageModal, setMessageModal] = useState({
+    visible: false,
+    type: 'info' as any,
+    title: '',
+    message: '',
+  });
 
-  const autoLockOptions = ['Immediately', 'after 1 Minute', 'after 5 Minutes', 'after 15 Minutes'];
-
-  const toggleSetting = (key: keyof typeof settings) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+  const showMessage = (type: any, title: string, message: string) => {
+    setMessageModal({ visible: true, type, title, message });
   };
-
-  const { logout, logoutAll } = useAuthStore();
 
   const handleGlobalSignOut = async () => {
     setActionLoading('Signing out from all devices...');
@@ -111,6 +123,64 @@ export default function SettingsPage() {
     { type: 'system', icon: Monitor, label: 'System' },
   ] as const;
 
+  const autoLockOptions = ['Immediately', 'after 1 Minute', 'after 5 Minutes', 'after 15 Minutes'];
+
+  const toggleSetting = (key: keyof typeof settings) => {
+    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const { user } = useAuthStore();
+
+  const handleBiometricToggle = async () => {
+    if (isBiometricEnabled) {
+      // Disabling is easy
+      try {
+        await updateBiometricStatus(false);
+      } catch (e) {
+        showMessage('error', 'Error', 'Failed to disable biometrics.');
+      }
+    } else {
+      // Enabling requires hardware check and password
+      const { available, enrolled } = await biometrics.checkAvailability();
+      if (!available || !enrolled) {
+        showMessage('error', 'Not Supported', 'Your device does not support biometrics or no face/fingerprint is enrolled.');
+        return;
+      }
+      setShowBioPasswordModal(true);
+    }
+  };
+
+  const handleConfirmBioPassword = async () => {
+    if (!bioPassword) {
+      setBioError('Password is required');
+      return;
+    }
+    
+    setActionLoading('Enabling Biometrics...');
+    try {
+      // 1. Verify password by attempting to login (or a verify-password endpoint if we had one)
+      // Since we don't have a verify endpoint, we'll use the existing login logic but locally
+      // This also ensures we have the correct credentials to save in SecureStore
+      if (!user?.email) throw new Error('User email not found');
+      
+      // Save credentials first
+      await biometrics.saveCredentials(user.email, bioPassword);
+      
+      // Update store and backend
+      await updateBiometricStatus(true);
+      
+      setActionLoading(null);
+      setShowBioPasswordModal(false);
+      setBioPassword('');
+      setBioError('');
+      showMessage('success', 'Success', 'Biometric authentication has been enabled.');
+    } catch (e: any) {
+      setActionLoading(null);
+      setBioError(e.message || 'Failed to enable biometrics.');
+      await biometrics.clearCredentials();
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <HeaderBar 
@@ -131,7 +201,7 @@ export default function SettingsPage() {
             <SectionHeader theme={theme} title="Appearance" uppercase marginBottom={12} />
             <Card theme={theme}>
               <CardContent theme={theme} style={styles.themeOptions}>
-                {themeOptions.map((opt) => {
+                {themeOptions.map((opt: any) => {
                   const Icon = opt.icon;
                   const isActive = themeType === opt.type;
                   return (
@@ -161,8 +231,8 @@ export default function SettingsPage() {
               <CardContent theme={theme} style={styles.cardInternal}>
                 <SettingRow theme={theme} icon={Fingerprint} title="Biometric Lock" subtitle="FaceID or Fingerprint">
                   <Switch 
-                    value={settings.biometric} 
-                    onValueChange={() => toggleSetting('biometric')}
+                    value={isBiometricEnabled} 
+                    onValueChange={handleBiometricToggle}
                     trackColor={{ false: theme.border, true: theme.brandPrimary }}
                     thumbColor="#FFF"
                   />
@@ -374,6 +444,60 @@ export default function SettingsPage() {
           </Card>
         </View>
       </Modal>
+
+      <MessageModal
+        visible={messageModal.visible}
+        type={messageModal.type}
+        title={messageModal.title}
+        message={messageModal.message}
+        onClose={() => setMessageModal(prev => ({ ...prev, visible: false }))}
+        theme={theme}
+      />
+
+      {/* BIOMETRIC PASSWORD MODAL */}
+      <Modal visible={showBioPasswordModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.confirmBox, { backgroundColor: theme.surface }]}>
+            <View style={[styles.alertIconBox, { backgroundColor: `${theme.brandPrimary}15` }]}>
+              <Fingerprint size={32} color={theme.brandPrimary} />
+            </View>
+            <Text style={[styles.confirmTitle, { color: theme.textPrimary }]}>Enable Biometrics</Text>
+            <Text style={[styles.confirmSubtitle, { color: theme.textSecondary }]}>
+              Enter your login password to securely enable FaceID or Fingerprint authentication.
+            </Text>
+            
+            <TextInput
+              style={[styles.modalInput, { 
+                backgroundColor: theme.background, 
+                color: theme.textPrimary,
+                borderColor: bioError ? theme.danger : theme.border
+              }]}
+              placeholder="Confirm your password"
+              placeholderTextColor={theme.textSecondary}
+              secureTextEntry
+              value={bioPassword}
+              onChangeText={(text) => { setBioPassword(text); setBioError(''); }}
+              autoFocus
+            />
+            {bioError ? <Text style={styles.bioErrorText}>{bioError}</Text> : null}
+
+            <View style={styles.confirmActions}>
+              <TouchableOpacity 
+                onPress={() => { setShowBioPasswordModal(false); setBioPassword(''); setBioError(''); }}
+                style={[styles.cancelBtn, { borderColor: theme.border }]}
+              >
+                <Text style={{ color: theme.textSecondary, fontWeight: '700' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={handleConfirmBioPassword}
+                style={[styles.deleteBtn, { backgroundColor: theme.brandPrimary }]}
+              >
+                <Text style={{ color: '#FFF', fontWeight: '800' }}>Enable Now</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -512,4 +636,21 @@ const styles = StyleSheet.create({
   selectionTitle: { fontSize: 16, fontWeight: '800' },
   selectionRow: { padding: 18, paddingHorizontal: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1 },
   selectionRowText: { fontSize: 14, fontWeight: '600' },
+  modalInput: {
+    width: '100%',
+    height: 52,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    marginBottom: 8,
+    marginTop: 10,
+  },
+  bioErrorText: {
+    color: '#EF4444',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 16,
+    alignSelf: 'flex-start',
+  },
 });

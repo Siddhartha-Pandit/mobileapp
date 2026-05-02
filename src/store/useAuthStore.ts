@@ -4,6 +4,7 @@ import { db } from '../db';
 import { users } from '../db/schema';
 import { eq } from 'drizzle-orm';
 import { getClientMeta } from '../utils/telemetry';
+import { biometrics } from '../utils/biometrics';
 
 // Fallback to localhost if env var is missing
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
@@ -20,6 +21,7 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isHydrated: boolean;
+  isBiometricEnabled: boolean;
   
   // Actions
   hydrate: () => Promise<void>;
@@ -30,6 +32,10 @@ interface AuthState {
   resendOtp: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   logoutAll: () => Promise<void>;
+  
+  // Biometrics
+  updateBiometricStatus: (enabled: boolean) => Promise<void>;
+  loginWithBiometrics: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -37,9 +43,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   accessToken: null,
   refreshToken: null,
   isHydrated: false,
+  isBiometricEnabled: false,
 
   hydrate: async () => {
     try {
+      // Check biometric status from secure storage
+      const bioEnabled = await biometrics.isEnabled();
+      set({ isBiometricEnabled: bioEnabled });
+
       // Try to load user from local database to restore session
       const existingUsers = await db.select().from(users).limit(1);
       if (existingUsers.length > 0) {
@@ -101,6 +112,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         refreshToken: data.refreshToken,
         synced: true,
       });
+
+      // If biometrics was already enabled, update the stored password in case it changed
+      if (get().isBiometricEnabled) {
+        await biometrics.saveCredentials(email, password);
+      }
     } catch (e) {
       console.error('Failed to save session locally', e);
     }
@@ -224,5 +240,55 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       console.error('Failed to clear local session', e);
     }
     set({ user: null, accessToken: null, refreshToken: null });
+  },
+
+  updateBiometricStatus: async (enabled: boolean) => {
+    try {
+      if (enabled) {
+        // We need password to enable biometrics securely. 
+        // This is usually done after a successful manual login or by asking for password.
+        // For now, we'll assume the user is logged in and we can't get the password directly from state.
+        // The implementation in settings will handle this by calling biometrics.saveCredentials directly.
+        set({ isBiometricEnabled: true });
+      } else {
+        await biometrics.clearCredentials();
+        set({ isBiometricEnabled: false });
+      }
+
+      // Update backend
+      const token = get().accessToken;
+      if (token) {
+        await fetch(`${API_URL}/auth/update-settings`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ biometricEnabled: enabled }),
+        }).catch(err => console.error('Failed to sync biometric setting to backend', err));
+      }
+    } catch (e) {
+      console.error('Failed to update biometric status', e);
+      throw e;
+    }
+  },
+
+  loginWithBiometrics: async () => {
+    const { available, enrolled } = await biometrics.checkAvailability();
+    if (!available || !enrolled) {
+      throw new Error('Biometrics not available or not set up on this device.');
+    }
+
+    const success = await biometrics.authenticate();
+    if (!success) {
+      throw new Error('Biometric authentication failed.');
+    }
+
+    const credentials = await biometrics.getCredentials();
+    if (!credentials) {
+      throw new Error('No saved credentials found. Please log in manually first.');
+    }
+
+    await get().login(credentials.email, credentials.password);
   },
 }));

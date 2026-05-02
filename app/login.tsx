@@ -27,6 +27,9 @@ const LoginScreen = () => {
   const router = useRouter();
   const { showLoading, hideLoading } = useLoadingStore();
   const loginAuth = useAuthStore(state => state.login);
+  const loginWithBiometrics = useAuthStore(state => state.loginWithBiometrics);
+  const isBiometricEnabled = useAuthStore(state => state.isBiometricEnabled);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -68,6 +71,23 @@ const LoginScreen = () => {
         hideLoading();
         setIsSubmitting(false);
         showError('Login Failed', e.message || 'An error occurred during login.');
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    if (isSubmitting) return;
+    
+    try {
+      showLoading('Authenticating...');
+      await loginWithBiometrics();
+      hideLoading();
+      router.replace('/(tabs)/home');
+    } catch (e: any) {
+      hideLoading();
+      // Only show error if it's not a user cancellation
+      if (!e.message?.includes('cancel')) {
+        showError('Biometric Error', e.message || 'Biometric authentication failed.');
+      }
     }
   };
 
@@ -172,16 +192,18 @@ const LoginScreen = () => {
           </View>
 
           {/* Biometric */}
-          <View style={styles.biometricContainer}>
-            <TouchableOpacity onPress={handleLogin} disabled={isSubmitting}>
-                {Platform.OS === 'ios' ? (
-                    <ScanFace size={40} color={theme.textSecondary} />
-                ) : (
-                    <Fingerprint size={40} color={theme.textSecondary} />
-                )}
-            </TouchableOpacity>
-            <Text style={[styles.biometricText, { color: theme.textSecondary }]}>USE BIOMETRICS</Text>
-          </View>
+          {isBiometricEnabled && (
+            <View style={styles.biometricContainer}>
+              <TouchableOpacity onPress={handleBiometricLogin} disabled={isSubmitting}>
+                  {Platform.OS === 'ios' ? (
+                      <ScanFace size={40} color={theme.textSecondary} />
+                  ) : (
+                      <Fingerprint size={40} color={theme.textSecondary} />
+                  )}
+              </TouchableOpacity>
+              <Text style={[styles.biometricText, { color: theme.textSecondary }]}>USE BIOMETRICS</Text>
+            </View>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
 
