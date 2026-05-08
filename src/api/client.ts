@@ -69,3 +69,27 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
 
   return response;
 };
+
+const api = {
+  get: (endpoint: string, options: RequestInit = {}) => 
+    apiFetch(endpoint, { ...options, method: 'GET' }),
+  
+  post: (endpoint: string, body: any, options: RequestInit = {}) => 
+    apiFetch(endpoint, { 
+      ...options, 
+      method: 'POST', 
+      body: JSON.stringify(body) 
+    }),
+  
+  put: (endpoint: string, body: any, options: RequestInit = {}) => 
+    apiFetch(endpoint, { 
+      ...options, 
+      method: 'PUT', 
+      body: JSON.stringify(body) 
+    }),
+  
+  delete: (endpoint: string, options: RequestInit = {}) => 
+    apiFetch(endpoint, { ...options, method: 'DELETE' }),
+};
+
+export default api;

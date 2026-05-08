@@ -12,16 +12,28 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { StepProgress } from '../components/StepProgress';
 import { SingleSelectOption } from '../components/SingleSelectOption';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { setupService } from '../src/services/setupService';
+import { useAuthStore } from '../src/store/useAuthStore';
 
 const CurrencySetupScreen = () => {
   const { theme } = useTheme();
   const router = useRouter();
   const [currency, setCurrency] = useState('NPR');
 
-  const handleNext = () => {
-    console.log('Currency selected:', currency);
-    // Move to next step: Create Account
+  const { user } = useAuthStore();
+
+  const handleNext = async () => {
+    if (user) {
+      await setupService.saveUserSettings({ userId: user.id, preferredCurrency: currency });
+    }
     router.push('/create-account');
+  };
+
+  const handleSkip = async () => {
+    if (user) {
+      await setupService.skipSetup(user.id);
+    }
+    router.replace('/(tabs)/home');
   };
 
   return (
@@ -94,7 +106,7 @@ const CurrencySetupScreen = () => {
                 fullWidth
             />
             <TouchableOpacity 
-                onPress={() => router.replace('/(tabs)/home')} 
+                onPress={handleSkip} 
                 style={styles.skipButton}
             >
                 <Text style={[styles.skipText, { color: theme.textSecondary }]}>

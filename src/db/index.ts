@@ -14,8 +14,14 @@ type Metric = { id: number; value: number; timestamp: number; synced: boolean | 
 
 let _users: User[] = [];
 let _metrics: Metric[] = [];
+let _userSettings: any[] = [];
+let _accounts: any[] = [];
+let _categories: any[] = [];
+let _budgets: any[] = [];
+
 let _userId = 1;
 let _metricId = 1;
+let _id = 1;
 
 // ---------- initializeDb (no-op on web) ----------
 export const initializeDb = () => {
@@ -28,7 +34,13 @@ export const db = {
   select: () => ({
     from: (table: { tableName?: string; _?: { name?: string } }) => {
       const tableName = (table as any)?._?.name ?? (table as any)?.tableName ?? '';
-      const data = tableName === 'users' ? [..._users] : tableName === 'metrics' ? [..._metrics] : [];
+      let data: any[] = [];
+      if (tableName === 'users') data = [..._users];
+      else if (tableName === 'metrics') data = [..._metrics];
+      else if (tableName === 'user_settings') data = [..._userSettings];
+      else if (tableName === 'accounts') data = [..._accounts];
+      else if (tableName === 'categories') data = [..._categories];
+      else if (tableName === 'budgets') data = [..._budgets];
       
       const queryResult = {
         data,
@@ -65,6 +77,38 @@ export const db = {
         },
       };
     }
+    if (tableName === 'user_settings') {
+      return {
+        values: (row: any) => {
+          _userSettings.push({ id: _id++, ...row, synced: row.synced ?? false });
+          return Promise.resolve();
+        },
+      };
+    }
+    if (tableName === 'accounts') {
+      return {
+        values: (row: any) => {
+          _accounts.push({ id: _id++, ...row, synced: row.synced ?? false });
+          return Promise.resolve();
+        },
+      };
+    }
+    if (tableName === 'categories') {
+      return {
+        values: (row: any) => {
+          _categories.push({ id: _id++, ...row, synced: row.synced ?? false });
+          return Promise.resolve();
+        },
+      };
+    }
+    if (tableName === 'budgets') {
+      return {
+        values: (row: any) => {
+          _budgets.push({ id: _id++, ...row, synced: row.synced ?? false });
+          return Promise.resolve();
+        },
+      };
+    }
     return { values: (_row: any) => Promise.resolve() };
   },
 
@@ -77,6 +121,14 @@ export const db = {
             _users = _users.map(u => ({ ...u, ...values }));
           } else if (tableName === 'metrics') {
             _metrics = _metrics.map(m => ({ ...m, ...values }));
+          } else if (tableName === 'user_settings') {
+            _userSettings = _userSettings.map(s => ({ ...s, ...values }));
+          } else if (tableName === 'accounts') {
+            _accounts = _accounts.map(a => ({ ...a, ...values }));
+          } else if (tableName === 'categories') {
+            _categories = _categories.map(c => ({ ...c, ...values }));
+          } else if (tableName === 'budgets') {
+            _budgets = _budgets.map(b => ({ ...b, ...values }));
           }
           return Promise.resolve();
         }
@@ -93,6 +145,14 @@ export const db = {
         _users = [];
       } else if (tableName === 'metrics') {
         _metrics = [];
+      } else if (tableName === 'user_settings') {
+        _userSettings = [];
+      } else if (tableName === 'accounts') {
+        _accounts = [];
+      } else if (tableName === 'categories') {
+        _categories = [];
+      } else if (tableName === 'budgets') {
+        _budgets = [];
       }
     });
   }

@@ -15,9 +15,11 @@ import { Bell, Plus, ChevronLeft, Calendar } from 'lucide-react-native';
 import { useTheme } from '../hooks/useTheme';
 import HeaderBar from '../components/HeaderBar';
 import { Card, CardContent } from '../components/Card';
+import { StepProgress } from '../components/StepProgress';
+import { setupService } from '../src/services/setupService';
+import { useAuthStore } from '../src/store/useAuthStore';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { BudgetSlider } from '../components/BudgetSlider';
-import { StepProgress } from '../components/StepProgress';
 
 export default function BudgetSetupFinalScreen() {
   const { theme } = useTheme();
@@ -33,8 +35,17 @@ export default function BudgetSetupFinalScreen() {
   const totalAllocated = needs + wants + savings;
   const calculateAmount = (percent: number) => Math.round((income * percent) / 100);
 
-  const handleComplete = () => {
-    console.log('Budget Setup Complete:', { income, needs, wants, savings, reminder });
+  const { user } = useAuthStore();
+
+  const handleComplete = async () => {
+    if (user) {
+      const budgets = [
+        { name: 'Needs', percentageAllocation: needs, color: theme.brandPrimary, icon: 'home', smartReminder: reminder },
+        { name: 'Wants', percentageAllocation: wants, color: '#3B82F6', icon: 'cart', smartReminder: reminder },
+        { name: 'Savings', percentageAllocation: savings, color: '#10B981', icon: 'trending-up', smartReminder: reminder },
+      ];
+      await setupService.setupBudgets(budgets.map(b => ({ ...b, userId: user.id })));
+    }
     router.replace('/(tabs)/home');
   };
 

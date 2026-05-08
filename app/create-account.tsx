@@ -14,9 +14,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Wallet, Building2, FileText, ChevronLeft } from 'lucide-react-native';
 import { useTheme } from '../hooks/useTheme';
 import { StepProgress } from '../components/StepProgress';
-import { PrimaryButton } from '../components/PrimaryButton';
-import { ColorPicker } from '../components/ColorPicker';
 import { SelectField } from '../components/SelectField';
+import { setupService } from '../src/services/setupService';
+import { useAuthStore } from '../src/store/useAuthStore';
+import { ColorPicker } from '../components/ColorPicker';
+import { PrimaryButton } from '../components/PrimaryButton';
 
 export default function CreateAccountScreen() {
   const { theme } = useTheme();
@@ -45,8 +47,20 @@ export default function CreateAccountScreen() {
     'Cash',
   ];
 
-  const handleContinue = () => {
-    console.log('Account Created:', { accountName, accountType, balance, color, notes });
+  const { user } = useAuthStore();
+
+  const handleContinue = async () => {
+    if (user) {
+      await setupService.createAccount({
+        userId: user.id,
+        name: accountName,
+        type: accountType === 'Checking / Current' ? 'Cash' : accountType, // Map to backend enum
+        initialBalance: parseFloat(balance) || 0,
+        themeColor: color,
+        notes: notes,
+        includeInTotal: true
+      });
+    }
     router.push('/expense-category');
   };
 

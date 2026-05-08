@@ -28,9 +28,10 @@ import {
 } from 'lucide-react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { StepProgress } from '@/components/StepProgress';
-import { PrimaryButton } from '@/components/PrimaryButton';
 import { MultiSelectCategoryCard } from '@/components/MultiSelectCategoryCard';
-import { SegmentTabs } from '@/components/SegmentTabs';
+import { setupService } from '../src/services/setupService';
+import { useAuthStore } from '../src/store/useAuthStore';
+import { PrimaryButton } from '@/components/PrimaryButton';
 
 export default function ExpenseCategorySetupScreen() {
   const { theme } = useTheme();
@@ -38,10 +39,12 @@ export default function ExpenseCategorySetupScreen() {
   
   const [selected, setSelected] = useState<string[]>([
     'food',
+    'transport',
     'housing',
-    'entertainment',
+    'health',
+    'education',
+    'bills',
   ]);
-  const [tab, setTab] = useState('All');
 
   const toggleCategory = (value: string) => {
     setSelected((prev) =>
@@ -68,8 +71,21 @@ export default function ExpenseCategorySetupScreen() {
     { label: 'Miscellaneous', value: 'misc', icon: Wrench },
   ];
 
-  const handleContinue = () => {
-    console.log('Selected Categories:', selected);
+  const { user } = useAuthStore();
+
+  const handleContinue = async () => {
+    if (user) {
+      const selectedCategories = categories
+        .filter(cat => selected.includes(cat.value))
+        .map(cat => ({
+          userId: user.id,
+          name: cat.label,
+          icon: cat.value, // Simplified icon name
+          themeColor: '#4CAF50', // Default color for simplicity or add color map
+          isEssential: true
+        }));
+      await setupService.setupCategories(selectedCategories);
+    }
     router.push('/budget-setup');
   };
 
@@ -86,14 +102,6 @@ export default function ExpenseCategorySetupScreen() {
             subtitle="Select categories that match your spending habits."
           />
 
-          <View style={styles.tabsContainer}>
-            <SegmentTabs
-              theme={theme}
-              tabs={['All', 'Essential Only', 'Custom']}
-              active={tab}
-              onChange={setTab}
-            />
-          </View>
         </View>
 
         {/* Scrollable Grid Section */}
