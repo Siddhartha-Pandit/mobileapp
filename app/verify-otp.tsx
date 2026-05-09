@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Lock } from 'lucide-react-native';
 import { useAuthStore } from '../src/store/useAuthStore';
 import { useLoadingStore } from '../src/store/useLoadingStore';
+import api from '../src/api/client';
 
 const CODE_LENGTH = 6;
 
@@ -82,9 +83,15 @@ const VerifyOtpScreen = () => {
             hideLoading();
             router.replace('/currency-setup' as any);
         } else {
-            // Handle forgot password flow here later
-            hideLoading();
-            router.push('/reset-password' as any);
+            // Handle forgot password flow
+            const response = await api.post('/auth/verify-forgot-password-otp', { email, otp: enteredOtp });
+            if (response.ok) {
+              hideLoading();
+              router.push({ pathname: '/reset-password', params: { email, otp: enteredOtp } } as any);
+            } else {
+              const error = await response.json();
+              throw new Error(error.error || 'Verification failed');
+            }
         }
     } catch (e: any) {
         hideLoading();

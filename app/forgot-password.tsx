@@ -14,12 +14,15 @@ import { useTheme } from '../hooks/useTheme';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Mail } from 'lucide-react-native';
+import api from '../src/api/client';
 
 const ForgotPasswordScreen = () => {
   const { theme } = useTheme();
   const router = useRouter();
   const params = useLocalSearchParams();
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (params.email && typeof params.email === 'string') {
@@ -27,10 +30,24 @@ const ForgotPasswordScreen = () => {
     }
   }, [params]);
 
-  const handleSendCode = () => {
-    // Logic to send verification code
-    console.log('Sending code to:', email);
-    router.push({ pathname: '/verify-otp', params: { email, flow: 'forgot' } } as any);
+  const handleSendCode = async () => {
+    if (!email) return;
+    
+    setError('');
+    setLoading(true);
+    try {
+      const response = await api.post('/auth/forgot-password', { email });
+      if (response.ok) {
+        router.push({ pathname: '/verify-otp', params: { email, flow: 'forgot' } } as any);
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Failed to send code');
+      }
+    } catch (e) {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -67,10 +84,11 @@ const ForgotPasswordScreen = () => {
                     placeholderTextColor={theme.textSecondary}
                     keyboardType="email-address"
                     autoCapitalize="none"
-                    style={[styles.input, { borderColor: theme.border, backgroundColor: theme.background, color: theme.textPrimary }]}
+                    style={[styles.input, { borderColor: error ? '#EF4444' : theme.border, backgroundColor: theme.background, color: theme.textPrimary }]}
                 />
+                {!!error && <Text style={styles.errorText}>{error}</Text>}
                 </View>
-                <PrimaryButton title="Next" theme={theme} onPress={handleSendCode} fullWidth />
+                <PrimaryButton title="Next" theme={theme} onPress={handleSendCode} isLoading={loading} fullWidth />
             </View>
             </ScrollView>
       </KeyboardAvoidingView>
@@ -100,6 +118,7 @@ const styles = StyleSheet.create({
   inputGroup: { marginBottom: 24 },
   label: { fontSize: 14, fontWeight: '600', marginBottom: 8 },
   input: { width: '100%', height: 52, paddingHorizontal: 16, borderRadius: 12, borderWidth: 1, fontSize: 14 },
+  errorText: { color: '#EF4444', fontSize: 12, fontWeight: '600', marginTop: 8, textAlign: 'left' },
 });
 
 export default ForgotPasswordScreen;

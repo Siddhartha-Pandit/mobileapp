@@ -15,10 +15,13 @@ import { useTheme } from '../hooks/useTheme';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, ShieldCheck, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { useLocalSearchParams } from 'expo-router';
+import api from '../src/api/client';
 
 const ResetPasswordScreen = () => {
   const { theme } = useTheme();
   const router = useRouter();
+  const { email, otp } = useLocalSearchParams<{ email: string; otp: string }>();
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -27,7 +30,7 @@ const ResetPasswordScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (!password || !confirmPassword) {
       setError('Please enter and confirm your new password.');
       return;
@@ -40,21 +43,33 @@ const ResetPasswordScreen = () => {
     setError('');
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-        setIsLoading(false);
-        console.log('Password has been reset.');
-        Alert.alert(
-            'Password Reset',
-            'Your password has been successfully updated.',
-            [{ text: 'OK', onPress: () => router.replace('/login') }]
-        );
-        
-        // For web/simplicity if Alert doesn't block
-        if (Platform.OS === 'web') {
-            router.replace('/login');
+    try {
+        const response = await api.post('/auth/reset-password', { 
+          email, 
+          otp, 
+          newPassword: password 
+        });
+
+        if (response.ok) {
+            setIsLoading(false);
+            Alert.alert(
+                'Password Reset',
+                'Your password has been successfully updated.',
+                [{ text: 'OK', onPress: () => router.replace('/login') }]
+            );
+            
+            if (Platform.OS === 'web') {
+                router.replace('/login');
+            }
+        } else {
+            const errData = await response.json();
+            setIsLoading(false);
+            setError(errData.error || 'Failed to reset password');
         }
-    }, 1500);
+    } catch (e) {
+        setIsLoading(false);
+        setError('Something went wrong. Please try again.');
+    }
   };
 
   return (
