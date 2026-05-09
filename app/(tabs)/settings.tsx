@@ -37,7 +37,9 @@ import {
   AlertTriangle,
   User,
   KeyRound,
+  Loader2,
 } from "lucide-react-native";
+import UserAvatar from "../../components/UserAvatar";
 
 // Types & Components
 import { useTheme } from "../../hooks/useTheme";
@@ -234,13 +236,18 @@ export default function SettingsPage() {
           {/* ================= USER PROFILE CARD ================= */}
           <View style={[styles.profileCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <View style={styles.profileInfo}>
-              <View style={[styles.settingsAvatar, { backgroundColor: theme.brandPrimary + '15' }]}>
-                {user?.avatarUrl ? (
-                  <Image source={{ uri: user.avatarUrl }} style={styles.avatarImg} />
-                ) : (
-                  <User size={28} color={theme.brandPrimary} />
-                )}
-              </View>
+              <TouchableOpacity 
+                onPress={() => router.push('/edit-profile' as any)}
+                style={[styles.settingsAvatar]}
+              >
+                <UserAvatar 
+                  fullName={user?.fullName}
+                  email={user?.email}
+                  avatarUrl={user?.avatarUrl}
+                  size={56}
+                  theme={theme}
+                />
+              </TouchableOpacity>
               <View>
                 <Text style={[styles.profileName, { color: theme.textPrimary }]}>
                   {user?.fullName || 'User Name'}

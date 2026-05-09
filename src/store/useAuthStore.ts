@@ -7,7 +7,7 @@ import { getClientMeta } from '../utils/telemetry';
 import { biometrics } from '../utils/biometrics';
 
 // Fallback to localhost if env var is missing
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 interface UserProfile {
   id: string;
@@ -337,7 +337,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         body: JSON.stringify(updates),
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        const data = await response.json();
+        if (data.user) {
+          updates = { ...updates, ...data.user };
+        }
+      } else {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.error || 'Failed to update profile');
       }

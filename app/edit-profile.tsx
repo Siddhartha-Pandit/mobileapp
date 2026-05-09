@@ -16,15 +16,17 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '../hooks/useTheme';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronLeft, Camera, User, Lock, Eye, EyeOff, Save, KeyRound } from 'lucide-react-native';
-import { useAuthStore } from '../src/store/useAuthStore';
+import { ChevronLeft, Camera, User, Lock, Eye, EyeOff, Save, KeyRound, Loader2, Briefcase, Phone } from 'lucide-react-native';
+import { useAuthStore, API_URL } from '../src/store/useAuthStore';
+import * as ImagePicker from 'expo-image-picker';
 import HeaderBar from '../components/HeaderBar';
+import UserAvatar from '../components/UserAvatar';
 
 const EditProfileScreen = () => {
   const { theme } = useTheme();
   const isDark = theme.background === '#121212';
   const router = useRouter();
-  const { user, updateProfile, changePassword } = useAuthStore();
+  const { user, updateProfile, refreshUser } = useAuthStore();
 
   // Profile State
   const [fullName, setFullName] = React.useState(user?.fullName || '');
@@ -32,12 +34,30 @@ const EditProfileScreen = () => {
   const [gender, setGender] = React.useState(user?.gender || '');
   const [phone, setPhone] = React.useState(user?.phone || '');
   const [isUpdatingProfile, setIsUpdatingProfile] = React.useState(false);
+  const [isUploadingImage, setIsUploadingImage] = React.useState(false);
+  const [avatarUri, setAvatarUri] = React.useState(user?.avatarUrl || '');
+
+  React.useEffect(() => {
+    refreshUser().catch(console.error);
+  }, []);
+
+  // Update local state if store user changes (e.g. after refresh)
+  React.useEffect(() => {
+    if (user) {
+      setFullName(user.fullName || '');
+      setOccupation(user.occupation || '');
+      setGender(user.gender || '');
+      setPhone(user.phone || '');
+      setAvatarUri(user.avatarUrl || '');
+    }
+  }, [user]);
 
   const handleUpdateProfile = async () => {
     if (!fullName.trim()) return;
     setIsUpdatingProfile(true);
     try {
       await updateProfile({ fullName, occupation, gender, phone });
+      await refreshUser(); // Fetch latest from server
       Alert.alert('Success', 'Profile updated successfully');
     } catch (e: any) {
       Alert.alert('Error', e.message || 'Failed to update profile');
@@ -46,9 +66,64 @@ const EditProfileScreen = () => {
     }
   };
 
-  const handlePickImage = () => {
-    // Mock image pick - in a real app use expo-image-picker
-    Alert.alert('Image Upload', 'Image upload feature would open the gallery here.');
+  const uploadImageToCloud = async (uri: string) => {
+    setIsUploadingImage(true);
+    try {
+      const formData = new FormData();
+      
+      if (Platform.OS === 'web') {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        formData.append('file', blob, 'profile.jpg');
+      } else {
+        // @ts-ignore
+        formData.append('file', {
+          uri,
+          name: 'profile.jpg',
+          type: 'image/jpeg',
+        });
+      }
+
+      const response = await fetch(`${API_URL}/auth/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${useAuthStore.getState().accessToken}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+      const data = await response.json();
+      
+      // Update profile with new avatar URL
+      await updateProfile({ avatarUrl: data.url });
+      setAvatarUri(data.url);
+      Alert.alert('Success', 'Profile picture updated');
+    } catch (e: any) {
+      Alert.alert('Upload Error', e.message);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handlePickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'We need camera roll permissions to change your profile picture.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      await uploadImageToCloud(uri);
+    }
   };
 
   return (
@@ -71,23 +146,29 @@ const EditProfileScreen = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Avatar Section */}
           <View style={styles.avatarContainer}>
-            <View style={[styles.avatarWrapper, { borderColor: theme.brandPrimary + '30' }]}>
-              {user?.avatarUrl ? (
-                <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
-              ) : (
-                <View style={[styles.avatarPlaceholder, { backgroundColor: theme.surface }]}>
-                  <User size={48} color={theme.textSecondary} />
+            <TouchableOpacity 
+              style={[styles.avatarWrapper, { borderColor: theme.brandPrimary + '30' }]}
+              onPress={handlePickImage}
+              disabled={isUploadingImage}
+            >
+              {isUploadingImage ? (
+                <View style={styles.avatarPlaceholder}>
+                   <Loader2 size={32} color={theme.brandPrimary} />
                 </View>
+              ) : (
+                <UserAvatar 
+                  fullName={fullName}
+                  email={user?.email}
+                  avatarUrl={avatarUri}
+                  size={104}
+                  theme={theme}
+                />
               )}
-              <TouchableOpacity 
-                style={[styles.cameraBtn, { backgroundColor: theme.brandPrimary }]}
-                onPress={handlePickImage}
-              >
+              <View style={[styles.cameraBtn, { backgroundColor: theme.brandPrimary }]}>
                 <Camera size={20} color="#FFF" />
-              </TouchableOpacity>
-            </View>
+              </View>
+            </TouchableOpacity>
             <Text style={[styles.emailText, { color: theme.textSecondary }]}>{user?.email}</Text>
           </View>
 
@@ -106,9 +187,7 @@ const EditProfileScreen = () => {
             </View>
 
             <View style={[styles.inputGroup, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <View style={[styles.inputIcon, { width: 20, alignItems: 'center' }]}>
-                <Text style={{ fontSize: 18 }}>💼</Text>
-              </View>
+              <Briefcase size={20} color={theme.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={[styles.input, { color: theme.textPrimary }]}
                 value={occupation}
@@ -119,9 +198,7 @@ const EditProfileScreen = () => {
             </View>
 
             <View style={[styles.inputGroup, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-              <View style={[styles.inputIcon, { width: 20, alignItems: 'center' }]}>
-                <Text style={{ fontSize: 18 }}>📱</Text>
-              </View>
+              <Phone size={20} color={theme.textSecondary} style={styles.inputIcon} />
               <TextInput
                 style={[styles.input, { color: theme.textPrimary }]}
                 value={phone}
@@ -181,6 +258,8 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     position: 'relative',
     padding: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   avatar: { width: '100%', height: '100%', borderRadius: 60 },
   avatarPlaceholder: {

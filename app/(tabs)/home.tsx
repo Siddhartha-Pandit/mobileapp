@@ -29,11 +29,14 @@ import { MonthYearSelector } from '../../components/MonthYearSelector';
 import { TransactionItem } from '../../components/TransactionItem';
 import { SectionHeader } from '../../components/SectionHeader';
 import { Card, CardHeader, CardContent, CardDescription } from '../../components/Card';
+import { useAuthStore } from '../../src/store/useAuthStore';
+import UserAvatar from '../../components/UserAvatar';
 
 export default function DashboardScreen() {
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const { theme } = useTheme();
   const router = useRouter();
+  const { user } = useAuthStore();
 
   const transactions = [
     { title: "Grocery Shopping", date: "Today, 10:45 AM", amount: -1250 },
@@ -74,16 +77,19 @@ export default function DashboardScreen() {
               <View style={styles.profileRow}>
                 <TouchableOpacity 
                   onPress={() => router.push('/edit-profile' as any)}
-                  style={[styles.avatarFrame, { borderColor: 'rgba(255,255,255,0.3)', backgroundColor: theme.surface }]}
+                  style={[styles.avatarFrame, { borderColor: 'rgba(255,255,255,0.3)' }]}
                 >
-                  <Image 
-                    source={{ uri: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex' }} 
-                    style={styles.avatar} 
+                  <UserAvatar 
+                    fullName={user?.fullName}
+                    email={user?.email}
+                    avatarUrl={user?.avatarUrl}
+                    theme={theme}
+                    size={36} // 44 - (2*2 border) - (2*2 padding)
                   />
                 </TouchableOpacity>
                 <View>
-                  <Text style={styles.greeting}>Hi, Alex</Text>
-                  <Text style={styles.dateText}>February 24, 2026</Text>
+                  <Text style={styles.greeting}>Hi, {user?.fullName?.split(' ')[0] || 'User'}</Text>
+                  <Text style={styles.dateText}>{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</Text>
                 </View>
               </View>
 
@@ -281,6 +287,9 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     borderWidth: 2,
+    padding: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
     overflow: 'hidden',
   },
   avatar: {

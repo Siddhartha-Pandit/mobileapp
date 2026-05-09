@@ -58,7 +58,6 @@ export default function TabLayout() {
       <Tabs.Screen name="transaction-detail" options={{ href: null }} />
       <Tabs.Screen name="transactions-list" options={{ href: null }} />
       
-      <Tabs.Screen name="edit-profile" options={{ href: null }} />
       <Tabs.Screen name="notifications" options={{ href: null }} />
       <Tabs.Screen name="more" options={{ href: null }} />
       <Tabs.Screen name="budget-breakdown" options={{ href: null }} />
