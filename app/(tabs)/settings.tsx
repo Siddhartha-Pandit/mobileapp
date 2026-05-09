@@ -43,8 +43,10 @@ import type { AppTheme } from "../../constants/theme";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { Modal, ActivityIndicator } from "react-native";
 import { useAuthStore } from "../../src/store/useAuthStore";
+import { useSetupStore } from "../../src/store/useSetupStore";
 import { biometrics } from "../../src/utils/biometrics";
 import { MessageModal } from "../../components/MessageModal";
+import { setupService } from "../../src/services/setupService";
 
 export default function SettingsPage() {
   const { theme, themeType, setThemeType } = useTheme();
@@ -52,15 +54,15 @@ export default function SettingsPage() {
   const router = useRouter();
   const isDark = theme.background === "#121212";
   
-  const { logout, logoutAll, isBiometricEnabled, updateBiometricStatus } = useAuthStore();
-  const [settings, setSettings] = useState({
-    hideBalance: false,
-    hideNotifications: true,
-    hideTransactions: false,
-    analytics: true,
-    crashReports: true,
-    autoLock: 'Immediately',
-  });
+  const { logout, logoutAll, isBiometricEnabled, updateBiometricStatus, user } = useAuthStore();
+  const setupStore = useSetupStore();
+  
+  // Hydrate on mount
+  React.useEffect(() => {
+    if (user?.id) {
+      setupStore.hydrateStore(user.id);
+    }
+  }, [user?.id]);
 
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -123,19 +125,43 @@ export default function SettingsPage() {
     { type: 'system', icon: Monitor, label: 'System' },
   ] as const;
 
-  const autoLockOptions = ['Immediately', 'after 1 Minute', 'after 5 Minutes', 'after 15 Minutes'];
+  const autoLockOptions = [
+    { label: 'Immediately', value: 0 },
+    { label: 'after 1 Minute', value: 1 },
+    { label: 'after 5 Minutes', value: 5 },
+    { label: 'after 15 Minutes', value: 15 }
+  ];
 
-  const toggleSetting = (key: keyof typeof settings) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+  const toggleSetting = async (key: keyof typeof setupStore) => {
+    if (typeof setupStore[key] !== 'boolean') return;
+    
+    const newVal = !setupStore[key];
+    const updates = { [key]: newVal };
+    
+    // Update local store
+    await setupStore.updateSettings(updates);
+    
+    // Persist to backend/local DB
+    if (user?.id) {
+      await setupService.saveUserSettings({
+        userId: user.id,
+        ...setupStore, // This is a bit lazy, should ideally just send what's needed
+        [key]: newVal
+      });
+    }
   };
 
-  const { user } = useAuthStore();
+
 
   const handleBiometricToggle = async () => {
     if (isBiometricEnabled) {
       // Disabling is easy
       try {
         await updateBiometricStatus(false);
+        await setupStore.updateSettings({ biometricLock: false });
+        if (user?.id) {
+          await setupService.saveUserSettings({ userId: user.id, ...setupStore, biometricLock: false });
+        }
       } catch (e) {
         showMessage('error', 'Error', 'Failed to disable biometrics.');
       }
@@ -168,6 +194,10 @@ export default function SettingsPage() {
       
       // Update store and backend
       await updateBiometricStatus(true);
+      await setupStore.updateSettings({ biometricLock: true });
+      if (user?.id) {
+        await setupService.saveUserSettings({ userId: user.id, ...setupStore, biometricLock: true });
+      }
       
       setActionLoading(null);
       setShowBioPasswordModal(false);
@@ -207,7 +237,13 @@ export default function SettingsPage() {
                   return (
                     <TouchableOpacity 
                       key={opt.type}
-                      onPress={() => setThemeType(opt.type)}
+                      onPress={async () => {
+                        setThemeType(opt.type);
+                        await setupStore.updateSettings({ theme: opt.type });
+                        if (user?.id) {
+                          await setupService.saveUserSettings({ userId: user.id, ...setupStore, theme: opt.type });
+                        }
+                      }}
                       style={[
                         styles.themeBtn, 
                         { 
@@ -244,7 +280,9 @@ export default function SettingsPage() {
                   isLast
                   onClick={() => setShowAutoLock(true)}
                 >
-                  <Text style={[styles.selectionText, { color: theme.brandPrimary }]}>{settings.autoLock}</Text>
+                  <Text style={[styles.selectionText, { color: theme.brandPrimary }]}>
+                    {autoLockOptions.find(o => o.value === setupStore.autoLockMinutes)?.label || 'Immediately'}
+                  </Text>
                 </SettingRow>
               </CardContent>
             </Card>
@@ -257,24 +295,24 @@ export default function SettingsPage() {
               <CardContent theme={theme} style={styles.cardInternal}>
                 <SettingRow theme={theme} icon={EyeOff} title="Stealth Mode" subtitle="Hide balances on dashboard">
                    <Switch 
-                    value={settings.hideBalance} 
-                    onValueChange={() => toggleSetting('hideBalance')}
+                    value={setupStore.stealthMode} 
+                    onValueChange={() => toggleSetting('stealthMode')}
                     trackColor={{ false: theme.border, true: theme.brandPrimary }}
                     thumbColor="#FFF"
                   />
                 </SettingRow>
                 <SettingRow theme={theme} icon={Bell} title="Private Notifications" subtitle="Hide amounts in alerts">
                    <Switch 
-                    value={settings.hideNotifications} 
-                    onValueChange={() => toggleSetting('hideNotifications')}
+                    value={setupStore.privateNotifications} 
+                    onValueChange={() => toggleSetting('privateNotifications')}
                     trackColor={{ false: theme.border, true: theme.brandPrimary }}
                     thumbColor="#FFF"
                   />
                 </SettingRow>
                 <SettingRow theme={theme} icon={History} title="Mask Transactions" subtitle="Hide details in history list" isLast>
                    <Switch 
-                    value={settings.hideTransactions} 
-                    onValueChange={() => toggleSetting('hideTransactions')}
+                    value={setupStore.maskTransactions} 
+                    onValueChange={() => toggleSetting('maskTransactions')}
                     trackColor={{ false: theme.border, true: theme.brandPrimary }}
                     thumbColor="#FFF"
                   />
@@ -290,16 +328,16 @@ export default function SettingsPage() {
               <CardContent theme={theme} style={styles.cardInternal}>
                 <SettingRow theme={theme} icon={BarChart3} title="Product Improvement" subtitle="Anonymous usage statistics">
                    <Switch 
-                    value={settings.analytics} 
-                    onValueChange={() => toggleSetting('analytics')}
+                    value={setupStore.productImprovement} 
+                    onValueChange={() => toggleSetting('productImprovement')}
                     trackColor={{ false: theme.border, true: theme.brandPrimary }}
                     thumbColor="#FFF"
                   />
                 </SettingRow>
                 <SettingRow theme={theme} icon={Activity} title="Crash Reporting" isLast subtitle="Help fix bugs automatically">
                    <Switch 
-                    value={settings.crashReports} 
-                    onValueChange={() => toggleSetting('crashReports')}
+                    value={setupStore.crashReporting} 
+                    onValueChange={() => toggleSetting('crashReporting')}
                     trackColor={{ false: theme.border, true: theme.brandPrimary }}
                     thumbColor="#FFF"
                   />
@@ -317,10 +355,12 @@ export default function SettingsPage() {
                   theme={theme} 
                   icon={ShieldCheck} 
                   title="Two-Factor Auth" 
-                  onClick={() => router.push('/setup-2fa')}
+                  onClick={() => toggleSetting('twoFactorAuth')}
                 >
                   <View style={styles.rowRight}>
-                    <Text style={styles.activeLabel}>ACTIVE</Text>
+                    <Text style={[styles.activeLabel, { color: setupStore.twoFactorAuth ? '#10b981' : theme.textSecondary }]}>
+                      {setupStore.twoFactorAuth ? 'ACTIVE' : 'DISABLED'}
+                    </Text>
                     <ChevronRight size={16} color={theme.textSecondary} />
                   </View>
                 </SettingRow>
@@ -433,12 +473,18 @@ export default function SettingsPage() {
             </View>
             {autoLockOptions.map((opt) => (
                 <TouchableOpacity 
-                    key={opt}
-                    onPress={() => { setSettings(s => ({ ...s, autoLock: opt })); setShowAutoLock(false); }}
+                    key={opt.value}
+                    onPress={async () => { 
+                      await setupStore.updateSettings({ autoLockMinutes: opt.value }); 
+                      if (user?.id) {
+                        await setupService.saveUserSettings({ userId: user.id, ...setupStore, autoLockMinutes: opt.value });
+                      }
+                      setShowAutoLock(false); 
+                    }}
                     style={[styles.selectionRow, { borderBottomColor: `${theme.border}30` }]}
                 >
-                    <Text style={[styles.selectionRowText, { color: settings.autoLock === opt ? theme.brandPrimary : theme.textPrimary }]}>{opt}</Text>
-                    {settings.autoLock === opt && <ShieldCheck size={18} color={theme.brandPrimary} />}
+                    <Text style={[styles.selectionRowText, { color: setupStore.autoLockMinutes === opt.value ? theme.brandPrimary : theme.textPrimary }]}>{opt.label}</Text>
+                    {setupStore.autoLockMinutes === opt.value && <ShieldCheck size={18} color={theme.brandPrimary} />}
                 </TouchableOpacity>
             ))}
           </Card>

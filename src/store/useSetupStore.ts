@@ -24,6 +24,15 @@ interface SetupState {
   customCategories: CustomCategory[];
   budgets: SetupBudget[];
   currencySymbol: string;
+  theme: 'light' | 'dark' | 'system';
+  biometricLock: boolean;
+  autoLockMinutes: number;
+  stealthMode: boolean;
+  privateNotifications: boolean;
+  maskTransactions: boolean;
+  productImprovement: boolean;
+  crashReporting: boolean;
+  twoFactorAuth: boolean;
   
   // Actions
   toggleCategory: (value: string) => void;
@@ -35,6 +44,7 @@ interface SetupState {
   removeBudget: (id: string) => void;
   
   setCurrencySymbol: (symbol: string) => void;
+  updateSettings: (updates: Partial<SetupState>) => Promise<void>;
   hydrateStore: (userId: string) => Promise<void>;
   resetSetup: () => void;
 }
@@ -43,11 +53,20 @@ export const useSetupStore = create<SetupState>((set) => ({
   selectedCategoryValues: [],
   customCategories: [],
   budgets: [
-    { id: 'needs', name: 'Needs', type: 'percent', value: 50, color: '#0AA971', icon: 'home', smartReminder: true, description: 'Rent, food, and utilities' },
-    { id: 'wants', name: 'Wants', type: 'percent', value: 30, color: '#3B82F6', icon: 'shopping-cart', smartReminder: true, description: 'Entertainment and hobbies' },
-    { id: 'savings', name: 'Savings', type: 'percent', value: 20, color: '#10B981', icon: 'trending-up', smartReminder: true, description: 'Emergency and investments' },
+    { id: 'needs', name: 'Needs', type: 'percent', value: 50, color: '#0AA971', icon: 'Home', smartReminder: true, description: 'Rent, food, and utilities' },
+    { id: 'wants', name: 'Wants', type: 'percent', value: 30, color: '#3B82F6', icon: 'ShoppingCart', smartReminder: true, description: 'Entertainment and hobbies' },
+    { id: 'savings', name: 'Savings', type: 'percent', value: 20, color: '#10B981', icon: 'TrendingUp', smartReminder: true, description: 'Emergency and investments' },
   ],
   currencySymbol: 'Rs',
+  theme: 'system',
+  biometricLock: false,
+  autoLockMinutes: 5,
+  stealthMode: false,
+  privateNotifications: false,
+  maskTransactions: false,
+  productImprovement: true,
+  crashReporting: true,
+  twoFactorAuth: false,
 
   toggleCategory: (value) => set((state) => ({
     selectedCategoryValues: state.selectedCategoryValues.includes(value)
@@ -84,9 +103,25 @@ export const useSetupStore = create<SetupState>((set) => ({
     if (settings) {
       const symbols: Record<string, string> = { NPR: 'Rs', USD: '$', INR: '₹', EUR: '€' };
       set({ 
-        currencySymbol: symbols[settings.preferredCurrency] || 'Rs' 
+        currencySymbol: symbols[settings.preferredCurrency] || 'Rs',
+        theme: settings.theme || 'system',
+        biometricLock: settings.biometricLock || false,
+        autoLockMinutes: settings.autoLockMinutes || 5,
+        stealthMode: settings.stealthMode || false,
+        privateNotifications: settings.privateNotifications || false,
+        maskTransactions: settings.maskTransactions || false,
+        productImprovement: settings.productImprovement !== undefined ? settings.productImprovement : true,
+        crashReporting: settings.crashReporting !== undefined ? settings.crashReporting : true,
+        twoFactorAuth: settings.twoFactorAuth || false,
       });
     }
+  },
+
+  updateSettings: async (updates) => {
+    set((state) => ({ ...state, ...updates }));
+    // Ideally we'd get the current user ID here
+    // For now, we'll assume the caller handles the actual persistence if needed
+    // or we'll add a separate save call.
   },
 
   resetSetup: () => set({
@@ -98,5 +133,14 @@ export const useSetupStore = create<SetupState>((set) => ({
       { id: 'savings', name: 'Savings', type: 'percent', value: 20, color: '#10B981', icon: 'trending-up', smartReminder: true, description: 'Emergency and investments' },
     ],
     currencySymbol: 'Rs',
+    theme: 'system',
+    biometricLock: false,
+    autoLockMinutes: 5,
+    stealthMode: false,
+    privateNotifications: false,
+    maskTransactions: false,
+    productImprovement: true,
+    crashReporting: true,
+    twoFactorAuth: false,
   }),
 }));

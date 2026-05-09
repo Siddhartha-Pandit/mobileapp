@@ -78,29 +78,47 @@ export const setupService = {
   },
 
   async skipSetup(userId: string) {
-    // Default values
-    const defaultCurrency = 'NPR';
+    // 1. Default User Settings
+    const defaultSettings = {
+      userId,
+      theme: 'system',
+      biometricLock: false,
+      autoLockMinutes: 5,
+      stealthMode: false,
+      privateNotifications: false,
+      maskTransactions: false,
+      productImprovement: true,
+      crashReporting: true,
+      twoFactorAuth: false,
+      preferredCurrency: 'NPR',
+    };
+
+    // 2. Default Cash Account
     const defaultAccount = {
       userId,
       name: 'Cash',
       type: 'Cash',
       initialBalance: 0,
-      themeColor: '#4CAF50', // Green
+      themeColor: '#0AA971', // Dhukuti Green
       includeInTotal: true,
     };
+
+    // 3. Essential Categories (using Lucide icons)
     const essentialCategories = [
-      { name: 'Food', icon: 'fast-food', themeColor: '#FF5722', isEssential: true },
-      { name: 'Transport', icon: 'bus', themeColor: '#2196F3', isEssential: true },
-      { name: 'Utilities', icon: 'flash', themeColor: '#FFEB3B', isEssential: true },
-      { name: 'Health', icon: 'medical', themeColor: '#E91E63', isEssential: true },
+      { name: 'Food', icon: 'Utensils', themeColor: '#FF5722', isEssential: true },
+      { name: 'Transport', icon: 'Bus', themeColor: '#2196F3', isEssential: true },
+      { name: 'Utilities', icon: 'Zap', themeColor: '#FFEB3B', isEssential: true },
+      { name: 'Health', icon: 'Activity', themeColor: '#E91E63', isEssential: true },
     ];
+
+    // 4. Default Budget Goals (50/30/20 rule)
     const defaultBudgets = [
       { name: 'Needs', percentageAllocation: 50, color: '#2196F3', icon: 'Home', smartReminder: true },
       { name: 'Wants', percentageAllocation: 30, color: '#FF9800', icon: 'ShoppingCart', smartReminder: true },
       { name: 'Savings', percentageAllocation: 20, color: '#4CAF50', icon: 'TrendingUp', smartReminder: true },
     ];
 
-    await this.saveUserSettings({ userId, preferredCurrency: defaultCurrency });
+    await this.saveUserSettings(defaultSettings);
     await this.createAccount(defaultAccount);
     await this.setupCategories(essentialCategories.map(c => ({ ...c, userId })));
     await this.setupBudgets(defaultBudgets.map(b => ({ ...b, userId })));

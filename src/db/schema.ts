@@ -19,9 +19,15 @@ export const metrics = sqliteTable('metrics', {
 export const userSettings = sqliteTable('user_settings', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: text('user_id').notNull(),
+  theme: text('theme').default('system'),
+  biometricLock: integer('biometric_lock', { mode: 'boolean' }).default(false),
   autoLockMinutes: integer('auto_lock_minutes').default(5),
-  hideBalance: integer('hide_balance', { mode: 'boolean' }).default(false),
-  hideTransactionDetails: integer('hide_transaction_details', { mode: 'boolean' }).default(false),
+  stealthMode: integer('stealth_mode', { mode: 'boolean' }).default(false),
+  privateNotifications: integer('private_notifications', { mode: 'boolean' }).default(false),
+  maskTransactions: integer('mask_transactions', { mode: 'boolean' }).default(false),
+  productImprovement: integer('product_improvement', { mode: 'boolean' }).default(true),
+  crashReporting: integer('crash_reporting', { mode: 'boolean' }).default(true),
+  twoFactorAuth: integer('two_factor_auth', { mode: 'boolean' }).default(false),
   preferredCurrency: text('preferred_currency').default('NPR'),
   synced: integer('synced', { mode: 'boolean' }).default(false),
 });
