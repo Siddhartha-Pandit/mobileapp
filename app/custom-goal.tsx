@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,9 @@ import {
   SafeAreaView,
   Platform,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Target, ChevronLeft, PieChart, Sparkles } from 'lucide-react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import * as LucideIcons from 'lucide-react-native';
+import { Pencil } from 'lucide-react-native';
 import { useTheme } from '../hooks/useTheme';
 import { 
   Card, 
@@ -21,16 +22,38 @@ import {
 } from '../components/Card';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { ColorPicker } from '../components/ColorPicker';
+import { IconModal } from '../components/IconModal';
 import HeaderBar from '../components/HeaderBar';
+import { useSetupStore } from '../src/store/useSetupStore';
 
 export default function AddCustomGoalScreen() {
   const { theme } = useTheme();
   const router = useRouter();
+  const { id: editId } = useLocalSearchParams<{ id?: string }>();
+  const { budgets, addCustomBudget, updateBudget } = useSetupStore();
 
-  const [goalName, setGoalName] = useState('');
-  const [targetAmount, setTargetAmount] = useState('');
-  const [monthlyContribution, setMonthlyContribution] = useState('');
-  const [selectedColor, setSelectedColor] = useState(theme.brandPrimary);
+  // Find existing budget if in edit mode
+  const existingBudget = editId ? budgets.find(b => b.id === editId) : null;
+
+  const [goalName, setGoalName] = React.useState(existingBudget?.name || '');
+  const [goalType, setGoalType] = React.useState<'percent' | 'amount'>(existingBudget?.type || 'amount');
+  const [goalValue, setGoalValue] = React.useState(existingBudget ? String(existingBudget.value) : '');
+  const [selectedColor, setSelectedColor] = React.useState(existingBudget?.color || theme.brandPrimary);
+  const [selectedIcon, setSelectedIcon] = React.useState(existingBudget?.icon || 'Target');
+  const [showIconModal, setShowIconModal] = React.useState(false);
+
+  // Helper to handle both PascalCase and old lowercase icon names
+  const getIconComponent = (name: string) => {
+    if (!name) return LucideIcons.Target;
+    // Try exact match first (PascalCase)
+    if ((LucideIcons as any)[name]) return (LucideIcons as any)[name];
+    // Fallback/Legacy handling
+    const legacyMap: any = { home: 'Home', cart: 'ShoppingCart', 'trending-up': 'TrendingUp', target: 'Target' };
+    const normalizedName = legacyMap[name.toLowerCase()] || name;
+    return (LucideIcons as any)[normalizedName] || LucideIcons.Target;
+  };
+
+  const IconComp = getIconComponent(selectedIcon);
 
   const colors = [
     theme.brandPrimary,
@@ -43,8 +66,24 @@ export default function AddCustomGoalScreen() {
   ];
 
   const handleSave = () => {
-    if (!goalName || !targetAmount) return;
-    console.log('Saving Goal:', { goalName, targetAmount, monthlyContribution, selectedColor });
+    if (!goalName || !goalValue) return;
+    
+    const budgetData = {
+      name: goalName.trim(),
+      type: goalType,
+      value: Number(goalValue),
+      color: selectedColor,
+      icon: selectedIcon,
+      smartReminder: true,
+      description: goalType === 'percent' ? `${goalValue}% allocation` : `Rs ${goalValue} target`
+    };
+
+    if (existingBudget && editId) {
+      updateBudget(editId, budgetData);
+    } else {
+      addCustomBudget(budgetData);
+    }
+
     router.back();
   };
 
@@ -52,13 +91,13 @@ export default function AddCustomGoalScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <HeaderBar
         theme={theme}
-        title="Create New Goal"
+        title={existingBudget ? "Edit Goal" : "Create New Goal"}
         leftContent={
           <TouchableOpacity
             onPress={() => router.back()}
             style={[styles.headerButton, { borderColor: theme.border, backgroundColor: theme.surface }]}
           >
-            <ChevronLeft size={20} color={theme.textPrimary} />
+            <LucideIcons.ChevronLeft size={20} color={theme.textPrimary} />
           </TouchableOpacity>
         }
       />
@@ -67,15 +106,22 @@ export default function AddCustomGoalScreen() {
         <View style={styles.container}>
           {/* 1. VISUAL ICON CARD */}
           <View style={styles.previewSection}>
-            <View style={[
-              styles.iconWrapper,
-              {
-                backgroundColor: `${selectedColor}10`,
-                borderColor: `${selectedColor}40`,
-              }
-            ]}>
-              <Target size={36} strokeWidth={2.5} color={selectedColor} />
-            </View>
+            <TouchableOpacity 
+              onPress={() => setShowIconModal(true)}
+              style={[
+                styles.iconWrapper,
+                {
+                  backgroundColor: `${selectedColor}10`,
+                  borderColor: `${selectedColor}40`,
+                }
+              ]}
+            >
+              <IconComp size={36} strokeWidth={2.5} color={selectedColor} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setShowIconModal(true)} style={styles.changeIconButton}>
+              <Pencil size={12} color={theme.brandPrimary} />
+              <Text style={[styles.changeIconText, { color: theme.brandPrimary }]}>Change Icon & Color</Text>
+            </TouchableOpacity>
             <Text style={[styles.previewLabel, { color: theme.textSecondary }]}>
               Goal Preview: <Text style={{ color: selectedColor, fontWeight: '700' }}>{goalName || 'Untitled Goal'}</Text>
             </Text>
@@ -85,7 +131,7 @@ export default function AddCustomGoalScreen() {
           <Card theme={theme} style={styles.card}>
             <CardHeader style={styles.cardHeader}>
               <CardTitle theme={theme}>Goal Details</CardTitle>
-              <CardDescription theme={theme}>What are you saving up for?</CardDescription>
+              <CardDescription theme={theme}>Set your target amount or allocation</CardDescription>
             </CardHeader>
             <CardContent theme={theme} style={styles.cardContent}>
               <View style={styles.inputGroup}>
@@ -100,43 +146,37 @@ export default function AddCustomGoalScreen() {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={[styles.label, { color: theme.textSecondary }]}>Target Amount</Text>
+                <Text style={[styles.label, { color: theme.textSecondary }]}>Goal Type</Text>
+                <View style={[styles.typeContainer, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                  <TouchableOpacity 
+                    onPress={() => setGoalType('amount')}
+                    style={[styles.typeBtn, goalType === 'amount' && { backgroundColor: theme.brandPrimary }]}
+                  >
+                    <Text style={[styles.typeText, { color: goalType === 'amount' ? '#fff' : theme.textSecondary }]}>Fixed Amount</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    onPress={() => setGoalType('percent')}
+                    style={[styles.typeBtn, goalType === 'percent' && { backgroundColor: theme.brandPrimary }]}
+                  >
+                    <Text style={[styles.typeText, { color: goalType === 'percent' ? '#fff' : theme.textSecondary }]}>Percentage</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={[styles.label, { color: theme.textSecondary }]}>{goalType === 'amount' ? 'Target Amount' : 'Percentage Allocation'}</Text>
                 <View style={styles.amountInputWrapper}>
-                  <Text style={[styles.currencyPrefix, { color: theme.brandPrimary }]}>₨</Text>
+                  <Text style={[styles.currencyPrefix, { color: theme.brandPrimary }]}>{goalType === 'amount' ? '₨' : '%'}</Text>
                   <TextInput
-                    value={targetAmount}
-                    onChangeText={setTargetAmount}
+                    value={goalValue}
+                    onChangeText={setGoalValue}
                     keyboardType="numeric"
-                    placeholder="0.00"
+                    placeholder="0"
                     placeholderTextColor={theme.textSecondary}
                     style={[styles.input, styles.amountInput, { borderColor: theme.border, backgroundColor: `${theme.background}80`, color: theme.textPrimary }]}
                   />
                 </View>
               </View>
-            </CardContent>
-          </Card>
-
-          {/* 3. PLANNING CARD */}
-          <Card theme={theme} style={styles.card}>
-            <CardHeader style={styles.cardHeader}>
-              <View style={styles.cardTitleRow}>
-                <PieChart size={18} color={theme.brandPrimary} />
-                <CardTitle theme={theme}>Saving Plan</CardTitle>
-              </View>
-            </CardHeader>
-            <CardContent theme={theme} style={styles.cardContent}>
-              <View style={styles.inputGroup}>
-                <Text style={[styles.label, { color: theme.textSecondary }]}>Monthly Commitment</Text>
-                <TextInput
-                  value={monthlyContribution}
-                  onChangeText={setMonthlyContribution}
-                  keyboardType="numeric"
-                  placeholder="Amount per month (optional)"
-                  placeholderTextColor={theme.textSecondary}
-                  style={[styles.input, { borderColor: theme.border, backgroundColor: `${theme.background}80`, color: theme.textPrimary }]}
-                />
-              </View>
-
               <View style={styles.colorPickerSection}>
                 <Text style={[styles.label, { color: theme.textSecondary }]}>Goal Theme Color</Text>
                 <View style={{ marginTop: 12 }}>
@@ -157,14 +197,28 @@ export default function AddCustomGoalScreen() {
       <View style={[styles.footer, { borderTopColor: `${theme.border}40` }]}>
         <View style={styles.footerInner}>
           <PrimaryButton
-            title="Create Goal"
+            title={existingBudget ? "Update Goal" : "Create Goal"}
             theme={theme}
             onPress={handleSave}
-            disabled={!goalName || !targetAmount}
+            disabled={!goalName || !goalValue}
             fullWidth
           />
         </View>
       </View>
+      {/* ICON PICKER MODAL */}
+      {showIconModal && (
+        <IconModal
+          theme={theme}
+          onClose={() => setShowIconModal(false)}
+          selectedIcon={selectedIcon}
+          activeColor={selectedColor}
+          onColorSelect={setSelectedColor}
+          onSelect={(icon) => {
+            setSelectedIcon(icon.name);
+            setShowIconModal(false);
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -214,6 +268,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 24,
     gap: 20,
+  },
+  typeContainer: {
+    flexDirection: 'row',
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 4,
+    gap: 4,
+  },
+  typeBtn: {
+    flex: 1,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  typeText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
   inputGroup: {
     gap: 8,
@@ -269,5 +341,19 @@ const styles = StyleSheet.create({
   },
   footerInner: {
     width: '100%',
+  },
+  changeIconButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    backgroundColor: 'rgba(10, 169, 113, 0.05)',
+  },
+  changeIconText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
 });

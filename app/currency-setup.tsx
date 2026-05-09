@@ -14,6 +14,7 @@ import { SingleSelectOption } from '../components/SingleSelectOption';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { setupService } from '../src/services/setupService';
 import { useAuthStore } from '../src/store/useAuthStore';
+import { useSetupStore } from '../src/store/useSetupStore';
 
 const CurrencySetupScreen = () => {
   const { theme } = useTheme();
@@ -21,8 +22,12 @@ const CurrencySetupScreen = () => {
   const [currency, setCurrency] = useState('NPR');
 
   const { user } = useAuthStore();
+  const { setCurrencySymbol } = useSetupStore();
 
   const handleNext = async () => {
+    const symbols: Record<string, string> = { NPR: 'Rs', USD: '$', INR: '₹', EUR: '€' };
+    setCurrencySymbol(symbols[currency] || 'Rs');
+
     if (user) {
       await setupService.saveUserSettings({ userId: user.id, preferredCurrency: currency });
     }

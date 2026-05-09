@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import * as React from "react";
 import {
   Modal,
   View,
@@ -12,9 +12,10 @@ import {
   KeyboardAvoidingView,
   SafeAreaView
 } from "react-native";
-import { X, Search } from "lucide-react-native";
+import { X, Search, Palette } from "lucide-react-native";
 import * as LucideIcons from "lucide-react-native";
 import type { AppTheme } from "../constants/theme";
+import { ColorPicker } from "./ColorPicker";
 
 // Extract all valid icon components exported from lucide-react-native
 const allIcons = Object.entries(LucideIcons)
@@ -33,6 +34,7 @@ interface IconModalProps {
   onSelect: (icon: any) => void;
   selectedIcon: any;
   activeColor: string;
+  onColorSelect?: (color: string) => void;
 }
 
 export const IconModal = ({
@@ -41,10 +43,11 @@ export const IconModal = ({
   onSelect,
   selectedIcon,
   activeColor,
+  onColorSelect,
 }: IconModalProps) => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = React.useState("");
 
-  const filteredIcons = useMemo(() => {
+  const filteredIcons = React.useMemo(() => {
     if (!searchQuery.trim()) return allIcons;
     return allIcons.filter((icon) =>
       icon.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -63,7 +66,7 @@ export const IconModal = ({
 
   return (
     <Modal
-      visible
+      visible={true}
       transparent
       animationType="slide"
       onRequestClose={onClose}
@@ -90,6 +93,30 @@ export const IconModal = ({
                 <X size={20} color={theme.textPrimary} />
               </TouchableOpacity>
             </View>
+
+            {/* Color Picker Section */}
+            {onColorSelect && (
+              <View style={styles.colorSection}>
+                <View style={styles.sectionHeader}>
+                  <Palette size={16} color={theme.textSecondary} />
+                  <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>Theme Color</Text>
+                </View>
+                <ColorPicker
+                  theme={theme}
+                  colors={[
+                    theme.brandPrimary,
+                    '#1E293B',
+                    '#3B82F6',
+                    '#F97316',
+                    '#8B5CF6',
+                    '#EF4444',
+                    '#14B8A6',
+                  ]}
+                  selected={activeColor}
+                  onChange={onColorSelect}
+                />
+              </View>
+            )}
 
             {/* Search Bar */}
             <View style={[styles.searchContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
@@ -133,7 +160,7 @@ export const IconModal = ({
 
                   return (
                     <TouchableOpacity
-                      onPress={() => onSelect(IconComp)}
+                      onPress={() => onSelect(item)}
                       style={[
                         styles.iconOption,
                         {
@@ -246,5 +273,20 @@ const styles = StyleSheet.create({
   emptyContainer: {
     padding: 20,
     alignItems: "center",
+  },
+  colorSection: {
+    marginBottom: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
 });

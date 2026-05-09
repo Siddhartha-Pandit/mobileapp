@@ -26,32 +26,36 @@ import {
   Wrench,
   ChevronLeft,
 } from 'lucide-react-native';
+import * as LucideIcons from 'lucide-react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { StepProgress } from '@/components/StepProgress';
 import { MultiSelectCategoryCard } from '@/components/MultiSelectCategoryCard';
 import { setupService } from '../src/services/setupService';
 import { useAuthStore } from '../src/store/useAuthStore';
+import { useSetupStore } from '../src/store/useSetupStore';
 import { PrimaryButton } from '@/components/PrimaryButton';
+import { CheckCircle2, Tag } from 'lucide-react-native';
 
 export default function ExpenseCategorySetupScreen() {
   const { theme } = useTheme();
   const router = useRouter();
   
-  const [selected, setSelected] = useState<string[]>([
-    'food',
-    'transport',
-    'housing',
-    'health',
-    'education',
-    'bills',
-  ]);
+  const { 
+    selectedCategoryValues: selected, 
+    toggleCategory, 
+    setSelectedCategories, 
+    customCategories 
+  } = useSetupStore();
 
-  const toggleCategory = (value: string) => {
-    setSelected((prev) =>
-      prev.includes(value)
-        ? prev.filter((v) => v !== value)
-        : [...prev, value]
-    );
+  const essentialValues = ['food', 'transport', 'housing', 'health', 'bills', 'insurance'];
+  const isAllEssentialSelected = essentialValues.every(v => selected.includes(v));
+
+  const toggleEssential = () => {
+    if (isAllEssentialSelected) {
+      setSelectedCategories(selected.filter(v => !essentialValues.includes(v)));
+    } else {
+      setSelectedCategories([...new Set([...selected, ...essentialValues])]);
+    }
   };
 
   const categories = [
@@ -75,16 +79,27 @@ export default function ExpenseCategorySetupScreen() {
 
   const handleContinue = async () => {
     if (user) {
-      const selectedCategories = categories
+      const standardSelected = categories
         .filter(cat => selected.includes(cat.value))
         .map(cat => ({
           userId: user.id,
           name: cat.label,
-          icon: cat.value, // Simplified icon name
-          themeColor: '#4CAF50', // Default color for simplicity or add color map
-          isEssential: true
+          icon: cat.value,
+          themeColor: '#4CAF50',
+          isEssential: essentialValues.includes(cat.value)
         }));
-      await setupService.setupCategories(selectedCategories);
+
+      const customSelected = customCategories
+        .filter(cat => selected.includes(cat.id))
+        .map(cat => ({
+          userId: user.id,
+          name: cat.name,
+          icon: cat.iconName,
+          themeColor: cat.themeColor,
+          isEssential: false
+        }));
+
+      await setupService.setupCategories([...standardSelected, ...customSelected]);
     }
     router.push('/budget-setup');
   };
@@ -104,6 +119,32 @@ export default function ExpenseCategorySetupScreen() {
 
         </View>
 
+        {/* Essential Toggle Section */}
+        <TouchableOpacity 
+          onPress={toggleEssential}
+          activeOpacity={0.7}
+          style={[
+            styles.essentialToggle, 
+            { 
+              backgroundColor: isAllEssentialSelected ? `${theme.brandPrimary}15` : theme.surface,
+              borderColor: isAllEssentialSelected ? theme.brandPrimary : `${theme.border}40`
+            }
+          ]}
+        >
+          <View style={styles.essentialInfo}>
+            <View style={[styles.iconContainer, { backgroundColor: isAllEssentialSelected ? theme.brandPrimary : `${theme.border}20` }]}>
+              <CheckCircle2 size={20} color={isAllEssentialSelected ? '#fff' : theme.textSecondary} />
+            </View>
+            <View>
+              <Text style={[styles.essentialTitle, { color: theme.textPrimary }]}>Essential Categories</Text>
+              <Text style={[styles.essentialSubtitle, { color: theme.textSecondary }]}>Auto-select recommended basics</Text>
+            </View>
+          </View>
+          <View style={[styles.checkbox, { borderColor: isAllEssentialSelected ? theme.brandPrimary : theme.border, backgroundColor: isAllEssentialSelected ? theme.brandPrimary : 'transparent' }]}>
+            {isAllEssentialSelected && <CheckCircle2 size={14} color="#fff" />}
+          </View>
+        </TouchableOpacity>
+
         {/* Scrollable Grid Section */}
         <ScrollView 
           showsVerticalScrollIndicator={false}
@@ -122,6 +163,23 @@ export default function ExpenseCategorySetupScreen() {
                 />
               </View>
             ))}
+
+            {/* Custom Categories */}
+            {customCategories.map((cat) => {
+              const IconComp = (LucideIcons as any)[cat.iconName] || Tag;
+              return (
+                <View key={cat.id} style={styles.gridItem}>
+                  <MultiSelectCategoryCard
+                    theme={theme}
+                    label={cat.name}
+                    value={cat.id}
+                    icon={IconComp}
+                    selectedValues={selected}
+                    onToggle={toggleCategory}
+                  />
+                </View>
+              );
+            })}
           </View>
 
           {/* Add Custom Button */}
@@ -178,6 +236,44 @@ const styles = StyleSheet.create({
   tabsContainer: {
     marginTop: -8,
     marginBottom: 16,
+  },
+  essentialToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    marginBottom: 20,
+    marginTop: 8,
+  },
+  essentialInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  essentialTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  essentialSubtitle: {
+    fontSize: 12,
+    marginTop: 1,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   scrollContent: {
     paddingBottom: 120, // Space for footer

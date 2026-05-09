@@ -17,6 +17,7 @@ import { PrimaryButton } from '../components/PrimaryButton';
 import { ColorPicker } from '../components/ColorPicker';
 import HeaderBar from '../components/HeaderBar';
 import { IconModal } from '../components/IconModal';
+import { useSetupStore } from '../src/store/useSetupStore';
 
 export default function CreateCustomCategoryScreen() {
   const { theme } = useTheme();
@@ -24,7 +25,7 @@ export default function CreateCustomCategoryScreen() {
 
   const [name, setName] = useState('');
   const [selectedColor, setSelectedColor] = useState('#0AA971');
-  const [selectedIcon, setSelectedIcon] = useState<any>(Tag);
+  const [selectedIcon, setSelectedIcon] = useState<any>({ name: 'Tag', Component: Tag });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const colors = [
@@ -38,13 +39,21 @@ export default function CreateCustomCategoryScreen() {
     '#F97316',
   ];
 
+  const { addCustomCategory } = useSetupStore();
+
   const handleSave = () => {
     if (!name.trim()) return;
-    console.log('Saving Category:', { name, selectedColor, selectedIcon });
+    
+    addCustomCategory({
+      name: name.trim(),
+      themeColor: selectedColor,
+      iconName: selectedIcon.name || 'Tag',
+    });
+
     router.back();
   };
 
-  const IconComp = selectedIcon;
+  const IconComp = selectedIcon?.Component || selectedIcon || Tag;
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
@@ -164,16 +173,16 @@ export default function CreateCustomCategoryScreen() {
 
       {/* ICON MODAL */}
       {isModalOpen && (
-        <IconModal
-          theme={theme}
-          selectedIcon={selectedIcon}
-          activeColor={selectedColor}
-          onClose={() => setIsModalOpen(false)}
-          onSelect={(icon) => {
-            setSelectedIcon(icon);
-            setIsModalOpen(false);
-          }}
-        />
+          <IconModal
+            theme={theme}
+            selectedIcon={selectedIcon?.Component || selectedIcon}
+            activeColor={selectedColor}
+            onClose={() => setIsModalOpen(false)}
+            onSelect={(iconObj) => {
+              setSelectedIcon(iconObj);
+              setIsModalOpen(false);
+            }}
+          />
       )}
     </SafeAreaView>
   );

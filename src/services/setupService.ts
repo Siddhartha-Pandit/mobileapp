@@ -21,6 +21,18 @@ export const setupService = {
     }
   },
 
+  async getUserSettings(userId: string) {
+    try {
+      const response = await api.get(`/setup/settings/${userId}`);
+      if (response.ok) return await response.json();
+    } catch (error) {
+      console.warn('Backend fetch failed, trying local DB:', error);
+    }
+
+    const results = await db.select().from(schema.userSettings).where(eq(schema.userSettings.userId, userId));
+    return results[0] || null;
+  },
+
   async createAccount(account: any) {
     await db.insert(schema.accounts).values({
       ...account,
@@ -83,9 +95,9 @@ export const setupService = {
       { name: 'Health', icon: 'medical', themeColor: '#E91E63', isEssential: true },
     ];
     const defaultBudgets = [
-      { name: 'Needs', percentageAllocation: 50, color: '#2196F3', icon: 'home', smartReminder: true },
-      { name: 'Wants', percentageAllocation: 30, color: '#FF9800', icon: 'cart', smartReminder: true },
-      { name: 'Savings', percentageAllocation: 20, color: '#4CAF50', icon: 'trending-up', smartReminder: true },
+      { name: 'Needs', percentageAllocation: 50, color: '#2196F3', icon: 'Home', smartReminder: true },
+      { name: 'Wants', percentageAllocation: 30, color: '#FF9800', icon: 'ShoppingCart', smartReminder: true },
+      { name: 'Savings', percentageAllocation: 20, color: '#4CAF50', icon: 'TrendingUp', smartReminder: true },
     ];
 
     await this.saveUserSettings({ userId, preferredCurrency: defaultCurrency });

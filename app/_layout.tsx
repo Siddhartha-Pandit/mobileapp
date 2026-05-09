@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSegments } from 'expo-router';
 import { Slot } from 'expo-router';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider } from '@/context/ThemeProvider';
 import SplashScreen from '../components/SplashScreen'; // Corrected import path
 import { GlobalLoader } from '../components/GlobalLoader';
@@ -68,9 +69,11 @@ export default function RootLayout() {
   }, [isAuthenticated, isHydrated, segments, router, showSplash]);
 
   return (
-    <ThemeProvider>
-      {showSplash ? <SplashScreen /> : <Slot />}
-      <GlobalLoader />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        {showSplash ? <SplashScreen /> : <Slot />}
+        <GlobalLoader />
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

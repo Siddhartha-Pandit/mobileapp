@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import {
   View,
   Text,
@@ -18,33 +18,146 @@ import { Card, CardContent } from '../components/Card';
 import { StepProgress } from '../components/StepProgress';
 import { setupService } from '../src/services/setupService';
 import { useAuthStore } from '../src/store/useAuthStore';
+import { useSetupStore, SetupBudget } from '../src/store/useSetupStore';
 import { PrimaryButton } from '../components/PrimaryButton';
-import { BudgetSlider } from '../components/BudgetSlider';
+import * as LucideIcons from 'lucide-react-native';
+import { Pencil, Trash2 } from 'lucide-react-native';
+import { Swipeable, RectButton } from 'react-native-gesture-handler';
+import { Animated } from 'react-native';
+import { AppTheme } from '../constants/theme';
+
+interface BudgetItemRowProps {
+  theme: AppTheme;
+  budget: SetupBudget;
+  currencySymbol: string;
+  onUpdate: (updates: Partial<SetupBudget>) => void;
+  onEdit: () => void;
+  onRemove: () => void;
+}
+
+function BudgetItemRow({ theme, budget, currencySymbol, onUpdate, onEdit, onRemove }: BudgetItemRowProps) {
+  // Helper to handle both PascalCase and old lowercase icon names
+  const getIconComponent = (name: string) => {
+    if (!name) return LucideIcons.Tag;
+    if ((LucideIcons as any)[name]) return (LucideIcons as any)[name];
+    const legacyMap: any = { home: 'Home', cart: 'ShoppingCart', 'trending-up': 'TrendingUp', target: 'Target' };
+    const normalizedName = legacyMap[name.toLowerCase()] || name;
+    return (LucideIcons as any)[normalizedName] || LucideIcons.Tag;
+  };
+
+  const IconComp = getIconComponent(budget.icon);
+
+  const renderRightActions = (progress: any, dragX: any) => {
+    const scale = dragX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [1, 0],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <RectButton style={styles.deleteAction} onPress={onRemove}>
+        <Animated.View style={{ transform: [{ scale }] }}>
+          <Trash2 size={24} color="#FFF" />
+        </Animated.View>
+      </RectButton>
+    );
+  };
+
+  return (
+    <Swipeable
+      renderRightActions={renderRightActions}
+      friction={2}
+      rightThreshold={40}
+    >
+      <Card theme={theme} style={styles.budgetCard}>
+        <CardContent theme={theme} style={styles.budgetCardContent}>
+          {/* HEADER: Icon, Title, and Toggle */}
+          <View style={styles.budgetHeader}>
+            <View style={styles.budgetHeaderLeft}>
+              <TouchableOpacity 
+                onPress={onEdit}
+                style={[styles.iconContainer, { backgroundColor: `${budget.color}15` }]}
+              >
+                <IconComp size={18} color={budget.color} />
+                <View style={[styles.editIconBadge, { backgroundColor: theme.surface }]}>
+                  <Pencil size={8} color={theme.textSecondary} />
+                </View>
+              </TouchableOpacity>
+              <Text style={[styles.budgetName, { color: theme.textPrimary }]}>{budget.name}</Text>
+            </View>
+            
+            <View style={styles.budgetHeaderRight}>
+              <View style={[styles.designToggle, { backgroundColor: theme.background }]}>
+                <TouchableOpacity 
+                  onPress={() => onUpdate({ type: 'amount' })}
+                  style={[styles.designToggleBtn, budget.type === 'amount' && { backgroundColor: theme.surface, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }]}
+                >
+                  <Text style={[styles.designToggleText, { color: budget.type === 'amount' ? theme.brandPrimary : theme.textSecondary }]}>{currencySymbol}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => onUpdate({ type: 'percent' })}
+                  style={[styles.designToggleBtn, budget.type === 'percent' && { backgroundColor: theme.surface, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }]}
+                >
+                  <Text style={[styles.designToggleText, { color: budget.type === 'percent' ? theme.brandPrimary : theme.textSecondary }]}>%</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+
+          {/* INPUT AREA WITH FLOATING LABEL */}
+          <View style={[styles.inputWrapper, { borderColor: theme.border }]}>
+            <View style={[styles.inputLabelContainer, { backgroundColor: theme.surface }]}>
+              <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>
+                Limit {budget.type === 'percent' ? '(%)' : ''}
+              </Text>
+            </View>
+            <View style={styles.inputInner}>
+              <TextInput
+                value={String(budget.value)}
+                onChangeText={(val) => onUpdate({ value: Number(val) || 0 })}
+                keyboardType="numeric"
+                style={[styles.budgetInput, { color: theme.textPrimary }]}
+                placeholder="Set amount"
+                placeholderTextColor={theme.textSecondary}
+              />
+            </View>
+          </View>
+        </CardContent>
+      </Card>
+    </Swipeable>
+  );
+}
 
 export default function BudgetSetupFinalScreen() {
   const { theme } = useTheme();
   const router = useRouter();
 
-  const [income, setIncome] = useState(45000);
-  const [needs, setNeeds] = useState(50);
-  const [wants, setWants] = useState(30);
-  const [savings, setSavings] = useState(20);
-  const [reminder, setReminder] = useState(true);
-  const [incomeDate, setIncomeDate] = useState(new Date().toISOString().split('T')[0]);
-
-  const totalAllocated = needs + wants + savings;
-  const calculateAmount = (percent: number) => Math.round((income * percent) / 100);
-
   const { user } = useAuthStore();
+  const { budgets, updateBudget, removeBudget, currencySymbol, hydrateStore } = useSetupStore();
+  const [reminder, setReminder] = React.useState(true);
+
+  React.useEffect(() => {
+    if (user) {
+      hydrateStore(user.id);
+    }
+  }, [user, hydrateStore]);
+
+  const totalPercentage = budgets
+    .filter(b => b.type === 'percent')
+    .reduce((acc, curr) => acc + curr.value, 0);
 
   const handleComplete = async () => {
     if (user) {
-      const budgets = [
-        { name: 'Needs', percentageAllocation: needs, color: theme.brandPrimary, icon: 'home', smartReminder: reminder },
-        { name: 'Wants', percentageAllocation: wants, color: '#3B82F6', icon: 'cart', smartReminder: reminder },
-        { name: 'Savings', percentageAllocation: savings, color: '#10B981', icon: 'trending-up', smartReminder: reminder },
-      ];
-      await setupService.setupBudgets(budgets.map(b => ({ ...b, userId: user.id })));
+      const budgetData = budgets.map(b => ({
+        userId: user.id,
+        name: b.name,
+        goalAmount: b.type === 'amount' ? b.value : null,
+        percentageAllocation: b.type === 'percent' ? b.value : null,
+        color: b.color,
+        icon: b.icon,
+        smartReminder: reminder,
+      }));
+      await setupService.setupBudgets(budgetData);
     }
     router.replace('/(tabs)/home');
   };
@@ -77,64 +190,25 @@ export default function BudgetSetupFinalScreen() {
             />
           </View>
 
-          {/* 1. INCOME DETAIL CARD */}
-          <Card theme={theme} style={styles.card}>
-            <CardContent theme={theme} style={styles.cardContent}>
-              <View style={styles.sectionHeader}>
-                <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>Income Detail</Text>
-                <View style={styles.dateDisplay}>
-                  <Calendar size={14} color={theme.brandPrimary} />
-                  <Text style={[styles.dateText, { color: theme.brandPrimary }]}>{incomeDate}</Text>
-                </View>
-              </View>
-
-              <View style={styles.incomeInputContainer}>
-                <Text style={[styles.currencyPrefix, { color: theme.brandPrimary }]}>NPR</Text>
-                <TextInput
-                  value={String(income)}
-                  onChangeText={(val) => setIncome(Number(val))}
-                  keyboardType="numeric"
-                  style={[styles.incomeInput, { color: theme.textPrimary }]}
-                />
-              </View>
-            </CardContent>
-          </Card>
-
-          {/* 2. ALLOCATION STRATEGY CARD */}
+          {/* BUDGET ALLOCATION CARD */}
           <Card theme={theme} style={styles.card}>
             <CardContent theme={theme} style={styles.cardContent}>
               <View style={styles.strategyHeader}>
                 <Text style={[styles.strategyTitle, { color: theme.textPrimary }]}>Allocation Strategy</Text>
-                <Text style={[styles.strategySubtitle, { color: theme.textSecondary }]}>Using the 50/30/20 guideline</Text>
+                <Text style={[styles.strategySubtitle, { color: theme.textSecondary }]}>Set by fixed amount or percentage</Text>
               </View>
 
-              <BudgetSlider
-                theme={theme}
-                label="Needs"
-                description="Rent, food, and utilities"
-                percentage={needs}
-                amount={calculateAmount(needs)}
-                color={theme.brandPrimary}
-                onChange={setNeeds}
-              />
-              <BudgetSlider
-                theme={theme}
-                label="Wants"
-                description="Entertainment and hobbies"
-                percentage={wants}
-                amount={calculateAmount(wants)}
-                color="#3B82F6"
-                onChange={setWants}
-              />
-              <BudgetSlider
-                theme={theme}
-                label="Savings"
-                description="Emergency and investments"
-                percentage={savings}
-                amount={calculateAmount(savings)}
-                color="#10B981"
-                onChange={setSavings}
-              />
+              {budgets.map((budget) => (
+                <BudgetItemRow
+                  key={budget.id}
+                  theme={theme}
+                  budget={budget}
+                  currencySymbol={currencySymbol}
+                  onUpdate={(updates) => updateBudget(budget.id, updates)}
+                  onEdit={() => router.push({ pathname: '/custom-goal', params: { id: budget.id } })}
+                  onRemove={() => removeBudget(budget.id)}
+                />
+              ))}
 
               <TouchableOpacity
                 onPress={() => router.push('/custom-goal')}
@@ -145,13 +219,16 @@ export default function BudgetSetupFinalScreen() {
               </TouchableOpacity>
 
               <View style={[styles.totalContainer, { borderTopColor: `${theme.border}40` }]}>
-                <Text style={[styles.totalLabel, { color: totalAllocated === 100 ? theme.textPrimary : '#EF4444' }]}>Total Allocated</Text>
-                <View style={[styles.percentageBadge, { backgroundColor: totalAllocated === 100 ? `${theme.brandPrimary}15` : '#EF444415' }]}>
-                  <Text style={[styles.percentageBadgeText, { color: totalAllocated === 100 ? theme.brandPrimary : '#EF4444' }]}>
-                    {totalAllocated}%
+                <Text style={[styles.totalLabel, { color: totalPercentage <= 100 ? theme.textPrimary : '#EF4444' }]}>Total Percentage</Text>
+                <View style={[styles.percentageBadge, { backgroundColor: totalPercentage <= 100 ? `${theme.brandPrimary}15` : '#EF444415' }]}>
+                  <Text style={[styles.totalBadgeText, { color: totalPercentage <= 100 ? theme.brandPrimary : '#EF4444' }]}>
+                    {totalPercentage}%
                   </Text>
                 </View>
               </View>
+              {totalPercentage > 100 && (
+                <Text style={styles.errorText}>Percentage allocation cannot exceed 100%</Text>
+              )}
             </CardContent>
           </Card>
 
@@ -187,7 +264,7 @@ export default function BudgetSetupFinalScreen() {
             theme={theme}
             fullWidth
             onPress={handleComplete}
-            disabled={totalAllocated !== 100}
+            disabled={totalPercentage > 100}
           />
         </View>
       </View>
@@ -267,6 +344,142 @@ const styles = StyleSheet.create({
   strategySubtitle: {
     fontSize: 13,
   },
+  budgetCard: {
+    marginBottom: 10,
+    borderRadius: 24,
+    borderWidth: 0,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.05,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+      }
+    }),
+  },
+  budgetCardContent: {
+    padding: 16,
+  },
+  budgetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  budgetHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  budgetName: {
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  budgetHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  designToggle: {
+    flexDirection: 'row',
+    padding: 3,
+    borderRadius: 12,
+    gap: 2,
+  },
+  designToggleBtn: {
+    width: 38,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+  },
+  designToggleText: {
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  deleteBtn: {
+    padding: 8,
+  },
+  inputWrapper: {
+    borderWidth: 1.5,
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginTop: 8,
+    position: 'relative',
+  },
+  inputLabelContainer: {
+    position: 'absolute',
+    top: -10,
+    left: 14,
+    paddingHorizontal: 6,
+    zIndex: 10,
+  },
+  inputLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  inputInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  budgetInput: {
+    fontSize: 18,
+    fontWeight: '700',
+    flex: 1,
+    padding: 0,
+  },
+  calculatedValue: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  actionMenu: {
+    position: 'absolute',
+    top: 50,
+    right: 16,
+    width: 140,
+    borderRadius: 12,
+    borderWidth: 1,
+    zIndex: 100,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 5,
+      },
+      web: {
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+      }
+    }),
+  },
+  menuItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  menuItemText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
   customGoalButton: {
     width: '100%',
     height: 50,
@@ -300,9 +513,16 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 10,
   },
-  percentageBadgeText: {
+  totalBadgeText: {
     fontSize: 13,
     fontWeight: '900',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 8,
+    textAlign: 'center',
   },
   reminderContent: {
     padding: 16,
@@ -350,5 +570,30 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 550,
     alignSelf: 'center',
+  },
+  editIconBadge: {
+    position: 'absolute',
+    bottom: -4,
+    right: -4,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    elevation: 2,
+  },
+  deleteAction: {
+    backgroundColor: '#EF4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
+    borderRadius: 16,
+    marginBottom: 10,
+    // Add a slight margin left so it doesn't overlap the card shadow
+    marginLeft: -10,
   },
 });
