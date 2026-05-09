@@ -43,8 +43,16 @@ const NotificationItem = ({ theme, icon, title, description, time, unread, accen
       friction={2}
       leftThreshold={30}
       rightThreshold={40}
+      containerStyle={{ overflow: 'hidden', borderRadius: 20 }}
     >
-      <View style={[styles.notifItem, { backgroundColor: unread ? `${accentColor}10` : theme.surface }]}>
+      <View style={{ backgroundColor: theme.surface, borderRadius: 20 }}>
+        <View style={[
+          styles.notifItem, 
+          { 
+            backgroundColor: unread ? `${accentColor}10` : theme.surface,
+            zIndex: 5 
+          }
+        ]}>
         <View style={styles.notifContent}>
           <View style={[styles.iconBox, { backgroundColor: theme.background }]}>
             {icon}
@@ -56,6 +64,7 @@ const NotificationItem = ({ theme, icon, title, description, time, unread, accen
           </View>
         </View>
         {unread && <View style={[styles.unreadDot, { backgroundColor: accentColor }]} />}
+        </View>
       </View>
     </Swipeable>
   );
