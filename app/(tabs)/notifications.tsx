@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Animated } from "react-native";
+import { Swipeable, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -18,22 +19,45 @@ import HeaderBar from "../../components/HeaderBar";
 
 // Notification Item Inline Component
 const NotificationItem = ({ theme, icon, title, description, time, unread, accentColor, onDelete }: any) => {
-  return (
-    <View style={[styles.notifItem, { backgroundColor: unread ? `${accentColor}10` : theme.surface }]}>
-      <View style={styles.notifContent}>
-        <View style={[styles.iconBox, { backgroundColor: theme.background }]}>
-          {icon}
+  const renderRightActions = (progress: any, dragX: any) => {
+    const scale = dragX.interpolate({
+      inputRange: [-80, 0],
+      outputRange: [1, 0],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <TouchableOpacity onPress={onDelete} activeOpacity={0.6}>
+        <View style={[styles.deleteAction, { backgroundColor: '#EF4444' }]}>
+          <Animated.View style={{ transform: [{ scale }] }}>
+            <Trash2 size={24} color="#FFF" />
+          </Animated.View>
         </View>
-        <View style={styles.textContainer}>
-          <Text style={[styles.notifTitle, { color: theme.textPrimary }]}>{title}</Text>
-          <Text style={[styles.notifDesc, { color: theme.textSecondary }]}>{description}</Text>
-          <Text style={[styles.notifTime, { color: theme.textSecondary }]}>{time}</Text>
-        </View>
-      </View>
-      <TouchableOpacity onPress={onDelete} style={styles.deleteBtn}>
-        <Trash2 size={16} color={theme.textSecondary} />
       </TouchableOpacity>
-    </View>
+    );
+  };
+
+  return (
+    <Swipeable
+      renderRightActions={renderRightActions}
+      friction={2}
+      leftThreshold={30}
+      rightThreshold={40}
+    >
+      <View style={[styles.notifItem, { backgroundColor: unread ? `${accentColor}10` : theme.surface }]}>
+        <View style={styles.notifContent}>
+          <View style={[styles.iconBox, { backgroundColor: theme.background }]}>
+            {icon}
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={[styles.notifTitle, { color: theme.textPrimary }]}>{title}</Text>
+            <Text style={[styles.notifDesc, { color: theme.textSecondary }]}>{description}</Text>
+            <Text style={[styles.notifTime, { color: theme.textSecondary }]}>{time}</Text>
+          </View>
+        </View>
+        {unread && <View style={[styles.unreadDot, { backgroundColor: accentColor }]} />}
+      </View>
+    </Swipeable>
   );
 };
 
@@ -112,7 +136,8 @@ export default function NotificationsScreen() {
   const hasNotifications = notificationSections.some((section) => section.data.length > 0);
 
   return (
-    <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.background }]}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.background }]}>
       {/* ================= HEADER BAR ================= */}
       <HeaderBar
         theme={theme}
@@ -202,7 +227,8 @@ export default function NotificationsScreen() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
@@ -235,12 +261,13 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1.2,
     marginBottom: 8,
+    zIndex: 10, // Ensure header is above swipeable items
   },
   listWrap: { gap: 12 },
   notifItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     padding: 16,
     borderRadius: 20,
   },
@@ -256,7 +283,20 @@ const styles = StyleSheet.create({
   notifTitle: { fontSize: 15, fontWeight: "800", marginBottom: 4 },
   notifDesc: { fontSize: 13, lineHeight: 20, marginBottom: 8 },
   notifTime: { fontSize: 11, fontWeight: "600", opacity: 0.7 },
-  deleteBtn: { padding: 8 },
+  deleteAction: {
+    width: 80,
+    height: '100%',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
   emptyState: { alignItems: "center", justifyContent: "center", paddingTop: 80, paddingHorizontal: 20 },
   emptyIconBox: { width: 96, height: 96, borderRadius: 48, alignItems: "center", justifyContent: "center", marginBottom: 24 },
   emptyTitle: { fontSize: 20, fontWeight: "800", marginBottom: 8 },
