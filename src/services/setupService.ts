@@ -23,7 +23,7 @@ export const setupService = {
 
   async getUserSettings(userId: string) {
     try {
-      const response = await api.get(`/setup/settings/${userId}`);
+      const response = await api.get('/setup');
       if (response.ok) return await response.json();
     } catch (error) {
       console.warn('Backend fetch failed, trying local DB:', error);

@@ -11,6 +11,7 @@ export const users = sqliteTable('users', {
   occupation: text('occupation'),
   gender: text('gender'),
   phone: text('phone'),
+  language: text('language').default('en'),
 });
 
 export const metrics = sqliteTable('metrics', {
@@ -70,4 +71,16 @@ export const budgets = sqliteTable('budgets', {
   icon: text('icon').notNull(),
   smartReminder: integer('smart_reminder', { mode: 'boolean' }).default(false),
   synced: integer('synced', { mode: 'boolean' }).default(false),
+});
+
+export const notifications = sqliteTable('notifications', {
+  id: text('id').primaryKey(), // Server ID
+  userId: text('user_id').notNull(),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  type: text('type').notNull(),
+  unread: integer('unread', { mode: 'boolean' }).default(true),
+  accentColor: text('accent_color'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
+  synced: integer('synced', { mode: 'boolean' }).default(true),
 });

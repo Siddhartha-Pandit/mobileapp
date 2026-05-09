@@ -12,13 +12,16 @@ import {
   BellOff,
   RefreshCw,
   Settings,
-  Trash2
+  Trash2,
+  Brain
 } from "lucide-react-native";
 import { useTheme } from "../../hooks/useTheme";
 import HeaderBar from "../../components/HeaderBar";
+import { useNotificationStore } from "../../src/store/useNotificationStore";
+import { RefreshControl } from "react-native";
 
 // Notification Item Inline Component
-const NotificationItem = ({ theme, icon, title, description, time, unread, accentColor, onDelete }: any) => {
+const NotificationItem = ({ theme, icon, title, description, time, unread, accentColor, onDelete, onPress }: any) => {
   const renderRightActions = (progress: any, dragX: any) => {
     const scale = dragX.interpolate({
       inputRange: [-80, 0],
@@ -46,25 +49,29 @@ const NotificationItem = ({ theme, icon, title, description, time, unread, accen
       containerStyle={{ overflow: 'hidden', borderRadius: 20 }}
     >
       <View style={{ backgroundColor: theme.surface, borderRadius: 20 }}>
-        <View style={[
-          styles.notifItem, 
-          { 
-            backgroundColor: unread ? `${accentColor}10` : theme.surface,
-            zIndex: 5 
-          }
-        ]}>
-        <View style={styles.notifContent}>
-          <View style={[styles.iconBox, { backgroundColor: theme.background }]}>
-            {icon}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={onPress}
+          style={[
+            styles.notifItem,
+            {
+              backgroundColor: unread ? `${accentColor}10` : theme.surface,
+              zIndex: 5
+            }
+          ]}
+        >
+          <View style={styles.notifContent}>
+            <View style={[styles.iconBox, { backgroundColor: theme.background }]}>
+              {icon}
+            </View>
+            <View style={styles.textContainer}>
+              <Text style={[styles.notifTitle, { color: theme.textPrimary }]}>{title}</Text>
+              <Text style={[styles.notifDesc, { color: theme.textSecondary }]}>{description}</Text>
+              <Text style={[styles.notifTime, { color: theme.textSecondary }]}>{time}</Text>
+            </View>
           </View>
-          <View style={styles.textContainer}>
-            <Text style={[styles.notifTitle, { color: theme.textPrimary }]}>{title}</Text>
-            <Text style={[styles.notifDesc, { color: theme.textSecondary }]}>{description}</Text>
-            <Text style={[styles.notifTime, { color: theme.textSecondary }]}>{time}</Text>
-          </View>
-        </View>
-        {unread && <View style={[styles.unreadDot, { backgroundColor: accentColor }]} />}
-        </View>
+          {unread && <View style={[styles.unreadDot, { backgroundColor: accentColor }]} />}
+        </TouchableOpacity>
       </View>
     </Swipeable>
   );
@@ -73,169 +80,153 @@ const NotificationItem = ({ theme, icon, title, description, time, unread, accen
 export default function NotificationsScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState("All");
-  const tabs = ["All", "Transactions", "Investments", "Reminders"];
+  const {
+    notifications,
+    fetchNotifications,
+    markAllRead,
+    markAsRead,
+    deleteNotification,
+    generateAiNotification,
+    isLoading
+  } = useNotificationStore();
 
-  const initialData = [
+  const [activeTab, setActiveTab] = useState("All");
+  const tabs = ["All", "Transactions", "Investments", "Reminders", "AI Insights"];
+
+  React.useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const onRefresh = async () => {
+    await fetchNotifications();
+    // Occasionally generate new AI insight on refresh if empty or user wants
+    if (notifications.length < 5) {
+      await generateAiNotification();
+    }
+  };
+
+  const filteredNotifications = notifications.filter(n => {
+    if (activeTab === "All") return true;
+    if (activeTab === "AI Insights") return n.type === 'ai_insight';
+    return n.type.toLowerCase().includes(activeTab.toLowerCase().slice(0, -1));
+  });
+
+  // Group by date
+  const sections = [
     {
-      title: "Today",
-      data: [
-        {
-          id: 1,
-          icon: <ArrowDownLeft size={22} color="#10B981" />,
-          title: "Salary Deposit",
-          description: "Your monthly salary of ₨ 75,000 has been credited.",
-          time: "10:24 AM",
-          unread: true,
-          accentColor: "#10B981",
-        },
-        {
-          id: 2,
-          icon: <ArrowUpRight size={22} color="#EF4444" />,
-          title: "Uber Payment",
-          description: "Payment of ₨ 1,250 processed successfully.",
-          time: "08:15 AM",
-          unread: true,
-          accentColor: "#EF4444",
-        },
-      ],
-    },
-    {
-      title: "Yesterday",
-      data: [
-        {
-          id: 3,
-          icon: <TrendingUp size={22} color="#8B5CF6" />,
-          title: "Portfolio Growth",
-          description: "Your tech portfolio is up 2.4% today.",
-          time: "04:30 PM",
-          accentColor: "#8B5CF6",
-        },
-        {
-          id: 4,
-          icon: <Bell size={22} color={theme.brandPrimary} />,
-          title: "Upcoming Bill",
-          description: "Internet subscription is due tomorrow.",
-          time: "11:00 AM",
-        },
-      ],
-    },
+      title: "Recent",
+      data: filteredNotifications
+    }
   ];
 
-  const [notificationSections, setNotificationSections] = useState(initialData);
-
-  const handleDelete = (id: number) => {
-    setNotificationSections((prev) =>
-      prev.map((section) => ({
-        ...section,
-        data: section.data.filter((item) => item.id !== id),
-      }))
-    );
-  };
-
-  const markAllRead = () => {
-    setNotificationSections((prev) =>
-      prev.map((section) => ({
-        ...section,
-        data: section.data.map((item) => ({ ...item, unread: false })),
-      }))
-    );
-  };
-
-  const hasNotifications = notificationSections.some((section) => section.data.length > 0);
+  const hasNotifications = filteredNotifications.length > 0;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView edges={['top']} style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* ================= HEADER BAR ================= */}
-      <HeaderBar
-        theme={theme}
-        title={<Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Notifications</Text>}
-        leftContent={
-          <TouchableOpacity onPress={() => router.back()} style={[styles.iconBtn, { borderColor: `${theme.border}80`, backgroundColor: theme.surface }]}>
-            <ChevronLeft size={22} color={theme.textPrimary} />
-          </TouchableOpacity>
-        }
-        rightContent={
-          <TouchableOpacity onPress={markAllRead}>
-            <Text style={[styles.markReadText, { color: theme.brandPrimary }]}>Mark all read</Text>
-          </TouchableOpacity>
-        }
-      />
+        {/* ================= HEADER BAR ================= */}
+        <HeaderBar
+          theme={theme}
+          title={<Text style={[styles.headerTitle, { color: theme.textPrimary }]}>Notifications</Text>}
+          leftContent={
+            <TouchableOpacity onPress={() => router.back()} style={[styles.iconBtn, { borderColor: `${theme.border}80`, backgroundColor: theme.surface }]}>
+              <ChevronLeft size={22} color={theme.textPrimary} />
+            </TouchableOpacity>
+          }
+          rightContent={
+            <TouchableOpacity onPress={markAllRead}>
+              <Text style={[styles.markReadText, { color: theme.brandPrimary }]}>Mark all read</Text>
+            </TouchableOpacity>
+          }
+        />
 
-      {/* ================= TABS ================= */}
-      <View style={styles.tabsWrapper}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScroll}>
-          {tabs.map((tab) => {
-            const active = activeTab === tab;
-            return (
-              <TouchableOpacity
-                key={tab}
-                onPress={() => setActiveTab(tab)}
-                style={[
-                  styles.tabChip,
-                  { backgroundColor: active ? theme.brandPrimary : theme.surface }
-                ]}
-              >
-                <Text style={{
-                  fontSize: 13,
-                  fontWeight: "700",
-                  color: active ? "#fff" : theme.textSecondary
-                }}>
-                  {tab}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
+        {/* ================= TABS ================= */}
+        <View style={styles.tabsWrapper}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScroll}>
+            {tabs.map((tab) => {
+              const active = activeTab === tab;
+              return (
+                <TouchableOpacity
+                  key={tab}
+                  onPress={() => setActiveTab(tab)}
+                  style={[
+                    styles.tabChip,
+                    { backgroundColor: active ? theme.brandPrimary : theme.surface }
+                  ]}
+                >
+                  <Text style={{
+                    fontSize: 13,
+                    fontWeight: "700",
+                    color: active ? "#fff" : theme.textSecondary
+                  }}>
+                    {tab}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
 
-      {/* ================= CONTENT ================= */}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {hasNotifications ? (
-          notificationSections.map((section) =>
-            section.data.length > 0 ? (
-              <View key={section.title} style={{ marginBottom: 16 }}>
-                <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
-                  {section.title}
-                </Text>
-                <View style={styles.listWrap}>
-                  {section.data.map((item) => (
-                    <NotificationItem
-                      key={item.id}
-                      theme={theme}
-                      {...item}
-                      onDelete={() => handleDelete(item.id)}
-                    />
-                  ))}
+        {/* ================= CONTENT ================= */}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl refreshing={isLoading} onRefresh={onRefresh} tintColor={theme.brandPrimary} />
+          }
+        >
+          {hasNotifications ? (
+            sections.map((section) =>
+              section.data.length > 0 ? (
+                <View key={section.title} style={{ marginBottom: 16 }}>
+                  <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>
+                    {section.title}
+                  </Text>
+                  <View style={styles.listWrap}>
+                    {section.data.map((item) => {
+                      let icon = <Bell size={22} color={item.accentColor || theme.brandPrimary} />;
+                      if (item.type === 'transaction') icon = <ArrowDownLeft size={22} color={item.accentColor || '#10B981'} />;
+                      if (item.type === 'ai_insight') icon = <Brain size={22} color="#8B5CF6" />;
+
+                      return (
+                        <NotificationItem
+                          key={item.id}
+                          theme={theme}
+                          {...item}
+                          icon={icon}
+                          time={new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          onDelete={() => deleteNotification(item.id)}
+                          onPress={() => markAsRead(item.id)}
+                        />
+                      );
+                    })}
+                  </View>
                 </View>
+              ) : null
+            )
+          ) : (
+            <View style={styles.emptyState}>
+              <View style={[styles.emptyIconBox, { backgroundColor: `${theme.brandPrimary}15` }]}>
+                <BellOff size={40} color={theme.brandPrimary} />
               </View>
-            ) : null
-          )
-        ) : (
-          <View style={styles.emptyState}>
-            <View style={[styles.emptyIconBox, { backgroundColor: `${theme.brandPrimary}15` }]}>
-              <BellOff size={40} color={theme.brandPrimary} />
+              <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>No notifications</Text>
+              <Text style={[styles.emptyDesc, { color: theme.textSecondary }]}>
+                You're all caught up! Pull down to generate a new AI financial insight.
+              </Text>
+              <TouchableOpacity
+                onPress={() => generateAiNotification()}
+                style={[styles.refreshBtn, { backgroundColor: theme.brandPrimary }]}
+              >
+                <Brain size={16} color="#fff" />
+                <Text style={styles.refreshBtnText}>Generate AI Insight</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.settingsBtn}>
+                <Settings size={16} color={theme.brandPrimary} />
+                <Text style={[styles.settingsBtnText, { color: theme.brandPrimary }]}>Manage preferences</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={[styles.emptyTitle, { color: theme.textPrimary }]}>No notifications</Text>
-            <Text style={[styles.emptyDesc, { color: theme.textSecondary }]}>
-              You're all caught up! We'll notify you here when there's activity.
-            </Text>
-            <TouchableOpacity
-              onPress={() => setNotificationSections(initialData)}
-              style={[styles.refreshBtn, { backgroundColor: theme.brandPrimary }]}
-            >
-              <RefreshCw size={16} color="#fff" />
-              <Text style={styles.refreshBtnText}>Refresh Screen</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.settingsBtn}>
-              <Settings size={16} color={theme.brandPrimary} />
-              <Text style={[styles.settingsBtnText, { color: theme.brandPrimary }]}>Manage preferences</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </ScrollView>
+          )}
+        </ScrollView>
       </SafeAreaView>
     </GestureHandlerRootView>
   );

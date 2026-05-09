@@ -9,7 +9,7 @@
  */
 
 // ---------- in-memory store ----------
-type User = { id: number; name: string; email: string; accessToken?: string; refreshToken?: string; synced: boolean | null };
+type User = { id: number; name: string; email: string; accessToken?: string; refreshToken?: string; synced: boolean | null; language?: string };
 type Metric = { id: number; value: number; timestamp: number; synced: boolean | null };
 
 let _users: User[] = [];
@@ -18,6 +18,7 @@ let _userSettings: any[] = [];
 let _accounts: any[] = [];
 let _categories: any[] = [];
 let _budgets: any[] = [];
+let _notifications: any[] = [];
 
 let _userId = 1;
 let _metricId = 1;
@@ -41,13 +42,18 @@ export const db = {
       else if (tableName === 'accounts') data = [..._accounts];
       else if (tableName === 'categories') data = [..._categories];
       else if (tableName === 'budgets') data = [..._budgets];
+      else if (tableName === 'notifications') data = [..._notifications];
       
       const queryResult = {
         data,
-        where: (_condition: any) => {
-          // Simplified where: for sync logic, we just return the data since eq(synced, false)
-          // is effectively what we're simulating.
-          return Promise.resolve(data.filter(item => (item as any).synced === false));
+        where: (condition: any) => {
+          // If we are looking for a specific ID, try to find it
+          if (condition?.left?.name === 'id' || condition?.left?.columnName === 'id') {
+            const targetId = condition?.right;
+            return Promise.resolve(data.filter(item => item.id === targetId));
+          }
+          // Otherwise return all (for UI)
+          return Promise.resolve(data);
         },
         limit: (n: number) => {
            return Promise.resolve(data.slice(0, n));
@@ -105,6 +111,14 @@ export const db = {
       return {
         values: (row: any) => {
           _budgets.push({ id: _id++, ...row, synced: row.synced ?? false });
+          return Promise.resolve();
+        },
+      };
+    }
+    if (tableName === 'notifications') {
+      return {
+        values: (row: any) => {
+          _notifications.push({ ...row, synced: row.synced ?? true });
           return Promise.resolve();
         },
       };
