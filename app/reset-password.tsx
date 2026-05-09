@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, ShieldCheck, Lock, Eye, EyeOff } from 'lucide-react-native';
 import { useLocalSearchParams } from 'expo-router';
 import api from '../src/api/client';
+import { validatePassword, getPasswordRulesStatus } from '../src/utils/validation';
 
 const ResetPasswordScreen = () => {
   const { theme } = useTheme();
@@ -31,10 +32,13 @@ const ResetPasswordScreen = () => {
   const [error, setError] = useState('');
 
   const handleResetPassword = async () => {
-    if (!password || !confirmPassword) {
-      setError('Please enter and confirm your new password.');
+    // Validation
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.isValid) {
+      setError(passwordCheck.message);
       return;
     }
+
     if (password !== confirmPassword) {
       setError('The passwords do not match. Please try again.');
       return;
@@ -131,6 +135,19 @@ const ResetPasswordScreen = () => {
                         </TouchableOpacity>
                     </View>
 
+                {/* Password Hints */}
+                <View style={styles.hintContainer}>
+                    <Text style={[styles.hintText, { color: getPasswordRulesStatus(password).length ? theme.brandPrimary : theme.textSecondary }]}>
+                        • Minimum 8 characters
+                    </Text>
+                    <Text style={[styles.hintText, { color: getPasswordRulesStatus(password).complexity ? theme.brandPrimary : theme.textSecondary }]}>
+                        • Include a mix of letters and numbers
+                    </Text>
+                    <Text style={[styles.hintText, { color: getPasswordRulesStatus(password).nameCheck ? theme.brandPrimary : theme.textSecondary }]}>
+                        • Avoid using your name or birthdate
+                    </Text>
+                </View>
+
                     {/* Error Message */}
                     <View style={styles.errorContainer}>
                         {!!error && <Text style={styles.errorText}>{error}</Text>}
@@ -170,7 +187,17 @@ const styles = StyleSheet.create({
   eyeIcon: { position: 'absolute', right: 14, padding: 4 },
   errorContainer: { minHeight: 24, marginBottom: 16, alignItems: 'center' },
   errorText: { color: '#EF4444', fontSize: 14, fontWeight: '600', textAlign: 'center' },
-  footerContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 32 }
+  footerContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 32 },
+  hintContainer: {
+    paddingHorizontal: 4,
+    marginBottom: 20,
+    marginTop: 8,
+  },
+  hintText: {
+    fontSize: 12,
+    lineHeight: 18,
+    opacity: 0.8,
+  },
 });
 
 export default ResetPasswordScreen;

@@ -14,6 +14,10 @@ interface UserProfile {
   email: string;
   role: string;
   fullName?: string;
+  avatarUrl?: string;
+  occupation?: string;
+  gender?: string;
+  phone?: string;
 }
 
 interface AuthState {
@@ -36,6 +40,11 @@ interface AuthState {
   // Biometrics
   updateBiometricStatus: (enabled: boolean) => Promise<void>;
   loginWithBiometrics: () => Promise<void>;
+  
+  // Profile
+  refreshUser: () => Promise<void>;
+  updateProfile: (updates: { fullName?: string, avatarUrl?: string, occupation?: string, gender?: string, phone?: string }) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -58,10 +67,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         const localUser = existingUsers[0] as any;
         if (localUser.accessToken) {
           set({ 
-            user: { id: localUser.id.toString(), email: localUser.email, role: 'user', fullName: localUser.name },
+            user: { 
+              id: localUser.id.toString(), 
+              email: localUser.email, 
+              role: 'user', 
+              fullName: localUser.name,
+              avatarUrl: localUser.avatarUrl || undefined,
+              occupation: localUser.occupation || undefined,
+              gender: localUser.gender || undefined,
+              phone: localUser.phone || undefined,
+            },
             accessToken: localUser.accessToken,
             refreshToken: localUser.refreshToken || null,
           });
+
+          // Refresh user data from backend in background
+          get().refreshUser().catch(console.error);
         }
       }
     } catch (e) {
@@ -106,10 +127,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Clear previous users so we only have one active session locally
       await db.delete(users); 
       await db.insert(users).values({
-        name: data.user.fullName || data.user.email.split('@')[0], // Next.js returns basic user info, adjust as needed
+        name: data.user.fullName,
         email: data.user.email,
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
+        avatarUrl: data.user.avatarUrl || null,
+        occupation: data.user.occupation || null,
+        gender: data.user.gender || null,
+        phone: data.user.phone || null,
         synced: true,
       });
 
@@ -171,10 +196,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Clear previous users
       await db.delete(users);
       await db.insert(users).values({
-        name: data.user.fullName || data.user.email.split('@')[0],
+        name: data.user.fullName,
         email: data.user.email,
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
+        avatarUrl: data.user.avatarUrl || null,
+        occupation: data.user.occupation || null,
+        gender: data.user.gender || null,
+        phone: data.user.phone || null,
         synced: true,
       });
     } catch (e) {
@@ -290,5 +319,115 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     await get().login(credentials.email, credentials.password);
+  },
+
+  updateProfile: async (updates) => {
+    const userId = get().user?.id;
+    if (!userId) return;
+
+    const netInfo = await NetInfo.fetch();
+    if (netInfo.isConnected) {
+      // Online update
+      const response = await fetch(`${API_URL}/auth/profile`, {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${get().accessToken}`
+        },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to update profile');
+      }
+    }
+
+    // Always update locally
+    try {
+      await db.update(users)
+        .set({ 
+          name: updates.fullName ?? get().user?.fullName, 
+          avatarUrl: updates.avatarUrl ?? get().user?.avatarUrl,
+          occupation: updates.occupation ?? get().user?.occupation,
+          gender: updates.gender ?? get().user?.gender,
+          phone: updates.phone ?? get().user?.phone,
+        })
+        .where(eq(users.email, get().user?.email || ''));
+
+      set((state) => ({
+        user: state.user ? {
+          ...state.user,
+          ...updates,
+        } : null
+      }));
+    } catch (e) {
+      console.error('Failed to update local profile', e);
+    }
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    const netInfo = await NetInfo.fetch();
+    if (!netInfo.isConnected) {
+      throw new Error('Internet connection required to change password.');
+    }
+
+    const response = await fetch(`${API_URL}/auth/change-password`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${get().accessToken}`
+      },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || 'Failed to change password');
+    }
+
+    // If biometrics enabled, update stored credentials
+    if (get().isBiometricEnabled && get().user?.email) {
+      await biometrics.saveCredentials(get().user!.email, newPassword);
+    }
+  },
+
+  refreshUser: async () => {
+    const accessToken = get().accessToken;
+    if (!accessToken) return;
+
+    const netInfo = await NetInfo.fetch();
+    if (!netInfo.isConnected) return;
+
+    try {
+      const response = await fetch(`${API_URL}/auth/me`, {
+        headers: { 
+          'Authorization': `Bearer ${accessToken}`
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const updatedUser = data.user;
+
+        // Update local DB
+        await db.update(users)
+          .set({ 
+            name: updatedUser.fullName, 
+            avatarUrl: updatedUser.avatarUrl,
+            occupation: updatedUser.occupation,
+            gender: updatedUser.gender,
+            phone: updatedUser.phone,
+          })
+          .where(eq(users.email, updatedUser.email));
+
+        // Update state
+        set((state) => ({
+          user: state.user ? { ...state.user, ...updatedUser } : updatedUser
+        }));
+      }
+    } catch (e) {
+      console.error('Failed to refresh user', e);
+    }
   },
 }));

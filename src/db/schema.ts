@@ -7,6 +7,10 @@ export const users = sqliteTable('users', {
   accessToken: text('access_token'),
   refreshToken: text('refresh_token'),
   synced: integer('synced', { mode: 'boolean' }).default(false),
+  avatarUrl: text('avatar_url'),
+  occupation: text('occupation'),
+  gender: text('gender'),
+  phone: text('phone'),
 });
 
 export const metrics = sqliteTable('metrics', {

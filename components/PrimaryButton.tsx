@@ -1,4 +1,5 @@
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import React from 'react';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import type { AppTheme } from '../constants/theme';
 
@@ -14,6 +15,7 @@ interface Props {
   textColor?: string;
   backgroundColor?: string;
   noShadow?: boolean;
+  icon?: React.ReactNode;
 }
 
 export const PrimaryButton = ({ 
@@ -27,7 +29,8 @@ export const PrimaryButton = ({
   textStyle, 
   textColor, 
   backgroundColor,
-  noShadow 
+  noShadow,
+  icon
 }: Props) => {
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -50,7 +53,10 @@ export const PrimaryButton = ({
       {isLoading ? (
         <ActivityIndicator color={textColor || "#FFFFFF"} />
       ) : (
-        <Text style={[styles.text, { color: textColor || '#FFFFFF' }, textStyle]}>{title}</Text>
+        <View style={styles.contentContainer}>
+          {icon && <View style={styles.iconWrapper}>{icon}</View>}
+          <Text style={[styles.text, { color: textColor || '#FFFFFF' }, textStyle]}>{title}</Text>
+        </View>
       )}
     </TouchableOpacity>
   );
@@ -64,6 +70,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 200,
+  },
+  contentContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconWrapper: {
+    marginRight: 8,
   },
   shadow: {
     boxShadow: '0 8px 24px rgba(10, 169, 113, 0.25)',

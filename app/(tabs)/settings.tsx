@@ -9,6 +9,9 @@ import {
   Platform,
   useWindowDimensions,
   TextInput,
+  Image,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { 
@@ -31,7 +34,9 @@ import {
   Moon,
   Monitor,
   Lock as LucideLockIcon,
-  AlertTriangle
+  AlertTriangle,
+  User,
+  KeyRound,
 } from "lucide-react-native";
 
 // Types & Components
@@ -41,7 +46,7 @@ import { SectionHeader } from "../../components/SectionHeader";
 import { Card, CardContent } from "../../components/Card";
 import type { AppTheme } from "../../constants/theme";
 import { PrimaryButton } from "../../components/PrimaryButton";
-import { Modal, ActivityIndicator } from "react-native";
+
 import { useAuthStore } from "../../src/store/useAuthStore";
 import { useSetupStore } from "../../src/store/useSetupStore";
 import { biometrics } from "../../src/utils/biometrics";
@@ -226,6 +231,33 @@ export default function SettingsPage() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.maxContainer}>
           
+          {/* ================= USER PROFILE CARD ================= */}
+          <View style={[styles.profileCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <View style={styles.profileInfo}>
+              <View style={[styles.settingsAvatar, { backgroundColor: theme.brandPrimary + '15' }]}>
+                {user?.avatarUrl ? (
+                  <Image source={{ uri: user.avatarUrl }} style={styles.avatarImg} />
+                ) : (
+                  <User size={28} color={theme.brandPrimary} />
+                )}
+              </View>
+              <View>
+                <Text style={[styles.profileName, { color: theme.textPrimary }]}>
+                  {user?.fullName || 'User Name'}
+                </Text>
+                <Text style={[styles.profileEmail, { color: theme.textSecondary }]}>
+                  {user?.email}
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity 
+              style={[styles.editProfileBtn, { backgroundColor: theme.brandPrimary }]}
+              onPress={() => router.push('/edit-profile' as any)}
+            >
+              <Text style={styles.editProfileBtnText}>Edit Profile</Text>
+            </TouchableOpacity>
+          </View>
+          
           {/* ================= APPEARANCE (THEME) ================= */}
           <View style={styles.section}>
             <SectionHeader theme={theme} title="Appearance" uppercase marginBottom={12} />
@@ -272,6 +304,15 @@ export default function SettingsPage() {
                     trackColor={{ false: theme.border, true: theme.brandPrimary }}
                     thumbColor="#FFF"
                   />
+                </SettingRow>
+                <SettingRow 
+                  theme={theme} 
+                  icon={KeyRound} 
+                  title="Change Password" 
+                  subtitle="Update your security code" 
+                  onClick={() => router.push('/change-password' as any)}
+                >
+                  <ChevronRight size={16} color={theme.textSecondary} />
                 </SettingRow>
                 <SettingRow 
                   theme={theme} 
@@ -698,5 +739,51 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 16,
     alignSelf: 'flex-start',
+  },
+  profileCard: {
+    marginTop: 20,
+    borderRadius: 24,
+    borderWidth: 1,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  profileInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  settingsAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImg: {
+    width: '100%',
+    height: '100%',
+  },
+  profileName: {
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  profileEmail: {
+    fontSize: 13,
+    fontWeight: '500',
+    opacity: 0.7,
+    marginTop: 2,
+  },
+  editProfileBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  editProfileBtnText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '800',
   },
 });

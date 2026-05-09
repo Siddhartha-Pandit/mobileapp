@@ -19,6 +19,7 @@ import { useLoadingStore } from '../src/store/useLoadingStore';
 import { useAuthStore } from '../src/store/useAuthStore';
 import { ChartNoAxesCombined, User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react-native';
 import { MessageModal, MessageType } from '../components/MessageModal';
+import { validatePassword, getPasswordRulesStatus } from '../src/utils/validation';
 
 const SignUpScreen = () => {
   const { theme } = useTheme();
@@ -72,9 +73,10 @@ const SignUpScreen = () => {
       return;
     }
 
-    // 4. Password length validation (matching backend)
-    if (password.length < 8) {
-      showError('Weak Password', 'Your password must be at least 8 characters long for better security.');
+    // 4. Password validation
+    const passwordCheck = validatePassword(password, fullName);
+    if (!passwordCheck.isValid) {
+      showError('Weak Password', passwordCheck.message);
       return;
     }
 
@@ -159,6 +161,19 @@ const SignUpScreen = () => {
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
             />
+
+             {/* Password Hints */}
+             <View style={styles.hintContainer}>
+                <Text style={[styles.hintText, { color: getPasswordRulesStatus(password, fullName).length ? theme.brandPrimary : theme.textSecondary }]}>
+                    • Minimum 8 characters
+                </Text>
+                <Text style={[styles.hintText, { color: getPasswordRulesStatus(password, fullName).complexity ? theme.brandPrimary : theme.textSecondary }]}>
+                    • Include a mix of letters and numbers
+                </Text>
+                <Text style={[styles.hintText, { color: getPasswordRulesStatus(password, fullName).nameCheck ? theme.brandPrimary : theme.textSecondary }]}>
+                    • Avoid using your name or birthdate
+                </Text>
+             </View>
 
             {/* Terms & Conditions */}
             <View style={styles.termsContainer}>
@@ -272,6 +287,15 @@ const styles = StyleSheet.create({
   },
   footerContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 24, paddingBottom: 20 },
   footerLink: { fontWeight: '700' },
+  hintContainer: {
+    paddingHorizontal: 4,
+    marginBottom: 10,
+  },
+  hintText: {
+    fontSize: 12,
+    lineHeight: 18,
+    opacity: 0.8,
+  },
 });
 
 export default SignUpScreen;
