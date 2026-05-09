@@ -106,15 +106,26 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       
       const newNotif = await response.json();
       if (newNotif && newNotif.id) {
-        // Trigger local notification
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: newNotif.title,
-            body: newNotif.description,
-            data: { id: newNotif.id },
-          },
-          trigger: null, // show immediately
-        });
+        // Trigger push notification based on platform
+        if (Platform.OS === 'web') {
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(newNotif.title, { body: newNotif.description });
+          } else if ('Notification' in window && Notification.permission !== 'denied') {
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+              new Notification(newNotif.title, { body: newNotif.description });
+            }
+          }
+        } else {
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: newNotif.title,
+              body: newNotif.description,
+              data: { id: newNotif.id },
+            },
+            trigger: null,
+          });
+        }
         
         await get().fetchNotifications();
       }

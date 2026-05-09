@@ -8,7 +8,10 @@ import {
   Wallet,
   Settings,
   HandCoins,
+  Bell
 } from 'lucide-react-native';
+import { useNotificationStore } from '../src/store/useNotificationStore';
+import { Platform } from 'react-native';
 import type { AppTheme } from '../constants/theme';
 
 interface Props {
@@ -27,9 +30,11 @@ export const BottomNavBar = ({ theme }: Props) => {
     { href: '/(tabs)/home', icon: Home, name: 'Home' },
     { href: '/(tabs)/analytics', icon: BarChart2, name: 'Analytics' },
     { href: '/(tabs)/portfolio-list', icon: Wallet, name: 'Portfolio' },
-    { href: '/(tabs)/loans', icon: HandCoins, name: 'Loans' },
+    { href: '/(tabs)/notifications', icon: Bell, name: 'Notifications', showBadge: true },
     { href: '/(tabs)/settings', icon: Settings, name: 'Settings' },
   ] as const;
+
+  const { unreadCount } = useNotificationStore();
 
   return (
     <View
@@ -53,7 +58,14 @@ export const BottomNavBar = ({ theme }: Props) => {
         return (
           <Link key={tab.href} href={tab.href as any} asChild>
             <Pressable style={styles.tab}>
-              <Icon color={getIconColor(isActive)} size={24} />
+              <View>
+                <Icon color={getIconColor(isActive)} size={24} />
+                {(tab as any).showBadge && unreadCount > 0 && (
+                  <View style={[styles.badge, { backgroundColor: '#EF4444' }]}>
+                    {unreadCount > 0 && <View style={styles.badgeDot} />}
+                  </View>
+                )}
+              </View>
             </Pressable>
           </Link>
         );
@@ -84,4 +96,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 8,
   },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#EF4444',
+  }
 });
