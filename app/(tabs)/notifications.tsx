@@ -82,7 +82,7 @@ export default function NotificationsScreen() {
       data: [
         {
           id: 1,
-          icon: <ArrowDownLeft size={18} color="#10B981" />,
+          icon: <ArrowDownLeft size={22} color="#10B981" />,
           title: "Salary Deposit",
           description: "Your monthly salary of ₨ 75,000 has been credited.",
           time: "10:24 AM",
@@ -91,7 +91,7 @@ export default function NotificationsScreen() {
         },
         {
           id: 2,
-          icon: <ArrowUpRight size={18} color="#EF4444" />,
+          icon: <ArrowUpRight size={22} color="#EF4444" />,
           title: "Uber Payment",
           description: "Payment of ₨ 1,250 processed successfully.",
           time: "08:15 AM",
@@ -105,7 +105,7 @@ export default function NotificationsScreen() {
       data: [
         {
           id: 3,
-          icon: <TrendingUp size={18} color="#8B5CF6" />,
+          icon: <TrendingUp size={22} color="#8B5CF6" />,
           title: "Portfolio Growth",
           description: "Your tech portfolio is up 2.4% today.",
           time: "04:30 PM",
@@ -113,7 +113,7 @@ export default function NotificationsScreen() {
         },
         {
           id: 4,
-          icon: <Bell size={18} color={theme.brandPrimary} />,
+          icon: <Bell size={22} color={theme.brandPrimary} />,
           title: "Upcoming Bill",
           description: "Internet subscription is due tomorrow.",
           time: "11:00 AM",
