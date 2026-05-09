@@ -18,6 +18,7 @@ import { ChevronLeft, Lock, Eye, EyeOff, KeyRound, ShieldCheck } from 'lucide-re
 import { useAuthStore } from '../src/store/useAuthStore';
 import HeaderBar from '../components/HeaderBar';
 import { validatePassword, getPasswordRulesStatus } from '../src/utils/validation';
+import { MessageModal, MessageType } from '../components/MessageModal';
 
 const ChangePasswordScreen = () => {
   const { theme } = useTheme();
@@ -30,6 +31,24 @@ const ChangePasswordScreen = () => {
   const [confirmPassword, setConfirmPassword] = React.useState('');
   const [showPasswords, setShowPasswords] = React.useState(false);
   const [isChangingPassword, setIsChangingPassword] = React.useState(false);
+  
+  // Modal State
+  const [modalVisible, setModalVisible] = React.useState(false);
+  const [modalConfig, setModalConfig] = React.useState<{
+    type: MessageType;
+    title: string;
+    message: string;
+    onClose?: () => void;
+  }>({
+    type: 'success',
+    title: '',
+    message: '',
+  });
+
+  const showMessage = (type: MessageType, title: string, message: string, onClose?: () => void) => {
+    setModalConfig({ type, title, message, onClose });
+    setModalVisible(true);
+  };
 
   React.useEffect(() => {
     // Ensure we have latest user data
@@ -56,14 +75,20 @@ const ChangePasswordScreen = () => {
     setIsChangingPassword(true);
     try {
       await changePassword(currentPassword, newPassword);
-      Alert.alert('Success', 'Password changed successfully');
-      router.back();
+      showMessage(
+        'success', 
+        'Password Changed', 
+        'Your password has been updated successfully. Please use your new password for future logins.',
+        () => router.replace('/home')
+      );
     } catch (e: any) {
-      Alert.alert('Error', e.message || 'Failed to change password');
+      showMessage('error', 'Update Failed', e.message || 'Failed to change password');
     } finally {
       setIsChangingPassword(false);
     }
   };
+
+  const rules = getPasswordRulesStatus(newPassword, user?.fullName);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
@@ -145,13 +170,13 @@ const ChangePasswordScreen = () => {
             </View>
 
             <View style={styles.hintBox}>
-                <Text style={[styles.hintText, { color: getPasswordRulesStatus(newPassword, user?.fullName).length ? theme.brandPrimary : theme.textSecondary }]}>
+                <Text style={[styles.hintText, { color: rules.length ? theme.brandPrimary : theme.textSecondary }]}>
                     • Minimum 8 characters
                 </Text>
-                <Text style={[styles.hintText, { color: getPasswordRulesStatus(newPassword, user?.fullName).complexity ? theme.brandPrimary : theme.textSecondary }]}>
+                <Text style={[styles.hintText, { color: rules.complexity ? theme.brandPrimary : theme.textSecondary }]}>
                     • Include a mix of letters and numbers
                 </Text>
-                <Text style={[styles.hintText, { color: getPasswordRulesStatus(newPassword, user?.fullName).nameCheck ? theme.brandPrimary : theme.textSecondary }]}>
+                <Text style={[styles.hintText, { color: rules.nameCheck ? theme.brandPrimary : theme.textSecondary }]}>
                     • Avoid using your name or birthdate
                 </Text>
             </View>
@@ -167,6 +192,18 @@ const ChangePasswordScreen = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <MessageModal
+        visible={modalVisible}
+        type={modalConfig.type}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        theme={theme}
+        onClose={() => {
+            setModalVisible(false);
+            if (modalConfig.onClose) modalConfig.onClose();
+        }}
+      />
     </SafeAreaView>
   );
 };

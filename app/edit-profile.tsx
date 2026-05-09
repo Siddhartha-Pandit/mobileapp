@@ -70,7 +70,7 @@ const EditProfileScreen = () => {
     setIsUploadingImage(true);
     try {
       const formData = new FormData();
-      
+
       if (Platform.OS === 'web') {
         const response = await fetch(uri);
         const blob = await response.blob();
@@ -94,7 +94,7 @@ const EditProfileScreen = () => {
 
       if (!response.ok) throw new Error('Upload failed');
       const data = await response.json();
-      
+
       // Update profile with new avatar URL
       await updateProfile({ avatarUrl: data.url });
       setAvatarUri(data.url);
@@ -142,22 +142,22 @@ const EditProfileScreen = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.avatarContainer}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.avatarWrapper, { borderColor: theme.brandPrimary + '30' }]}
               onPress={handlePickImage}
               disabled={isUploadingImage}
             >
               {isUploadingImage ? (
                 <View style={styles.avatarPlaceholder}>
-                   <Loader2 size={32} color={theme.brandPrimary} />
+                  <Loader2 size={32} color={theme.brandPrimary} />
                 </View>
               ) : (
-                <UserAvatar 
+                <UserAvatar
                   fullName={fullName}
                   email={user?.email}
                   avatarUrl={avatarUri}
@@ -216,14 +216,14 @@ const EditProfileScreen = () => {
                   onPress={() => setGender(g)}
                   style={[
                     styles.genderBtn,
-                    { 
+                    {
                       backgroundColor: gender === g ? theme.brandPrimary : theme.surface,
                       borderColor: gender === g ? theme.brandPrimary : theme.border
                     }
                   ]}
                 >
                   <Text style={[
-                    styles.genderText, 
+                    styles.genderText,
                     { color: gender === g ? '#FFF' : theme.textSecondary }
                   ]}>{g}</Text>
                 </TouchableOpacity>
@@ -234,7 +234,6 @@ const EditProfileScreen = () => {
               theme={theme}
               onPress={handleUpdateProfile}
               isLoading={isUpdatingProfile}
-              icon={<Save size={18} color="#FFF" />}
               style={styles.saveBtn}
             />
           </View>
