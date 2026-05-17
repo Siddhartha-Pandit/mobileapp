@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import NetInfo from '@react-native-community/netinfo';
 import { db } from '../db';
-import { users, metrics } from '../db/schema';
+import { users, metrics, transactions } from '../db/schema';
 import { eq } from 'drizzle-orm';
+import api from '../api/client';
 
 interface SyncState {
   isOnline: boolean;
@@ -30,22 +31,51 @@ export const useSyncStore = create<SyncState>((set, get) => ({
     set({ syncPending: true });
 
     try {
-      // Fetch unsynced data
+      // Fetch unsynced metrics
       const unsyncedMetrics = await db.select().from(metrics).where(eq(metrics.synced, false));
-
-      if (unsyncedMetrics.length === 0) {
-        set({ syncPending: false });
-        return;
+      if (unsyncedMetrics.length > 0) {
+        console.log('Uploading unsynced metrics...', { unsyncedMetrics });
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await db.update(metrics).set({ synced: true }).where(eq(metrics.synced, false));
       }
 
-      console.log('Uploading unsynced data...', { unsyncedMetrics });
+      // Fetch unsynced transactions
+      const unsyncedTransactions = await db.select().from(transactions).where(eq(transactions.synced, false));
+      if (unsyncedTransactions.length > 0) {
+        console.log(`Syncing ${unsyncedTransactions.length} offline transactions...`);
+        for (const t of unsyncedTransactions) {
+          try {
+            const dto: any = {
+              id: t.id,
+              amount: t.amount,
+              date: new Date(t.date).toISOString(),
+              description: t.description || '',
+            };
 
-      // SIMULATE UPLOAD TO CLOUD:
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+            if (t.type === 'transfer') {
+              dto.fromAccountId = t.accountId;
+              dto.toAccountId = t.toAccountId;
+              await api.post('/transfer', dto);
+            } else {
+              dto.accountId = t.accountId;
+              dto.categoryId = t.categoryId;
+              dto.People = JSON.parse(t.people || '[]');
+              dto.GoalAllocation = JSON.parse(t.goalAllocation || '[]');
+              
+              if (t.type === 'income') {
+                await api.post('/add-money', dto);
+              } else if (t.type === 'expense') {
+                await api.post('/add-expense', dto);
+              }
+            }
 
-      // After successful upload, mark them as synced
-      if (unsyncedMetrics.length > 0) {
-        await db.update(metrics).set({ synced: true }).where(eq(metrics.synced, false));
+            // Mark this specific transaction as synced upon successful API call
+            await db.update(transactions).set({ synced: true }).where(eq(transactions.id, t.id));
+          } catch (err) {
+            console.error(`Failed to sync transaction ${t.id}`, err);
+            // We do not throw, we just let it try again on next sync
+          }
+        }
       }
 
       console.log('Sync successful.');

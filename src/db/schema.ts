@@ -84,3 +84,18 @@ export const notifications = sqliteTable('notifications', {
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
   synced: integer('synced', { mode: 'boolean' }).default(true),
 });
+
+export const transactions = sqliteTable('transactions', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  accountId: text('account_id').notNull(),
+  categoryId: text('category_id'),
+  toAccountId: text('to_account_id'),
+  amount: integer('amount').notNull(),
+  type: text('type').notNull(), // 'income', 'expense', 'transfer'
+  date: integer('date', { mode: 'timestamp' }).notNull(),
+  description: text('description'),
+  people: text('people'), // Stored as JSON string
+  goalAllocation: text('goal_allocation'), // Stored as JSON string
+  synced: integer('synced', { mode: 'boolean' }).default(false),
+});
